@@ -30,6 +30,7 @@ export default function BarcodeAction({
     >
       <div className="mr-5 grid place-items-left text-left">
         <QRCode
+          id={qr}
           style={{ width: 60, height: 60, filter: disable ? 'blur(3px)' : '', opacity: disable ? 0.5 : 1 }}
           bgColor={disable ? 'rgba(255, 255, 0, 0)' : qrBgColor}
           value={qr}

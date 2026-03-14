@@ -16,11 +16,12 @@ export default function BarcodeDetails({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="w-200">
+      
       {children}
 
       {barcode !== null && barcode != null ? (
-        <div className="w-200">
+        <div>
           <BarcodeHeader barcode={barcode} />
           <br />
           <br />

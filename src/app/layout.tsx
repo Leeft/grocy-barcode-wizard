@@ -36,7 +36,7 @@ export default function RootLayout({ children,
         <nav>
           {/* <Link href='/'><h1 className="text-4x1 font-bold underline">Top page layout</h1></Link> */}
         </nav>
-        <main className="min-h-screen flex-col justify-between p-14">{children}</main>
+        <main className="min-h-screen flex-col justify-between p-2">{children}</main>
 
       </body>
     </html>

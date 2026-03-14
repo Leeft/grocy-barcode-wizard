@@ -2,6 +2,7 @@
 
 import { Barcode } from "@/interfaces";
 import { useEffect, useState } from "react";
+import QRCode from "react-qrcode-logo";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 
@@ -64,51 +65,53 @@ export default function BarcodeScanStream({
   }, [retryCount]); // Only re-run if we manually trigger a retry
 
   return (
-      <div className={`pb-5 transition-colors duration-500 ${isFlashing ? "" : ""}`}>
-        <div className={`max-w-xl pt-10 text-center ${isFlashing} ? "animate-flash" : ""`}>
-          {/* <StatusBadge
+    <div className={`pb-5 transition-colors duration-500 ${isFlashing ? "" : ""}`}>
+      <div className={`text-center ${isFlashing} ? "animate-flash" : ""`}>
+        {/* <StatusBadge
             status={status}
             onRetry={() => {  }}
           /> */}
 
-          <div className="mt-10 p-8 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden">
-            {/* Subtle inner flash indicator */}
-            {isFlashing && <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />}
+        <div className="mt-0 p-6 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden">
+          {/* Subtle inner flash indicator */}
+          {isFlashing && <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />}
 
-            {/* <div className="mt-10 p-8 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden"> */}
-            <div>
-              {barcode ? (
-                <div key={barcode.timestamp} className="animate-in zoom-in duration-300">
-                  {/* Container for Barcode and Laser */}
-                  <div className="relative inline-block">
-                    {/* The Visual Barcode */}
+          {/* <div className="mt-10 p-8 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden"> */}
+          <div>
+            {barcode ? (
+              <div key={barcode.timestamp} className="animate-in zoom-in duration-300">
+                {/* Container for Barcode and Laser */}
+                <div className="relative inline-block">
+                  {/* The Visual Barcode */}
+                  {barcode.type === "product" ? (
                     <div className="font-barcode text-6xl leading-none text-black tracking-widest">
                       {`*${barcode.barcode}*`}
                     </div>
+                  ) : (
+                    <QRCode id={barcode.barcode} style={{ width: 70, height: 70 }} value={barcode.barcode} quietZone={5} ecLevel={"L"} />
+                  )}
 
-                    {/* The Red Laser Line */}
-                    <div className="absolute top-1/2 left-0 w-full h-0.5 bg-red-600 animate-laser pointer-events-none" />
-                  </div>
-
-                  {/* The Human Readable ID */}
-                  <div className="mt-1 text-xl font-mono font-black text-slate-700">{barcode.barcode}</div>
-
-                  <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
-                    SCAN_SUCCESS //{" "}
-                    {new Date(
-                      barcode.timestamp !== undefined ? barcode.timestamp : Date.now(),
-                    ).toLocaleTimeString()}
-                  </p>
+                  {/* The Red Laser Line */}
+                  <div className="absolute top-1/2 left-0 w-full h-0.5 bg-red-600 animate-laser pointer-events-none" />
                 </div>
-              ) : (
-                <div className="py-10 text-gray-600 italic font-mono animate-pulse">
-                  SYSTEM_READY; AWAITING_BARCODE_SCAN
-                </div>
-              )}
-            </div>
+
+                {/* The Human Readable ID */}
+                <div className="mt-1 text-xl font-mono font-black text-slate-700">{barcode.barcode}</div>
+
+                <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
+                  SCAN_SUCCESS //{" "}
+                  {new Date(barcode.timestamp !== undefined ? barcode.timestamp : Date.now()).toLocaleTimeString()}
+                </p>
+              </div>
+            ) : (
+              <div className="py-10 text-gray-600 italic font-mono animate-pulse">
+                SYSTEM_READY; AWAITING_BARCODE_SCAN
+              </div>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
 }
 
