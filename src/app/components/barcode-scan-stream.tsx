@@ -2,7 +2,7 @@
 
 import { Barcode } from "@/interfaces";
 import React, { useEffect, useState } from "react";
-import QRCode from "react-qrcode-logo";
+import QRCode from "./qrcode";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 

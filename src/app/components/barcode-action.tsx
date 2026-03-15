@@ -1,6 +1,6 @@
 "use client";
 import { Barcode } from "@/interfaces";
-import QRCode from "react-qrcode-logo";
+import QRCode from "./qrcode";
 
 export default function BarcodeAction({
   qr,
