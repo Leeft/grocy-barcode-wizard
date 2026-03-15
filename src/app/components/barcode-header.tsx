@@ -1,5 +1,6 @@
 import { Barcode } from "@/interfaces";
 import { BarcodeInfoRow } from "./barcode-info-row";
+import { LocationsDropdown } from "./locations-dropdown";
 
 export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
   if (barcode.barcode == "") {
@@ -19,30 +20,29 @@ export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
   }
 
   return (
-    <div className="text-left">
-      {/* <div className="px-4 sm:px-0">
-        <h1 className="text-slate-0 font-bold uppercase">
-          Barcode &nbsp;&nbsp;
-          <strong>
-            <code className="text-lg text-amber-500">{barcode.barcode}</code>
-          </strong>
-        </h1>
-      </div> */}
+    <form className="text-left">
       <div className="mt-3 pt-3 mb-0 sm:mb-2">
         <dl className="px-0">
-          <BarcodeInfoRow heading="Name" description={barcode.name} />
-          {/* <BarcodeInfoRow
-          heading="Product"
-          description={barcode.productId?.toString()}
-        /> */}
+
+          <BarcodeInfoRow heading="Name">
+            <input name="product_name" defaultValue={barcode.name} />
+          </BarcodeInfoRow>
+
           {barcode.quantity !== undefined && barcode.quantity > 0 && (
-            <BarcodeInfoRow heading="Location" description={barcode.location?.name?.toString()} />
+            <BarcodeInfoRow heading="Location">
+              {/* <LocationsDropdown /> */}
+              {/* description={barcode.location?.name?.toString()} /> */}
+            </BarcodeInfoRow>
           )}
+
           {barcode.name !== undefined && barcode.name.length > 0 && (
-            <BarcodeInfoRow heading="Quantity" description={quantity} className={className} />
+            <BarcodeInfoRow heading="Stock quantity" className={className}>
+              <input name="stock_quantity" defaultValue={quantity} type="number" />
+            </BarcodeInfoRow>
           )}
+
         </dl>
       </div>
-    </div>
+    </form>
   );
 }
