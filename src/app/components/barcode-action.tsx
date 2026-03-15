@@ -9,6 +9,10 @@ export default function BarcodeAction({
   title,
   description,
   disable,
+  logoImage,
+  logoWidth,
+  logoHeight,
+  ecLevel,
 }: {
   qr: string;
   qrBgColor: string;
@@ -16,6 +20,10 @@ export default function BarcodeAction({
   title: string;
   description: string;
   disable?: boolean;
+  logoImage?: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  ecLevel?: 'L' | 'M' | 'Q' | 'H';
 }) {
   const href = `/api/scan/${barcode.barcode}`;
   // QRCode is at:
@@ -35,10 +43,17 @@ export default function BarcodeAction({
           bgColor={disable ? 'rgba(255, 255, 0, 0)' : qrBgColor}
           value={qr}
           quietZone={5}
+          logoImage={logoImage}
+          logoOpacity={1}
+          logoPadding={0}
+          logoWidth={logoWidth}
+          logoHeight={logoHeight}
+          removeQrCodeBehindLogo={false}
+          ecLevel={ecLevel}
         />
       </div>
       <div className={disable ? "opacity-60 pr-4 line-through": "pr-4"}>
-        <h6 className="text-slate-800 font-bold text-left uppercase">
+        <h6 className="text-slate-400 font-bold text-left uppercase">
           {title}
         </h6>
         <p className="text-slate-500 text-sm text-left">{description}</p>

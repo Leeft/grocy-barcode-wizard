@@ -15,70 +15,100 @@ export default function BarcodeDetails({
   isFlashing: boolean;
   children: React.ReactNode;
 }) {
+
+  const logoWidth: number = 135*0.75;
+  const logoHeight: number = 135*0.45;
+
   return (
-    <div className="w-200">
-      
+    <div className="max-w-240">
+
       {children}
 
       {barcode !== null && barcode != null ? (
         <div>
-          <BarcodeHeader barcode={barcode} />
-          <br />
-          <br />
-          <div className="relative flex 200 flex-col rounded-lg border border-slate-500 bg-slate-300 shadow-sm">
+
+          <div className="relative flex 200 flex-col rounded-lg bg-slate-800 shadow-sm">
             <nav className="flex min-w-[240px] flex-col gap-1 p-1.5">
               <BarcodeAction
-                qr="sho:consume"
-                qrBgColor="#ffffaa"
+                qr="sho:c"
+                qrBgColor="#61e6d0"
+                logoImage={"http://192.168.10.48:3000/icons/consume.png"}
+                logoWidth={logoWidth}
+                logoHeight={logoHeight}
                 title="Consume"
                 barcode={barcode}
                 description="Consume stock associated with the barcode"
                 disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+                ecLevel={"H"}
               />
               <BarcodeAction
-                qr="sho:useall"
+                qr="sho:ca"
                 qrBgColor="hsl(24, 63%, 60%)"
+                logoImage="/icons/consume_all.png"
+                logoWidth={logoWidth}
+                logoHeight={logoHeight}
                 title="Consume all"
                 barcode={barcode}
                 description="Remove all remaining inventory as consumed"
                 disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+                ecLevel={"H"}
               />
               <BarcodeAction
-                qr="sho:spoiled"
-                qrBgColor="hsl(345, 49%, 62%)"
+                qr="sho:cs"
+                qrBgColor="hsl(345, 25%, 65%)"
+                logoImage="/icons/spoiled.png"
+                logoWidth={logoWidth*0.8}
+                logoHeight={logoHeight*0.8}
                 title="Consume spoiled"
                 barcode={barcode}
                 description="Remove remaining inventory and mark it as spoiled"
                 disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+                ecLevel={"Q"}
               />
               <BarcodeAction
-                qr="sho:purchase"
-                qrBgColor="hsl(121, 26%, 52%)"
+                qr="sho:p"
+                qrBgColor="hsl(121, 24%, 56%)"
+                logoImage="/icons/purchased.png"
+                logoWidth={logoWidth*0.8}
+                logoHeight={logoHeight*0.8}
                 title="Purchase"
                 barcode={barcode}
                 description="Add the item to the inventory, and remove from shopping list if this is configured"
+                ecLevel={"H"}
               />
               <BarcodeAction
-                qr="sho:open"
+                qr="sho:o"
                 qrBgColor="hsl(171, 55%, 78%)"
+                logoImage="/icons/open.png"
+                logoWidth={logoWidth*0.9}
+                logoHeight={logoHeight*0.9}
                 title="Open"
                 barcode={barcode}
                 description="Mark item as having been opened"
                 disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+                ecLevel={"H"}
               />
               <BarcodeAction
-                qr="sho:inventory"
-                qrBgColor="hsl(0, 0%, 93%)"
+                qr="sho:i"
+                qrBgColor="hsl(281, 46%, 66%)"
+                logoImage="/icons/inventory.png"
+                logoWidth={logoWidth*0.9}
+                logoHeight={logoHeight*0.9}
                 title="Inventory"
                 barcode={barcode}
                 description="Refresh inventory information"
+                ecLevel={"H"}
               />
               <BarcodeAction
-                qr="sho:shop"
-                qrBgColor="hsl(295, 39%, 74%)"
+                qr="sho:as"
+                qrBgColor="hsl(219, 37%, 58%)"
+                logoImage="/icons/shopping_list.png"
+                logoWidth={logoWidth*0.9}
+                logoHeight={logoHeight*0.9}
                 title="Add to shopping list"
                 barcode={barcode}
                 description="Add the item to the shopping list for restocking"
+                ecLevel={"H"}
               />
             </nav>
           </div>
@@ -90,71 +120,3 @@ export default function BarcodeDetails({
   );
 }
 
-function BarcodeHeader({ barcode }: { barcode: Barcode }) {
-  if (barcode.barcode == "") {
-    barcode.barcode = "-- waiting for barcode scan --";
-  }
-
-  let quantity: string = "0";
-  let className: string = "";
-
-  if (barcode.quantity !== undefined && barcode.quantity >= 0) {
-    quantity = barcode.quantity.toString();
-  }
-
-  if (barcode.id !== undefined && barcode.id > 0 && quantity === "0") {
-    quantity = "-- not in stock --";
-    className = "text-amber-500";
-  }
-
-  return (
-    <div>
-      <div className="px-4 sm:px-0">
-        <h1 className="text-slate-0 font-bold uppercase">
-          Barcode &nbsp;&nbsp;
-          <strong>
-            <code className="text-lg text-amber-500">{barcode.barcode}</code>
-          </strong>
-        </h1>
-      </div>
-      <div className="mt-2 border-t border-white/10">
-        <BarcodeInfoRow heading="Name" description={barcode.name} />
-        {/* <BarcodeInfoRow
-          heading="Product"
-          description={barcode.productId?.toString()}
-        /> */}
-        {barcode.quantity !== undefined && barcode.quantity > 0 && (
-          <BarcodeInfoRow heading="Location" description={barcode.location?.name?.toString()} />
-        )}
-        {barcode.name !== undefined && barcode.name.length > 0 && (
-          <BarcodeInfoRow heading="Quantity" description={quantity} className={className} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function BarcodeInfoRow({
-  heading,
-  description,
-  className,
-}: {
-  heading: string;
-  description?: string;
-  className?: string;
-}) {
-  if (description === undefined) {
-    description = "";
-  }
-
-  return (
-    <dl className="divide-y divide-white/10 px-3">
-      <div className="px-4 py-0 sm:grid sm:grid-cols-[140_1_600] sm:gap-2 sm:px-0">
-        <dt className="text-sm/6 font-medium text-gray-100">{heading}</dt>
-        <dd className="mt-1 text-sm/6 text-gray-400 sm:col-span-2 sm:mt-0">
-          <div className={className !== undefined ? className : ""}>{description}</div>
-        </dd>
-      </div>
-    </dl>
-  );
-}
