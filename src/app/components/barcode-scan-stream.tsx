@@ -90,7 +90,13 @@ export default function BarcodeScanStream({
                       {`*${barcode.barcode}*`}
                     </div>
                   ) : (
-                    <QRCode id={barcode.barcode} style={{ width: 70, height: 70 }} value={barcode.barcode} quietZone={5} ecLevel={"L"} />
+                    <QRCode
+                      id={barcode.barcode}
+                      style={{ width: 70, height: 70 }}
+                      value={barcode.barcode}
+                      quietZone={5}
+                      ecLevel={"L"}
+                    />
                   )}
 
                   {/* The Red Laser Line */}
@@ -112,7 +118,6 @@ export default function BarcodeScanStream({
             )}
 
             {children}
-
           </div>
         </div>
       </div>

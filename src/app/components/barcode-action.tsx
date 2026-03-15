@@ -1,4 +1,3 @@
-"use client";
 import { Barcode } from "@/interfaces";
 import QRCode from "./qrcode";
 
@@ -23,7 +22,7 @@ export default function BarcodeAction({
   logoImage?: string;
   logoWidth?: number;
   logoHeight?: number;
-  ecLevel?: 'L' | 'M' | 'Q' | 'H';
+  ecLevel?: "L" | "M" | "Q" | "H";
 }) {
   const href = `/api/scan/${barcode.barcode}`;
   // QRCode is at:
@@ -31,16 +30,17 @@ export default function BarcodeAction({
   return (
     <button
       role="button"
-      className={disable
-        ? "text-slate-800 flex w-full items-left rounded-md p-4"
-        : "text-slate-800 flex w-full items-left rounded-md p-4 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
+      className={
+        disable
+          ? "text-slate-800 flex w-full items-left rounded-md p-4"
+          : "text-slate-800 flex w-full items-left rounded-md p-4 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
       }
     >
       <div className="mr-5 grid place-items-left text-left">
         <QRCode
           id={qr}
-          style={{ width: 60, height: 60, filter: disable ? 'blur(3px)' : '', opacity: disable ? 0.5 : 1 }}
-          bgColor={disable ? 'rgba(255, 255, 0, 0)' : qrBgColor}
+          style={{ width: 60, height: 60, filter: disable ? "blur(3px)" : "", opacity: disable ? 0.5 : 1 }}
+          bgColor={disable ? "rgba(255, 255, 0, 0)" : qrBgColor}
           value={qr}
           quietZone={5}
           logoImage={logoImage}
@@ -52,10 +52,8 @@ export default function BarcodeAction({
           ecLevel={ecLevel}
         />
       </div>
-      <div className={disable ? "opacity-60 pr-4 line-through": "pr-4"}>
-        <h6 className="text-slate-400 font-bold text-left uppercase">
-          {title}
-        </h6>
+      <div className={disable ? "opacity-60 pr-4 line-through" : "pr-4"}>
+        <h6 className="text-slate-400 font-bold text-left uppercase">{title}</h6>
         <p className="text-slate-500 text-sm text-left">{description}</p>
       </div>
     </button>

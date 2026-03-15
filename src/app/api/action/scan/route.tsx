@@ -1,9 +1,9 @@
 import { globalEvents } from "@/app/lib/events";
 import { Barcode } from "@/interfaces";
-import { grocyClient } from "@/app/lib/grocy";
 import { NextRequest } from "next/server";
 import ProductLookup from "@/app/lib/lookup";
 import { bbuddyQuantity, grocyProductNumber, isAnyBarcode, isSpecialBarcode, barcodeToType } from "@/app/lib/barcodes";
+import { grocyClient } from "@/app/lib/grocy";
 
 // TODO FIXME: Access control
 
@@ -69,10 +69,10 @@ async function FetchFromGrocy(barcode: Barcode) {
   const productNumber = grocyProductNumber(barcode.barcode);
 
   try {
-      barcode.type = barcodeToType( barcode.barcode );
-    } catch (err) {
-      console.error( err );
-    };
+    barcode.type = barcodeToType(barcode.barcode);
+  } catch (err) {
+    console.error(err);
+  }
 
   // Special non-product number barcodes are intercepted first before
   // proceeding; they are sent to a different stream so it is easier to
@@ -83,13 +83,13 @@ async function FetchFromGrocy(barcode: Barcode) {
 
   if (productNumber === 0 && isSpecialBarcode(barcode.barcode)) {
     const quantity: number | null = bbuddyQuantity(barcode.barcode);
-  
+
     if (quantity !== null) {
       barcode.quantity = quantity;
     }
 
-    console.log( "emitting", barcode );
-  
+    //console.log("emitting", barcode);
+
     globalEvents.emit("special-match", barcode); // Notify all connected SSE clients
 
     return Response.json(
@@ -105,23 +105,28 @@ async function FetchFromGrocy(barcode: Barcode) {
       { status: 200, statusText: "OK" },
     );
   }
-  
+
   // It's not a special barcode, but it might have a product number which
   // needs looking up. And if it's not a product number, it might be a
   // product we've not seen before yet.
 
   if (productNumber > 0) {
-    console.log("looking up by GRCY in grocy");
+    console.log(`looking up by GRCY in grocy at ${process.env.GROCY_API_URL}`);
 
     try {
-      let {
+      const {
         data, // only present if 2XX response
         error, // only present if 4XX or 5XX response
       } = await grocyClient.GET("/stock/products/{productId}", {
         params: { path: { productId: productNumber } },
       });
 
-      if ( data === undefined && error !== undefined && error.error_message !== undefined && /does not exist or is inactive/.test( error.error_message ) ) {
+      if (
+        data === undefined &&
+        error !== undefined &&
+        error?.error_message !== undefined &&
+        /does not exist or is inactive/.test(error.error_message)
+      ) {
         globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
 
         return Response.json(
@@ -163,8 +168,8 @@ async function FetchFromGrocy(barcode: Barcode) {
         );
       } else if (
         error !== undefined &&
-        error.error_message !== undefined &&
-        error.error_message.match(/^No product with barcode .* found$/)
+        error?.error_message !== undefined &&
+        error?.error_message.match(/^No product with barcode .* found$/)
       ) {
         // Give it another chance; failure to fetch the product isn't fatal.
         var raw: any = data; // allow for values not in the spec
@@ -195,7 +200,7 @@ async function FetchFromGrocy(barcode: Barcode) {
   }
 
   try {
-    let {
+    const {
       data, // only present if 2XX response
       error, // only present if 4XX or 5XX response
     } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
@@ -205,8 +210,8 @@ async function FetchFromGrocy(barcode: Barcode) {
     // Give it another chance; failure to fetch the product isn't fatal.
     if (
       error !== undefined &&
-      error.error_message !== undefined &&
-      error.error_message.match(/^No product with barcode .* found$/)
+      error?.error_message !== undefined &&
+      error?.error_message.match(/^No product with barcode .* found$/)
     ) {
       globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
 
