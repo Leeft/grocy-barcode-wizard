@@ -17,6 +17,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-qrcode-logo": "^4.0.0",
+    "react-select": "^5.10.2",
     "xstate": "^5.28.0"
   },
   "devDependencies": {
