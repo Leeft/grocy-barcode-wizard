@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { ThemeProvider } from "@material-tailwind/react"
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/styles/globals.css";
-import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +19,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   initialScale: 1,
-  width: 'device-width'
+ // width: 860,
+  width: 'device-width',
+  //viewportFit: 'cover',
 }
 
 export default function RootLayout({ children,
@@ -33,10 +33,9 @@ export default function RootLayout({ children,
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav>
-          {/* <Link href='/'><h1 className="text-4x1 font-bold underline">Top page layout</h1></Link> */}
-        </nav>
-        <main className="min-h-screen flex-col justify-between p-2">{children}</main>
+        <main className="min-h-screen md:pt-4 md:pl-4 md:lr-4">
+          {children}
+        </main>
 
       </body>
     </html>

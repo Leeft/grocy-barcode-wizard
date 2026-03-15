@@ -1,7 +1,7 @@
 "use client";
 
 import { Barcode } from "@/interfaces";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import QRCode from "react-qrcode-logo";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
@@ -12,12 +12,14 @@ export default function BarcodeScanStream({
   debug,
   changeBarcode,
   onShow,
+  children,
 }: {
   barcode: Barcode | null;
   editing: boolean;
   debug: boolean;
   changeBarcode: Function;
   onShow: Function;
+  children: React.ReactNode;
 }) {
   const [isFlashing, setIsFlashing] = useState(false);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
@@ -65,14 +67,14 @@ export default function BarcodeScanStream({
   }, [retryCount]); // Only re-run if we manually trigger a retry
 
   return (
-    <div className={`pb-5 transition-colors duration-500 ${isFlashing ? "" : ""}`}>
+    <div className="pb-6 mt-1 sm:mt-0 transition-colors duration-250">
       <div className={`text-center ${isFlashing} ? "animate-flash" : ""`}>
         {/* <StatusBadge
             status={status}
             onRetry={() => {  }}
           /> */}
 
-        <div className="mt-0 p-6 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden">
+        <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6 rounded-2xl bg-gray-800 relative overflow-hidden">
           {/* Subtle inner flash indicator */}
           {isFlashing && <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />}
 
@@ -84,7 +86,7 @@ export default function BarcodeScanStream({
                 <div className="relative inline-block">
                   {/* The Visual Barcode */}
                   {barcode.type === "product" ? (
-                    <div className="font-barcode text-6xl leading-none text-black tracking-widest">
+                    <div className="font-barcode text-3xl md:text-6x1 leading-none text-slate-200 tracking-normal">
                       {`*${barcode.barcode}*`}
                     </div>
                   ) : (
@@ -96,7 +98,7 @@ export default function BarcodeScanStream({
                 </div>
 
                 {/* The Human Readable ID */}
-                <div className="mt-1 text-xl font-mono font-black text-slate-700">{barcode.barcode}</div>
+                <div className="mt-1 text-xl font-mono text-slate-500">{barcode.barcode}</div>
 
                 <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
                   SCAN_SUCCESS //{" "}
@@ -104,10 +106,13 @@ export default function BarcodeScanStream({
                 </p>
               </div>
             ) : (
-              <div className="py-10 text-gray-600 italic font-mono animate-pulse">
+              <div className="py-6 font-mono text-1xl md:text-3x1 xl:text-1x1 text-gray-100 italic animate-pulse decoration-solid">
                 SYSTEM_READY; AWAITING_BARCODE_SCAN
               </div>
             )}
+
+            {children}
+
           </div>
         </div>
       </div>
