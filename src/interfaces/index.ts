@@ -14,6 +14,11 @@ export type Barcode = {
   timestamp?: number;
 };
 
+export interface Option {
+  value: string;
+  label: string;
+}
+
 export const allBarcodeTypes = [ "product", "grocy-product", "grocy-recipe", "bbuddy-operation", "bbuddy-quantity", "sho-operation" ] as const;
 export const specialBarcodeTypes = [ "grocy-recipe", "bbuddy-operation", "bbuddy-quantity", "sho-operation" ] as const;
 export const productOnlyBarcodeTypes = [ "product", "grocy-product" ] as const;
