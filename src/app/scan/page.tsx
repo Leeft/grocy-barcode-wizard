@@ -14,13 +14,21 @@ export default function Page() {
     <div>
       <BarcodeDetails barcode={barcode} editing={editing} isFlashing={isFlashing}>
         <BarcodeScanStream
+          // @ts-ignore
           barcode={barcode}
           editing={editing}
           changeBarcode={setBarcode}
           onShow={() => setIsFlashing(true)}
           debug={false}
         >
-          {barcode !== null && <BarcodeHeader barcode={barcode} />}
+          {barcode && (
+            // @ts-ignore
+            barcode !== null && barcode.name !== undefined && barcode.name !== null ? (
+              <BarcodeHeader barcode={barcode} />
+            ) : (
+              <h1 className="p-6 font-bold uppercase font-c">Unknown barcode</h1>
+            )
+          )}
         </BarcodeScanStream>
       </BarcodeDetails>
     </div>

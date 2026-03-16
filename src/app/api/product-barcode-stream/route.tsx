@@ -1,3 +1,4 @@
+import { SerialisedBarcode } from "@/app/lib/barcode";
 import { globalEvents } from "@/app/lib/events";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export async function GET(req: Request) {
       // Flip the client status to 'connected' immediately
       controller.enqueue(encoder.encode(": ok\n\n"));
 
-      const specialHandler = (data: any) => {
+      const productHandler = (data: SerialisedBarcode) => {
         try {
           // Check if the controller is still open before enqueuing
           controller.enqueue(
@@ -19,13 +20,13 @@ export async function GET(req: Request) {
           );
         } catch (e) {
           // If enqueuing fails, the controller is likely closed
-          console.error("Stream controller closed, removing special listener.");
-          globalEvents.off("special-match", specialHandler);
+          console.error("Stream controller closed, removing product listener.");
+          globalEvents.off("product-barcode-stream", productHandler);
         }
-      };      
+      };
 
       // 2. Listen for the event
-      globalEvents.on("special-match", specialHandler);
+      globalEvents.on("product-barcode-stream", productHandler);
 
       const keepAlive = setInterval(() => {
         controller.enqueue(encoder.encode(": ping\n\n"));
@@ -34,7 +35,7 @@ export async function GET(req: Request) {
       // And clear it on abort
       req.signal.addEventListener("abort", () => {
         clearInterval(keepAlive);
-        globalEvents.off("special-match", specialHandler);
+        globalEvents.off("product-barcode-stream", productHandler);
       });
 
       // 3. IMPORTANT: The "cancel" method is called when the client disconnects

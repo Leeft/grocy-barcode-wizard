@@ -1,4 +1,4 @@
-import { Barcode } from "@/interfaces";
+import Barcode from "@/app/lib/barcode";
 
 interface IdleState {
   type: "idle";

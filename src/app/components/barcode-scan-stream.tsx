@@ -1,8 +1,7 @@
 "use client";
-
-import { Barcode } from "@/interfaces";
 import React, { useEffect, useState } from "react";
 import QRCode from "./qrcode";
+import Barcode, { SerialisedBarcode } from '@/app/lib/barcode';
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 
@@ -26,28 +25,21 @@ export default function BarcodeScanStream({
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    // 1. Clear any existing connection immediately
-    const es = new EventSource("/api/product-stream");
+    const es = new EventSource("/api/product-barcode-stream");
 
     if (debug) console.log("Attempting to connect..."); // Debug log
 
     es.onopen = () => {
-      if (debug) console.log("Connected to SSE");
+      console.log("Connected to SSE");
       setStatus("connected");
     };
 
     es.onmessage = async (event) => {
       try {
-        const data = JSON.parse(event.data);
-
-        // console.log("Received data:", data); // Debug log
-
-        // 2. Update state
-        changeBarcode(data);
-
-        // 3. Trigger Flash
+        if (debug) console.log("Received barcode data:", event.data);
+        changeBarcode(Barcode.fromJSON( JSON.parse( event.data ) ));
         setIsFlashing(true);
-        setTimeout(() => setIsFlashing(false), 800);
+        setTimeout(() => setIsFlashing(false), 1500);
       } catch (err) {
         console.error("JSON Parse Error:", err);
       }
@@ -74,14 +66,14 @@ export default function BarcodeScanStream({
             onRetry={() => {  }}
           /> */}
 
-        <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6 rounded-2xl bg-gray-800 relative overflow-hidden">
+        <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6 rounded-2xl bg-gray-800 relative">
           {/* Subtle inner flash indicator */}
           {isFlashing && <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />}
 
           {/* <div className="mt-10 p-8 border-2 rounded-2xl bg-white shadow-2xl relative overflow-hidden"> */}
           <div>
             {barcode ? (
-              <div key={barcode.timestamp} className="animate-in zoom-in duration-300">
+              <div key={barcode.id} className="animate-in zoom-in duration-300">
                 {/* Container for Barcode and Laser */}
                 <div className="relative inline-block">
                   {/* The Visual Barcode */}
@@ -108,7 +100,7 @@ export default function BarcodeScanStream({
 
                 <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
                   SCAN_SUCCESS //{" "}
-                  {new Date(barcode.timestamp !== undefined ? barcode.timestamp : Date.now()).toLocaleTimeString()}
+                  {new Date(Date.now()).toLocaleTimeString()}
                 </p>
               </div>
             ) : (

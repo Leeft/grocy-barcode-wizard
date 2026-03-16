@@ -1,12 +1,8 @@
-import { Barcode } from "@/interfaces";
+import Barcode from "@/app/lib/barcode";
 import { BarcodeInfoRow } from "./barcode-info-row";
 import { LocationsDropdown } from "./locations-dropdown";
 
 export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
-  if (barcode.barcode == "") {
-    barcode.barcode = "-- waiting for barcode scan --";
-  }
-
   let quantity: string = "0";
   let className: string = "";
 
@@ -30,8 +26,7 @@ export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
 
           {barcode.quantity !== undefined && barcode.quantity > 0 && (
             <BarcodeInfoRow heading="Location">
-              {/* <LocationsDropdown /> */}
-              {/* description={barcode.location?.name?.toString()} /> */}
+              <LocationsDropdown selectedIndex={barcode.product?.location_id} />
             </BarcodeInfoRow>
           )}
 

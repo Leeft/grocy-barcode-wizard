@@ -1,18 +1,6 @@
 import { name } from "@material-tailwind/react/types/components/select";
 import { Product, ProductLocation } from "./grocy";
 
-export type Barcode = {
-  id?: number; // Internal id to keep track of them
-  name?: name;
-  barcode: string;
-  type?: BarcodeAnyType;
-  description?: string;
-  productId?: number;
-  quantity?: number;
-  product?: Product;
-  location?: ProductLocation;
-  timestamp?: number;
-};
 
 export interface Option {
   value: string;

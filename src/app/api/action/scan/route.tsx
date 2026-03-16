@@ -1,275 +1,208 @@
 import { globalEvents } from "@/app/lib/events";
-import { Barcode } from "@/interfaces";
 import { NextRequest } from "next/server";
 import ProductLookup from "@/app/lib/lookup";
-import { bbuddyQuantity, grocyProductNumber, isAnyBarcode, isSpecialBarcode, barcodeToType } from "@/app/lib/barcodes";
 import { grocyClient } from "@/app/lib/grocy";
+import Barcode from "@/app/lib/barcode";
 
 // TODO FIXME: Access control
 
 /************************** endpoints ****************************/
 
 export async function POST(req: Request) {
-  const barcode: Barcode = { barcode: "" };
-
   if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
     const formData = await req.formData();
     const code = formData.get("barcode")?.toString();
-    if (code !== undefined && code !== null) {
-      barcode.barcode = code;
-    }
-  } else {
-    const json: any = await req.json();
-    barcode.barcode = json.barcode;
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
-  return FetchFromGrocy(barcode);
+  if (req.headers.get("content-type") === "application/json") {
+    const json: any = await req.json();
+    if (json.barcode !== undefined && json.barcode !== null) return processReceivedBarcode(json.barcode);
+  }
+
+  return processReceivedBarcode("");
 }
 
 export async function GET(req: NextRequest) {
-  const barcode: Barcode = { barcode: "" };
-
   if (req.nextUrl.searchParams.get("barcode")) {
     const code = req.nextUrl.searchParams.get("barcode");
-    if (code !== undefined && code !== null) {
-      barcode.barcode = code;
-    }
-  } else if (req.nextUrl.searchParams.get("add")) {
-    const code = req.nextUrl.searchParams.get("add");
-    if (code !== undefined && code !== null) {
-      barcode.barcode = code;
-    }
-  } else if (req.nextUrl.searchParams.get("text")) {
-    const code = req.nextUrl.searchParams.get("text");
-    if (code !== undefined && code !== null) {
-      barcode.barcode = code;
-    }
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
-  return FetchFromGrocy(barcode);
+  if (req.nextUrl.searchParams.get("add")) {
+    const code = req.nextUrl.searchParams.get("add");
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+  }
+
+  if (req.nextUrl.searchParams.get("text")) {
+    const code = req.nextUrl.searchParams.get("text");
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+  }
+
+  return processReceivedBarcode("");
 }
 
 /************************* supporting code ****************************/
 
-async function FetchFromGrocy(barcode: Barcode) {
-  //
-  if (!isAnyBarcode(barcode.barcode)) {
-    return Response.json(
-      {
-        data: null,
-        result: {
-          result: "No barcode supplied",
-          http_code: 400,
-        },
-      },
-      { status: 400, statusText: "No barcode supplied" },
-    );
-  }
-
-  const productNumber = grocyProductNumber(barcode.barcode);
+async function processReceivedBarcode(code: string) {
+  let barcode: Barcode;
 
   try {
-    barcode.type = barcodeToType(barcode.barcode);
+    barcode = new Barcode({ barcode: code });
   } catch (err) {
-    console.error(err);
+    return bbuddyErrorResponse(400, "No valid barcode supplied");
   }
 
-  // Special non-product number barcodes are intercepted first before
-  // proceeding; they are sent to a different stream so it is easier to
-  // ignore them where they should be.
-  //
-  // (This code here is a bit messy already anyway, want to keep the
-  // presentation side of things much more readable though).
+  // Special non-product barcodes are intercepted first. When so identified
+  // they are sent to a different stream (special-barcode-stream rather than
+  // product-barcode-stream) which means they don't need to be always ignored
+  // at the UI side of things where doing so is much more complicated.
 
-  if (productNumber === 0 && isSpecialBarcode(barcode.barcode)) {
-    const quantity: number | null = bbuddyQuantity(barcode.barcode);
-
+  if (barcode.isSpecialBarcode()) {
+    const quantity: number | null = barcode.bbuddyQuantity();
     if (quantity !== null) {
       barcode.quantity = quantity;
     }
 
-    //console.log("emitting", barcode);
-
-    globalEvents.emit("special-match", barcode); // Notify all connected SSE clients
-
-    return Response.json(
-      {
-        data: {
-          result: `Special barcode scanned. Barcode: ${barcode.barcode}`,
-        },
-        result: {
-          result: "OK",
-          http_code: 200,
-        },
-      },
-      { status: 200, statusText: "OK" },
-    );
+    globalEvents.emit("special-barcode-stream", barcode);
+    return bbuddySuccessResponse(`Special barcode processed. Barcode: ${barcode.barcode}`);
   }
 
-  // It's not a special barcode, but it might have a product number which
-  // needs looking up. And if it's not a product number, it might be a
-  // product we've not seen before yet.
-
-  if (productNumber > 0) {
-    console.log(`looking up by GRCY in grocy at ${process.env.GROCY_API_URL}`);
-
-    try {
-      const {
-        data, // only present if 2XX response
-        error, // only present if 4XX or 5XX response
-      } = await grocyClient.GET("/stock/products/{productId}", {
-        params: { path: { productId: productNumber } },
-      });
-
-      if (
-        data === undefined &&
-        error !== undefined &&
-        error?.error_message !== undefined &&
-        /does not exist or is inactive/.test(error.error_message)
-      ) {
-        globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-
-        return Response.json(
-          {
-            data: {
-              result: `Inactive barcode scanned. Barcode: ${barcode.barcode}`,
-            },
-            result: {
-              result: "OK",
-              http_code: 200,
-            },
-          },
-          { status: 200, statusText: "OK" },
-        );
-      }
-
-      if (data !== undefined) {
-        var raw: any = data; // allow for values not in the spec
-        barcode.name = data.product?.name;
-        barcode.quantity = raw.stock_amount_aggregated; // not in OpenAPI spec
-        barcode.product = data.product;
-        if (barcode.quantity !== undefined && barcode.quantity > 0) {
-          barcode.location = data.location;
-        }
-
-        globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-
-        return Response.json(
-          {
-            data: {
-              result: `Unknown barcode scanned. Barcode: ${barcode.barcode}`,
-            },
-            result: {
-              result: "OK",
-              http_code: 200,
-            },
-          },
-          { status: 200, statusText: "OK" },
-        );
-      } else if (
-        error !== undefined &&
-        error?.error_message !== undefined &&
-        error?.error_message.match(/^No product with barcode .* found$/)
-      ) {
-        // Give it another chance; failure to fetch the product isn't fatal.
-        var raw: any = data; // allow for values not in the spec
-        // barcode.name = data.product?.name;
-        // barcode.quantity = raw.stock_amount_aggregated; // not in OpenAPI spec
-        // barcode.product = data.product;
-        // if (barcode.quantity !== undefined && barcode.quantity > 0) {
-        //   barcode.location = data.location;
-        // }
-
-        globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-        return Response.json(
-          {
-            data: {
-              result: `Unknown barcode scanned. Barcode: ${barcode.barcode}`,
-            },
-            result: {
-              result: "OK",
-              http_code: 200,
-            },
-          },
-          { status: 200, statusText: "OK" },
-        );
-      }
-    } catch (error) {
-      console.error("Couldn't fetch information from grocy by grcy id:", error);
-    }
-  }
+  // It's not a special barcode, so it must be a product barcode.
+  // See if grocy knows about it, and if it doesn't, do a final
+  // pass at openfoodfacts. (This might change, may just end up
+  // doing this async in the UI).
 
   try {
+    findProductInGrocy(barcode)
+      .then((productBarcode) => {
+        globalEvents.emit("product-barcode-stream", productBarcode);
+      })
+      .catch((notFoundBarcode) => {
+        // Not found, but might end up sending another emit if found in OpenFoodFacts
+        globalEvents.emit("product-barcode-stream", new Barcode({
+          barcode: notFoundBarcode.barcode,
+          name: `Unkown product with barcode ${notFoundBarcode.barcode}`
+        }));
+        // See if it can be identified after the fact (async)
+        findProductInOpenFoodFacts(barcode);
+      });
+
+    return bbuddySuccessResponse(`Product barcode processed. Barcode: ${barcode.barcode}`);
+  } catch (err: any) {
+    console.error("Couldn't fetch information from grocy:", err);
+  }
+
+  return bbuddyErrorResponse(400, "Invalid request");
+}
+
+async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
+  // GRCY:P:* codes contain a product number and potentially other data
+  // but for most purposes they'll be treated as a "regular" product
+  // barcode, sent to the products data stream. They just need a
+  // different API call for the lookup.
+  const productNumber: number | null = barcode.grocyProductNumber();
+
+  if (productNumber !== null && productNumber > 0) {
+    console.log(`Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`);
+
     const {
       data, // only present if 2XX response
       error, // only present if 4XX or 5XX response
-    } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
-      params: { path: { barcode: barcode.barcode } },
+    } = await grocyClient.GET("/stock/products/{productId}", {
+      params: { path: { productId: productNumber } },
     });
 
-    // Give it another chance; failure to fetch the product isn't fatal.
+    // Might get an inactive code, which isn't "wrong" for us (still
+    // need to use it) but it needs special handling. Just return the
+    // barcode we have already and use that, pretend all is well.
     if (
+      data === undefined &&
       error !== undefined &&
       error?.error_message !== undefined &&
-      error?.error_message.match(/^No product with barcode .* found$/)
+      /does not exist or is inactive/.test(error.error_message)
     ) {
-      globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-
-      const scanners = new ProductLookup();
-      scanners.lookupOpenFoodFacts(barcode);
-
-      return Response.json(
-        {
-          data: {
-            result: `Unknown barcode scanned. Barcode: ${barcode.barcode}`,
-          },
-          result: {
-            result: "OK",
-            http_code: 200,
-          },
-        },
-        { status: 200, statusText: "OK" },
-      );
+      return Promise.reject(barcode);
     }
 
     if (data !== undefined) {
-      var raw: any = data; // allow for values not in the spec
-      barcode.name = data.product?.name;
-      barcode.quantity = raw.stock_amount_aggregated; // not in OpenAPI spec
-      barcode.product = data.product;
-      if (barcode.quantity !== undefined && barcode.quantity > 0) {
-        barcode.location = data.location;
-      }
-
-      globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-
-      return Response.json(
-        {
-          data: {
-            result: `Unknown barcode looked up, found name: ${barcode.name}. Barcode: ${barcode.barcode}`,
-          },
-          result: {
-            result: "OK",
-            http_code: 200,
-          },
-        },
-        { status: 200, statusText: "OK" },
+      return Promise.resolve(
+        new Barcode({
+          barcode: barcode.barcode,
+          name: data.product?.name,
+          product: data.product,
+          // @ts-ignore : not in OpenAPI spec, no typescript here
+          quantity: data.stock_amount_aggregated,
+        }),
       );
-    } else {
-      console.error(`Couldn't retrieve barcode ${barcode} from grocy:`, error);
     }
-  } catch (error) {
-    console.error("Couldn't fetch information from grocy:", error);
   }
 
+  // There is no productnumber, but there may be a barcode for it
+
+  const {
+    data, // only present if 2XX response
+    error, // only present if 4XX or 5XX response
+  } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
+    params: { path: { barcode: barcode.barcode } },
+  });
+
+  if (data !== undefined) {
+    return Promise.resolve(
+      new Barcode({
+        barcode: barcode.barcode,
+        name: data.product?.name,
+        product: data.product,
+        // @ts-ignore : not in OpenAPI spec, no typescript here
+        quantity: data.stock_amount_aggregated,
+      }),
+    );
+  } else {
+    return Promise.reject(barcode);
+  }
+}
+
+function findProductInOpenFoodFacts(barcode: Barcode): void {
+  new ProductLookup().lookupOpenFoodFacts(barcode).then((json: any) => {
+    if (json.status) {
+      const foundBarcode: Barcode = new Barcode({
+        barcode: barcode.barcode,
+        name: json.product.product_name_en,
+      });
+      console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
+      globalEvents.emit("product-barcode-stream", foundBarcode);
+    } else {
+      console.log(`Barcode ${barcode.barcode} was not found at openfoodfacts API`);
+    }
+  });
+}
+
+function bbuddySuccessResponse(message: string): Response {
+  return Response.json(
+    {
+      data: {
+        result: message,
+      },
+      result: {
+        result: "OK",
+        http_code: 200,
+      },
+    },
+    { status: 200, statusText: "OK" },
+  );
+}
+
+function bbuddyErrorResponse(code: number, message: string): Response {
   return Response.json(
     {
       data: null,
       result: {
-        result: "Invalid request",
-        http_code: 400,
+        result: message,
+        http_code: code,
       },
     },
-    { status: 400, statusText: "Invalid request" },
+    { status: code, statusText: message },
   );
 }
+
+// EOF
