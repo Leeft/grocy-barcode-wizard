@@ -39,6 +39,7 @@ export function ProductgroupsDropdown({
 
   return (
     <AsyncSelect<Option>
+      key={'group-' + selectedIndex}
       value={selectedOption}
       loadOptions={loadOptions}
       defaultOptions

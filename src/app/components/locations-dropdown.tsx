@@ -44,6 +44,7 @@ export function LocationsDropdown({
 
   return (
     <AsyncSelect<Option>
+      key={'location-' + selectedIndex}
       value={selectedOption}
       loadOptions={loadOptions}
       defaultOptions

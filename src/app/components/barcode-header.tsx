@@ -21,18 +21,18 @@ export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
         <dl className="px-0">
 
           <BarcodeInfoRow heading="Name">
-            <input name="product_name" defaultValue={barcode.name} />
+            <input name="product_name" key={barcode.id} defaultValue={barcode.name !== undefined ? barcode.name : ''} />
           </BarcodeInfoRow>
 
-          {barcode.quantity !== undefined && barcode.quantity > 0 && (
+          {barcode.quantity !== undefined && barcode.quantity > 0 ? (
             <BarcodeInfoRow heading="Location">
               <LocationsDropdown selectedIndex={barcode.product?.location_id} />
             </BarcodeInfoRow>
-          )}
+          ): ('') }
 
           {barcode.name !== undefined && barcode.name.length > 0 && (
             <BarcodeInfoRow heading="Stock quantity" className={className}>
-              <input name="stock_quantity" defaultValue={quantity} type="number" />
+              <input name="stock_quantity" key={barcode.id + "-stock"} defaultValue={quantity} type="number" />
             </BarcodeInfoRow>
           )}
 
