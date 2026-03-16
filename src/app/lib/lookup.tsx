@@ -13,12 +13,13 @@ export default class ProductLookup {
       .then((response) => response.json())
       .then((json) => {
         if (json.status) {
-          barcode.name = json.product.product_name_en;
+          // Fresh barcode to notify with (ensures no old parameters are left behind)
+          const foundBarcode: Barcode = {
+            barcode: barcode.barcode,
+            name: json.product.product_name_en,
+          };
           console.log(`found openfoodfacts product as ${json.product.product_name_en}`);
-          globalEvents.emit("product-match", barcode); // Notify all connected SSE clients
-          //console.log( barcode );
-          //console.log( JSON.stringify(json) );
-          //console.log(json);
+          globalEvents.emit("product-match", foundBarcode); // Notify all connected SSE clients
         } else {
           console.log(`barcode ${barcode.barcode} not found at openfoodfacts API`);
         }
