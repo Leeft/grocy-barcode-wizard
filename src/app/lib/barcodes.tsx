@@ -1,34 +1,10 @@
 import {
-  allBarcodeTypes,
-  Barcode,
   BarcodeAnyType,
   BarcodeProductType,
   BarcodeSpecialType,
   productOnlyBarcodeTypes,
   specialBarcodeTypes,
 } from "@/interfaces";
-
-export default class Barcodes {
-  private _barcodes: Barcode[] = [
-    { id: 1, barcode: "XXXX", quantity: 1 },
-    { id: 123, barcode: "YYYY", quantity: 0, description: "Whyohwhyohwhy" },
-    { id: 27, barcode: "5701018050906", quantity: 12, description: "Not quite sure what this is for" },
-    { barcode: "slug:life", quantity: 1, description: "It's a thug's life." },
-    { id: 76, barcode: "5706911027437", quantity: 1 },
-  ];
-
-  get barcodes() {
-    return this._barcodes;
-  }
-
-  barcode(code: string): Barcode | undefined {
-    return this._barcodes.find((barcode) => barcode.barcode === code);
-  }
-
-  private set barcodes(value: Barcode[]) {
-    this._barcodes = value;
-  }
-}
 
 function parseProductBarcode(maybeProductBarcode: string): BarcodeProductType {
   const barcode = productOnlyBarcodeTypes.find((validName) => validName === maybeProductBarcode);
@@ -63,12 +39,16 @@ export function barcodeToType(barcode: string): BarcodeAnyType {
     return "bbuddy-operation";
   }
 
-  if (/^(GRCY)[:]R[:][^:]+$/i.test(barcode)) {
+  if (/^(GRCY)[:]R[:].*$/i.test(barcode)) {
     return "grocy-recipe";
   }
 
-  if (/^(GRCY)[:]P[:][^:]+$/i.test(barcode)) {
+  if (/^(GRCY)[:]P[:].*$/i.test(barcode)) {
     return "grocy-product";
+  }
+
+  if (/^(GRCY)[:]B[:].*$/i.test(barcode)) {
+    return "grocy-battery";
   }
 
   return "product";
