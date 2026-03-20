@@ -1,8 +1,8 @@
 import Barcode from "@/app/lib/barcode";
-import { BarcodeInfoRow } from "./barcode-info-row";
-import { LocationsDropdown } from "./locations-dropdown";
+import { BarcodeInfoRow } from "@/app/components/barcode-info-row";
+import { LocationsDropdown } from "@/app/ui/product/locations-dropdown";
 
-export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
+export function ExistingProductForm({ barcode }: { barcode: Barcode }) {
   let quantity: string = "0";
   let className: string = "";
 
@@ -19,23 +19,32 @@ export function BarcodeHeader({ barcode }: { barcode: Barcode }) {
     <form className="text-left">
       <div className="mt-3 pt-3 mb-0 sm:mb-2">
         <dl className="px-0">
-
           <BarcodeInfoRow heading="Name">
-            <input name="product_name" key={barcode.id} defaultValue={barcode.name !== undefined ? barcode.name : ''} />
+            <input
+              name="product_name"
+              key={barcode.id}
+              defaultValue={barcode.name !== undefined ? barcode.name : ""}
+            />
           </BarcodeInfoRow>
 
           {barcode.quantity !== undefined && barcode.quantity > 0 ? (
             <BarcodeInfoRow heading="Location">
               <LocationsDropdown selectedIndex={barcode.product?.location_id} />
             </BarcodeInfoRow>
-          ): ('') }
+          ) : (
+            ""
+          )}
 
           {barcode.name !== undefined && barcode.name.length > 0 && (
             <BarcodeInfoRow heading="Stock quantity" className={className}>
-              <input name="stock_quantity" key={barcode.id + "-stock"} defaultValue={quantity} type="number" />
+              <input
+                name="stock_quantity"
+                key={barcode.id + "-stock"}
+                defaultValue={quantity}
+                type="number"
+              />
             </BarcodeInfoRow>
           )}
-
         </dl>
       </div>
     </form>
