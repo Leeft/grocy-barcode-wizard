@@ -11,6 +11,13 @@ export type QuantityUnitConversion = {
   product_id: number;
   row_created_timestamp: string;
 };
+export type ProductGroup = {
+  id: number;
+  name: string;
+  description: string;
+  row_created_timestamp: string;
+  active: 0 | 1;
+};
 
 export type ObjectByIdParams = paths["/objects/{entity}/{objectId}"]["parameters"];
 export type ProductByBarcodeParams = paths["/stock/products/by-barcode/{barcode}"]["parameters"];
