@@ -1,11 +1,14 @@
 "use client";
 
-import { Option } from "@/interfaces";
-import AsyncSelect from "react-select/async";
+import Select, { ActionMeta, SingleValue } from "react-select";
 import { QuantityUnit } from "@/interfaces/grocy";
 import dropdownStyles from "@/app/lib/dropdownstyles";
-import { Dispatch, SetStateAction, use, useContext, useState } from "react";
-import { QuantityUnitContext } from "../../providers/quantity-unit-context";
+import { useState } from "react";
+
+interface Option {
+  value: string | undefined;
+  label: string | undefined;
+}
 
 const quantityTypes = [
   "other",
@@ -20,92 +23,80 @@ type QuantityType = (typeof quantityTypes)[number];
 export function QuantityUnitsDropdown({
   // name,
   // size,
+  units,
   className,
   mode,
-  selectedIndex,
+  selectedId,
+  setSelectedId,
 }: {
   // name: string;
   // size?: number;
+  units: QuantityUnit[],
   className?: string;
   mode: QuantityType;
-  selectedIndex?: number;
+  selectedId: number;
+  setSelectedId: Function;
 }) {
-  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+  //const [selectedOption, setSelectedOption] = useState<Option | null>(null);
 
-  const quantityUnitPromise = useContext(QuantityUnitContext);
-  if (!quantityUnitPromise) {
-    throw new Error("useContext must be used within a data provider");
-  }
-
-  // @ts-expect-error
-  const data = use(quantityUnitPromise);
-
-  const loadOptions = async (inputValue: string) => {
-    try {
-      return quantityUnitsToOptions({
-        selectedIndex: selectedIndex,
-        setSelectedOption: setSelectedOption,
-        // @ts-ignore
-        entityObjects: data,
-        filterType: mode,
-      });
-    } catch (error) {
-      console.error("Error loading quantity units:", error);
-      return [];
-    }
-  };
+  const [options, selected] = quantityUnitsToOptions({
+    // @ts-ignore
+    entityObjects: units,
+    filterType: mode,
+  });
 
   return (
-    <AsyncSelect<Option>
+    <Select<Option>
       styles={dropdownStyles}
       className={className}
       maxMenuHeight={500}
       name="quantity_unit"
-      key={mode + "-" + selectedIndex}
-      value={selectedOption}
-      loadOptions={loadOptions}
-      defaultOptions
-      onChange={setSelectedOption}
+      //key={mode + "-" + selectedId}
+      //defaultValue={selectedOption}
+      options={options}
+      //defaultValue={selected}
+      //defaultOptions
+      onChange={(inputValue: SingleValue<Option>, action: ActionMeta<Option>) => {
+        if (
+          inputValue !== null &&
+          (selectedId === undefined || inputValue.value !== selectedId.toString())
+        ) {
+          //console.log(inputValue);
+          setSelectedId(inputValue.value);
+        }
+      }}
       placeholder="Pick..."
-      loadingMessage={async () => "Loading..."}
-      noOptionsMessage={async ({ inputValue }) =>
+      //loadingMessage={async () => "Loading..."}
+      // getOptionValue={(option: any) => `${option["id"]}`}
+      // getOptionLabel={(option: any) => `${option["label"]}`}
+      noOptionsMessage={({ inputValue }) =>
         inputValue ? `No quantity units found for "${inputValue}"` : "Start typing to pick..."
       }
     />
   );
 }
 
+type OptionsPlusSelected = [Option[], Option | undefined];
+
 function quantityUnitsToOptions({
-  selectedIndex,
   entityObjects,
-  setSelectedOption,
   filterType,
 }: {
-  selectedIndex?: number;
-  setSelectedOption: Dispatch<SetStateAction<Option | null>>;
   entityObjects: QuantityUnit[];
   filterType: QuantityType;
-}): Option[] {
-  if (entityObjects === undefined) return [];
+}): OptionsPlusSelected {
+  if (entityObjects === undefined) return [[], undefined];
 
-  const options: any = entityObjects
+  const options = entityObjects
     .filter((qu: QuantityUnit) => {
       return qu.userfields?.type === filterType;
     })
-    .map((qu: QuantityUnit) => ({
-      value: qu.id,
-      label: qu.name,
-    }));
+    .map(
+      (qu: QuantityUnit): Option => ({
+        value: qu.id?.toString(),
+        label: qu.name,
+      }),
+    );
 
-  if (selectedIndex !== undefined && selectedIndex !== null && selectedIndex >= 0) {
-    const optionIndex: number = options.findIndex((n: any) => {
-      return n.value.toString() === selectedIndex?.toString();
-    });
-
-    if (options[optionIndex] !== undefined) {
-      setSelectedOption(options[optionIndex]);
-    }
-  }
-
-  return options;
+  return [options, undefined];
 }

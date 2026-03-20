@@ -99,6 +99,7 @@ export const fetchQuantityUnitConversions = cache(async () => {
   }
 });
 
+
 export const fetchLocations = cache(async () => {
   try {
     const res = await grocyClient.GET("/objects/{entity}", {
