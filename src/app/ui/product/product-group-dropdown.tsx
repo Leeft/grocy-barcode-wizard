@@ -1,31 +1,31 @@
 "use client";
-import AsyncSelect from "react-select/async";
-import { EntityObjectsToOptions, grocyClient } from "../lib/grocy";
-import { useState } from "react";
-import { Option } from "@/interfaces";
 
-export function ProductgroupsDropdown({
-  // name,
-  // size,
-  // className,
+import { Option } from "@/interfaces";
+import AsyncSelect from "react-select/async";
+import { EntityObjectsToOptions } from "../../lib/grocy";
+import { use, useContext, useState } from "react";
+import dropdownstyles from "../../lib/dropdownstyles";
+import { ProductGroupContext } from "@/app/providers/product-group-context";
+
+export function ProductGroupDropdown({
+  //   name,
   selectedIndex,
 }: {
-  // name: string;
-  // size?: number;
-  // className?: string;
+  //   name: string;
   selectedIndex?: number;
 }) {
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
 
+  const productGroupPromise = useContext(ProductGroupContext);
+  if (!productGroupPromise) {
+    throw new Error("useContext must be used within a data provider");
+  }
+
+  // @ts-expect-error
+  const data = use(productGroupPromise);
+
   const loadOptions = async (inputValue: string) => {
     try {
-      const { data, error } = await grocyClient.GET("/objects/{entity}", {
-        params: {
-          path: { entity: "product_groups" },
-          query: { order: "name:asc" },
-        },
-      });
-
       return EntityObjectsToOptions({
         selectedIndex: selectedIndex,
         setSelectedOption: setSelectedOption,
@@ -39,13 +39,14 @@ export function ProductgroupsDropdown({
 
   return (
     <AsyncSelect<Option>
-      key={'group-' + selectedIndex}
+      styles={dropdownstyles}
+      key={"location-" + selectedIndex}
       value={selectedOption}
       loadOptions={loadOptions}
       defaultOptions
       onChange={setSelectedOption}
       isSearchable
-      placeholder="Search groups..."
+      placeholder="Search product group..."
       loadingMessage={() => "Loading..."}
       noOptionsMessage={({ inputValue }) =>
         inputValue ? `No product groups found for "${inputValue}"` : "Start typing to search..."

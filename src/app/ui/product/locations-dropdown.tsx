@@ -1,36 +1,31 @@
 "use client";
-import AsyncSelect from "react-select/async";
-import { Product } from "@/interfaces/grocy";
-import { EntityObjectsToOptions, grocyClient } from "../lib/grocy";
-import { useState } from "react";
 
-interface Option {
-  value: string;
-  label: string;
-}
+import { Option } from "@/interfaces";
+import AsyncSelect from "react-select/async";
+import { EntityObjectsToOptions } from "../../lib/grocy";
+import { use, useContext, useState } from "react";
+import dropdownstyles from "../../lib/dropdownstyles";
+import { LocationContext } from "@/app/providers/location-context";
 
 export function LocationsDropdown({
   //   name,
-  //   size,
-  //   className,
   selectedIndex,
 }: {
   //   name: string;
-  //   size?: number;
-  //   className?: string;
   selectedIndex?: number;
 }) {
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
 
+  const locationPromise = useContext(LocationContext);
+  if (!locationPromise) {
+    throw new Error("useContext must be used within a data provider");
+  }
+
+  // @ts-expect-error
+  const data = use(locationPromise);
+
   const loadOptions = async (inputValue: string) => {
     try {
-      const { data, error } = await grocyClient.GET("/objects/{entity}", {
-        params: {
-          path: { entity: "locations" },
-          query: { order: "name:asc" },
-        },
-      });
-
       return EntityObjectsToOptions({
         selectedIndex: selectedIndex,
         setSelectedOption: setSelectedOption,
@@ -44,7 +39,8 @@ export function LocationsDropdown({
 
   return (
     <AsyncSelect<Option>
-      key={'location-' + selectedIndex}
+      styles={dropdownstyles}
+      key={"location-" + selectedIndex}
       value={selectedOption}
       loadOptions={loadOptions}
       defaultOptions
