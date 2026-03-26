@@ -16,8 +16,14 @@ export async function POST(req: Request) {
   }
 
   if (req.headers.get("content-type") === "application/json") {
-    const json: any = await req.json();
-    if (json.barcode !== undefined && json.barcode !== null) return processReceivedBarcode(json.barcode);
+    const json: any = (await req.json());
+    if (
+      typeof json === "object" &&
+      json !== null &&
+      json.barcode !== undefined &&
+      json.barcode !== null
+    )
+      return processReceivedBarcode(json.barcode);
   }
 
   return processReceivedBarcode("");
@@ -50,7 +56,7 @@ async function processReceivedBarcode(code: string) {
   try {
     barcode = new Barcode({ barcode: code });
   } catch (err) {
-    return bbuddyErrorResponse(400, "No valid barcode supplied");
+    return bbuddyErrorResponse(400, `No valid barcode supplied: ${err}` );
   }
 
   // Special non-product barcodes are intercepted first. When so identified
@@ -80,16 +86,19 @@ async function processReceivedBarcode(code: string) {
       })
       .catch((notFoundBarcode) => {
         // Not found, but might end up sending another emit if found in OpenFoodFacts
-        globalEvents.emit("product-barcode-stream", new Barcode({
-          barcode: notFoundBarcode.barcode,
-          name: `Unkown product with barcode ${notFoundBarcode.barcode}`
-        }));
+        globalEvents.emit(
+          "product-barcode-stream",
+          new Barcode({
+            barcode: notFoundBarcode.barcode,
+            name: `Unkown product with barcode ${notFoundBarcode.barcode}`,
+          }),
+        );
         // See if it can be identified after the fact (async)
         findProductInOpenFoodFacts(barcode);
       });
 
     return bbuddySuccessResponse(`Product barcode processed. Barcode: ${barcode.barcode}`);
-  } catch (err: any) {
+  } catch (err) {
     console.error("Couldn't fetch information from grocy:", err);
   }
 
@@ -131,7 +140,7 @@ async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
           barcode: barcode.barcode,
           name: data.product?.name,
           product: data.product,
-          // @ts-ignore : not in OpenAPI spec, no typescript here
+          // @ts-expect-error : not in OpenAPI spec, no typescript here
           quantity: data.stock_amount_aggregated,
         }),
       );
@@ -147,13 +156,17 @@ async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
     params: { path: { barcode: barcode.barcode } },
   });
 
+  if (error) {
+    console.error("Could not retrieve by barcode from grocy:", error);
+  }
+
   if (data !== undefined) {
     return Promise.resolve(
       new Barcode({
         barcode: barcode.barcode,
         name: data.product?.name,
         product: data.product,
-        // @ts-ignore : not in OpenAPI spec, no typescript here
+        // @ts-expect-error : not in OpenAPI spec, no typescript here
         quantity: data.stock_amount_aggregated,
       }),
     );

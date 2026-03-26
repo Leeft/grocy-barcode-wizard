@@ -1,6 +1,5 @@
 import Barcode from "@/app/lib/barcode";
 import QRCode from "@/app/components/qrcode";
-import { Suspense } from "react";
 
 export default function BarcodeActions({
   barcode,
@@ -134,7 +133,6 @@ function BarcodeAction({
   logoHeight?: number;
   ecLevel?: "L" | "M" | "Q" | "H";
 }) {
-  const href = `/api/scan/${barcode.barcode}`;
   // QRCode is at:
   // https://github.com/gcoro/react-qrcode-logo
   return (

@@ -46,8 +46,8 @@ export function EntityObjectsToOptions({
   setSelectedOption,
 }: {
   selectedIndex?: number;
-  setSelectedOption: Dispatch<SetStateAction<Option | null>>;
   entityObjects: any;
+  setSelectedOption: Dispatch<SetStateAction<Option | null>>;
 }): Option[] {
   if (entityObjects === undefined) return [];
 
@@ -74,7 +74,7 @@ export const fetchQuantityUnits = cache(async () => {
     const res = await grocyClient.GET("/objects/{entity}", {
       params: {
         path: { entity: "quantity_units" },
-        query: { order: "name:asc", "query[]": ["active=1"] },
+        query: { order: "id:asc", "query[]": ["active=1"] },
       },
     });
     return res.data;
@@ -115,6 +115,21 @@ export const fetchLocations = cache(async () => {
   }
 });
 
+export const fetchShoppingLocations = cache(async () => {
+  try {
+    const res = await grocyClient.GET("/objects/{entity}", {
+      params: {
+        path: { entity: "shopping_locations" },
+        query: { order: "name:asc", "query[]": ["active=1"] },
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error loading locations:", error);
+    throw new Error("Could not fetch locations.");
+  }
+});
+
 export const fetchProductGroups = cache(async () => {
   try {
     const res = await grocyClient.GET("/objects/{entity}", {
@@ -127,5 +142,20 @@ export const fetchProductGroups = cache(async () => {
   } catch (error) {
     console.error("Error loading product groups:", error);
     throw new Error("Could not fetch product groups.");
+  }
+});
+
+export const fetchProducts = cache(async () => {
+  try {
+    const res = await grocyClient.GET("/objects/{entity}", {
+      params: {
+        path: { entity: "products" },
+        query: { order: "name:asc", "query[]": ["active=1"] },
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error loading products:", error);
+    throw new Error("Could not fetch products.");
   }
 });

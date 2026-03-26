@@ -1,37 +1,36 @@
 "use client";
 
 import { Option } from "@/interfaces";
-import React from "react";
-import { ProductGroup } from "@/interfaces/grocy";
-import CustomSelect from "../custom-select";
 import { SingleValue } from "react-select";
+import CustomSelect from "../custom-select";
+import { Product } from "@/interfaces/grocy";
 
 type OptionsPlusSelected = [Option[], Option | undefined];
 
-export function ProductGroupDropdown({
+export function ProductDropdown({
   name,
   units,
   className,
   setSelectedId,
-  required = false,
+  optional = true,
   insert,
-  placeholder = 'Select or search for a product category...',
+  placeholder = "Pick a product...",
 }: {
   name: string;
-  units: ProductGroup[];
+  units: Product[];
   className?: string;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
-  required?: boolean;
+  optional?: boolean;
   insert?: Option;
   placeholder?: string;
 }) {
-  const [options, /* selected */] = productGroupsToOptions({
+  const [options, /*selected*/] = productsToOptions({
     entityObjects: units,
   });
 
   let defaultValue = undefined;
 
-  if (!required && insert !== undefined) {
+  if (optional && insert !== undefined) {
     options.unshift(insert);
     defaultValue = options[0];
   }
@@ -49,29 +48,39 @@ export function ProductGroupDropdown({
       defaultValue={defaultValue}
       //   defaultValue={options[0]}
       isSearchable
-      required={required}
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No product groups found for "${inputValue}"` : "Start typing to pick..."
+        inputValue ? `No quantity units found for "${inputValue}"` : "Start typing to pick..."
       }
-       loadingMessage={() => "Loading..."}
     />
   );
 }
 
-function productGroupsToOptions({ entityObjects }: { entityObjects: ProductGroup[] }): OptionsPlusSelected {
+function productsToOptions({ entityObjects }: { entityObjects: Product[] }): OptionsPlusSelected {
   if (entityObjects === undefined) return [[], undefined];
 
   const options: any = [];
 
-  function compareWords(a: ProductGroup, b: ProductGroup) {
+  // options.push({
+  //   value: 300,
+  //   label: 'æg',
+  //   type: null,
+  // });
+  //var arr = ['Aalborg', 'Sorø']; // array to sort
+  //var myLocale = 'da-DK'; // danish locale
+
+  //var sortedArr = arr.sort(function(a,b) { return a.localeCompare(b, myLocale); }); // sort
+
+  //console.log(sortedArr);
+  //function(a,b) { return a.localeCompare(b, myLocale); }
+  function compareWords(a: Product, b: Product) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
       return -1;
     } else {
       return 1;
     }
   }
-  entityObjects.sort(compareWords).forEach((entity: ProductGroup) => {
+  entityObjects.sort(compareWords).forEach((entity: Product) => {
     options.push({
       value: entity.id,
       label: entity.name,

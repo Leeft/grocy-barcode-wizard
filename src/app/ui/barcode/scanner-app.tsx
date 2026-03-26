@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 
-export default function BarcodeScannerApp({}: {}) {
+export default function BarcodeScannerApp() {
   const [editing, setEditing] = useState(false);
   const [barcode, setBarcode] = useState<Barcode | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
@@ -65,7 +65,7 @@ export default function BarcodeScannerApp({}: {}) {
       console.log("Closing product barcode stream connection");
       es.close();
     };
-  }, [retryCount]); // Only re-run if we manually trigger a retry
+  }, [debug,retryCount]); // Only re-run if we manually trigger a retry
 
   return (
     <div className={`w-auto`}>

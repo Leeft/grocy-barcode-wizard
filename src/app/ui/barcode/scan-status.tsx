@@ -47,7 +47,7 @@ export default function BarcodeScanStatus({
                 <div className="mt-1 text-xl font-mono text-slate-500">{barcode.barcode}</div>
 
                 <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
-                  SCAN_SUCCESS // {new Date(Date.now()).toLocaleTimeString()}
+                  SCAN_SUCCESS // {barcode.scannedAt?.getUTCDate()}
                 </p>
               </div>
             ) : (
@@ -67,7 +67,7 @@ export default function BarcodeScanStatus({
   );
 }
 
-function statusInfo(status: string) {
+function statusInfo(status: string): string {
   switch (status) {
     case "connecting": {
       return "ATTEMPTING CONNECTION TO BARCODE STREAM";
@@ -81,7 +81,7 @@ function statusInfo(status: string) {
   }
 }
 
-function statusColour(status: string) {
+function statusColour(status: string): string {
   switch (status) {
     case "connecting": {
       return "text-orange-300";

@@ -24,6 +24,7 @@ export default class Barcode {
   name?: string;
   quantity?: number;
   product?: GrocyProduct;
+  scannedAt?: Date;
 
   constructor({
     barcode,
@@ -52,12 +53,14 @@ export default class Barcode {
   }
 
   static fromJSON(json: SerialisedBarcode): Barcode {
-    return new Barcode({
+    const barcode = new Barcode({
       barcode: json.barcode,
       name: json.name,
       quantity: json.quantity,
       product: json.product,
     });
+    barcode.scannedAt = new Date(Date.now());
+    return barcode;
   }
 
   toJSON(): SerialisedBarcode {
@@ -158,16 +161,16 @@ export function barcodeToType(barcode: string): BarcodeAnyType {
   return "product";
 }
 
-function isAnyBarcode(barcode: string): boolean {
-  const inferredType: BarcodeAnyType = barcodeToType(barcode);
-  try {
-    barcodeToType(inferredType);
-    return true;
-  } catch (err) {
-    console.error("barcode rejected:", err);
-    return false;
-  }
-}
+// function isAnyBarcode(barcode: string): boolean {
+//   const inferredType: BarcodeAnyType = barcodeToType(barcode);
+//   try {
+//     barcodeToType(inferredType);
+//     return true;
+//   } catch (err) {
+//     console.error("barcode rejected:", err);
+//     return false;
+//   }
+// }
 
 function isSpecialBarcode(barcode: string): boolean {
   const inferredType: BarcodeAnyType = barcodeToType(barcode);

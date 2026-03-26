@@ -3,6 +3,7 @@ import type { paths, components } from "./grocy.d";
 export type Product = components["schemas"]["Product"];
 export type QuantityUnit = components["schemas"]["QuantityUnit"];
 export type ProductLocation = components["schemas"]["Location"];
+export type ShoppingLocation = components["schemas"]["ShoppingLocation"];
 
 export type QuantityUnitConversion = {
   id: number;

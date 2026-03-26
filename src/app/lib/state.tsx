@@ -99,198 +99,198 @@ function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
 }
 
-const SPECIAL_PREFIX: string = "^(SHO|BBUDDY)$";
+// const SPECIAL_PREFIX: string = "^(SHO|BBUDDY)$";
+//
+// function barcodeTransition(state: BarcodeState, event: BarcodeEvent): BarcodeState {
+//   switch (state.type) {
+//     case "idle": {
+//       if (event.type === "BARCODE_SCANNED") {
+//         return {
+//           type: "parsed",
+//           barcode: event.barcode,
+//           editing: event.editing,
+//         };
+//       } else if (event.type === "USER_EDITING") {
+//         return {
+//           type: "editing",
+//           barcode: event.barcode,
+//           editing: true,
+//         };
+//       }
+//       return state;
+//     }
 
-function barcodeTransition(state: BarcodeState, event: BarcodeEvent): BarcodeState {
-  switch (state.type) {
-    case "idle": {
-      if (event.type === "BARCODE_SCANNED") {
-        return {
-          type: "parsed",
-          barcode: event.barcode,
-          editing: event.editing,
-        };
-      } else if (event.type === "USER_EDITING") {
-        return {
-          type: "editing",
-          barcode: event.barcode,
-          editing: true,
-        };
-      }
-      return state;
-    }
+//     case "parsed": {
+//       if (event.type === "USER_EDITING") {
+//         console.log("entering edit state; barcodes should now be scrutinised");
+//         return {
+//           type: "editing",
+//           barcode: event.barcode,
+//           editing: true,
+//         };
+//       }
 
-    case "parsed": {
-      if (event.type === "USER_EDITING") {
-        console.log("entering edit state; barcodes should now be scrutinised");
-        return {
-          type: "editing",
-          barcode: event.barcode,
-          editing: true,
-        };
-      }
+//       if (event.type === "BARCODE_SCANNED") {
+//         // Guard: if a barcode comes in which isn't special while the
+//         //        user is editing, ignore it.
+//         if (event.editing && !/^${SPECIAL_PREFIX}[-]/.test(event.barcode.barcode)) {
+//           return state;
+//         }
 
-      if (event.type === "BARCODE_SCANNED") {
-        // Guard: if a barcode comes in which isn't special while the
-        //        user is editing, ignore it.
-        if (event.editing && !/^${SPECIAL_PREFIX}[-]/.test(event.barcode.barcode)) {
-          return state;
-        }
+//         const matches = event.barcode.barcode.match(/^${SPECIAL_PREFIX}[-:]([a-z]+)([0-9]+)?/i);
 
-        const matches = event.barcode.barcode.match(/^${SPECIAL_PREFIX}[-:]([a-z]+)([0-9]+)?/i);
+//         if (matches !== undefined && matches !== null) {
+//           if (event.editing) {
+//             // TODO: quantities might be allowed, need to figure this out still
+//             console.error("ignored barcode", event.barcode, "due to editing state");
+//           } else {
+//             if (matches[1] !== undefined) {
+//               switch (matches[1].toUpperCase()) {
+//                 case "C":
+//                   return {
+//                     type: "product-consume",
+//                     barcode: event.barcode,
+//                   };
+//                 case "CA":
+//                   return {
+//                     type: "product-consume-all",
+//                     barcode: event.barcode,
+//                   };
+//                 case "CS":
+//                   return {
+//                     type: "product-consume-spoiled",
+//                     barcode: event.barcode,
+//                   };
+//                 case "P":
+//                   return {
+//                     type: "product-consume",
+//                     barcode: event.barcode,
+//                   };
+//                 case "O":
+//                   return {
+//                     type: "product-open",
+//                     barcode: event.barcode,
+//                   };
+//                 case "I":
+//                   return {
+//                     type: "product-inventory",
+//                     barcode: event.barcode,
+//                   };
+//                 case "AS":
+//                   return {
+//                     type: "product-add-shopping-list",
+//                     barcode: event.barcode,
+//                   };
+//                 default:
+//                   console.error(
+//                     "Special barcode",
+//                     event.barcode,
+//                     "parsed to",
+//                     matches[1],
+//                     "which is not recognised as a valid state handler",
+//                   );
+//                   return state;
+//               }
+//             }
+//           }
+//         }
 
-        if (matches !== undefined && matches !== null) {
-          if (event.editing) {
-            // TODO: quantities might be allowed, need to figure this out still
-            console.error("ignored barcode", event.barcode, "due to editing state");
-          } else {
-            if (matches[1] !== undefined) {
-              switch (matches[1].toUpperCase()) {
-                case "C":
-                  return {
-                    type: "product-consume",
-                    barcode: event.barcode,
-                  };
-                case "CA":
-                  return {
-                    type: "product-consume-all",
-                    barcode: event.barcode,
-                  };
-                case "CS":
-                  return {
-                    type: "product-consume-spoiled",
-                    barcode: event.barcode,
-                  };
-                case "P":
-                  return {
-                    type: "product-consume",
-                    barcode: event.barcode,
-                  };
-                case "O":
-                  return {
-                    type: "product-open",
-                    barcode: event.barcode,
-                  };
-                case "I":
-                  return {
-                    type: "product-inventory",
-                    barcode: event.barcode,
-                  };
-                case "AS":
-                  return {
-                    type: "product-add-shopping-list",
-                    barcode: event.barcode,
-                  };
-                default:
-                  console.error(
-                    "Special barcode",
-                    event.barcode,
-                    "parsed to",
-                    matches[1],
-                    "which is not recognised as a valid state handler",
-                  );
-                  return state;
-              }
-            }
-          }
-        }
+//         return {
+//           type: "idle",
+//           barcode: event.barcode,
+//           editing: event.editing,
+//         };
+//         //
+//       }
 
-        return {
-          type: "idle",
-          barcode: event.barcode,
-          editing: event.editing,
-        };
-        //
-      }
+//       return state;
+//     }
 
-      return state;
-    }
+//     case "editing": {
+//       switch (event.type) {
+//         case "USER_SAVING": {
+//           return {
+//             type: "saving",
+//             barcode: event.barcode,
+//           };
+//         }
 
-    case "editing": {
-      switch (event.type) {
-        case "USER_SAVING": {
-          return {
-            type: "saving",
-            barcode: event.barcode,
-          };
-        }
+//         case "USER_CANCELLED_EDITING": {
+//           return {
+//             type: "idle",
+//             barcode: event.barcode,
+//             editing: false,
+//           };
+//         }
 
-        case "USER_CANCELLED_EDITING": {
-          return {
-            type: "idle",
-            barcode: event.barcode,
-            editing: false,
-          };
-        }
+//         default:
+//           return state;
+//       }
+//     }
 
-        default:
-          return state;
-      }
-    }
+//     case "saving": {
+//       switch (event.type) {
+//         case "USER_SAVE_FAILED": {
+//           return {
+//             type: "editing",
+//             barcode: event.barcode,
+//             editing: true,
+//           };
+//         }
 
-    case "saving": {
-      switch (event.type) {
-        case "USER_SAVE_FAILED": {
-          return {
-            type: "editing",
-            barcode: event.barcode,
-            editing: true,
-          };
-        }
+//         case "USER_SAVE_SUCCESS": {
+//           return {
+//             type: "idle",
+//             barcode: event.barcode,
+//             editing: false,
+//           };
+//         }
 
-        case "USER_SAVE_SUCCESS": {
-          return {
-            type: "idle",
-            barcode: event.barcode,
-            editing: false,
-          };
-        }
+//         default:
+//           return state;
+//       }
+//     }
 
-        default:
-          return state;
-      }
-    }
+//     case "saved": {
+//       switch (event.type) {
+//         case "BARCODE_IDLE": {
+//           return {
+//             type: "idle",
+//             barcode: event.barcode,
+//             editing: false,
+//           };
+//         }
 
-    case "saved": {
-      switch (event.type) {
-        case "BARCODE_IDLE": {
-          return {
-            type: "idle",
-            barcode: event.barcode,
-            editing: false,
-          };
-        }
+//         default:
+//           return state;
+//       }
+//     }
 
-        default:
-          return state;
-      }
-    }
+//     case "product-purchase":
+//     case "product-consume":
+//     case "product-consume-all":
+//     case "product-consume-spoiled":
+//     case "product-open":
+//     case "product-inventory":
+//     case "product-add-shopping-list": {
+//       switch (event.type) {
+//         case "BARCODE_IDLE": {
+//           return {
+//             type: "idle",
+//             barcode: event.barcode,
+//             editing: false,
+//           };
+//         }
 
-    case "product-purchase":
-    case "product-consume":
-    case "product-consume-all":
-    case "product-consume-spoiled":
-    case "product-open":
-    case "product-inventory":
-    case "product-add-shopping-list": {
-      switch (event.type) {
-        case "BARCODE_IDLE": {
-          return {
-            type: "idle",
-            barcode: event.barcode,
-            editing: false,
-          };
-        }
+//         default:
+//           return state;
+//       }
+//     }
 
-        default:
-          return state;
-      }
-    }
-
-    default:
-      return assertNever(state);
-  }
-}
+//     default:
+//       return assertNever(state);
+//   }
+// }
 
 type Listener<St> = (state: St) => void;
 

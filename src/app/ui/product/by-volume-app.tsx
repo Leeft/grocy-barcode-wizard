@@ -7,16 +7,17 @@ import { QuantityUnit, QuantityUnitConversion } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/app/providers/quantity-unit-context";
 import { QuantityUnitConversionContext } from "@/app/providers/quantity-unit-conversion-context";
 
-export function ByWeightApp({}: {}) {
+export function ByVolumeApp() {
   const [selectedId, setSelectedId] = useState<number>(0);
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1.0);
 
   const quantityUnitsPromise = useContext(QuantityUnitContext);
   const quantityUnitConversionPromise = useContext(QuantityUnitConversionContext);
 
-  // @ts-ignore
+  // @ts-expect-error: not quite sure yet if this is avoidable
   const units: QuantityUnit[] = use(quantityUnitsPromise);
-  // @ts-ignore
+  // @ts-expect-error: not quite sure yet if this is avoidable
   const conversions: QuantityUnitConversion[] = use(quantityUnitConversionPromise);
 
   return (
@@ -26,19 +27,22 @@ export function ByWeightApp({}: {}) {
         type="number"
         className="w-19 flex-none h-8 text-right text-lg mt-0.75 p-3 mr-4"
         defaultValue={quantity}
-        onChange={( e ) => setQuantity(Number.parseFloat(e.target.value))}
+        onChange={(e) => setQuantity(Number.parseFloat(e.target.value))}
       />
       <QuantityUnitsDropdown
+        name="TODO"
         units={units}
         selectedId={selectedId}
         setSelectedId={setSelectedId}
+        setSelectedGroup={setSelectedGroup}
         className="w-40 flex-2 mr-4"
-        mode="weight-metric"
+        mode="volume"
       />
       <QuantityUnitCalculation
         units={units}
         conversions={conversions}
         selectedUnit={selectedId}
+        selectedGroup={selectedGroup}
         quantity={quantity}
         factor={1.0}
         className="flex-2 text-lg pt-1.5"

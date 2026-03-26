@@ -1,6 +1,5 @@
 import Barcode from "@/app/lib/barcode";
 import { BarcodeInfoRow } from "@/app/components/barcode-info-row";
-import { LocationsDropdown } from "@/app/ui/product/locations-dropdown";
 
 export function ExistingProductForm({ barcode }: { barcode: Barcode }) {
   let quantity: string = "0";
@@ -29,7 +28,7 @@ export function ExistingProductForm({ barcode }: { barcode: Barcode }) {
 
           {barcode.quantity !== undefined && barcode.quantity > 0 ? (
             <BarcodeInfoRow heading="Location">
-              <LocationsDropdown selectedIndex={barcode.product?.location_id} />
+              {/* <LocationDropdown selectedIndex={barcode.product?.location_id} /> */}
             </BarcodeInfoRow>
           ) : (
             ""

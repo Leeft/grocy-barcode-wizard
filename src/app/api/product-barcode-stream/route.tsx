@@ -20,7 +20,7 @@ export async function GET(req: Request) {
           );
         } catch (e) {
           // If enqueuing fails, the controller is likely closed
-          console.error("Stream controller closed, removing product listener.");
+          console.error("Stream controller closed, removing product listener:", e);
           globalEvents.off("product-barcode-stream", productHandler);
         }
       };

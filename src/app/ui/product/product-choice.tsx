@@ -1,9 +1,22 @@
-import Image from 'next/image';
+import ContentToggle from "@/app/components/content-toggle";
+import Image from "next/image";
+import React, { MouseEventHandler, SetStateAction } from "react";
+import { SingleValue } from "react-select";
 
-export function NewProductTypeChoiceDescription({ children }: { children: React.ReactNode }) {
+export function NewProductTypeChoiceDescription({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="text-slate-400 [&>*]:mt-3 [&>*]:mb-4 [&>h1]:font-bold [&>h1]:uppercase [&>p>em]:mr-[0.90]">
-      {children}
+    <div className="text-slate-400 text-left [&_p]:mt-3 [&_p]:mb-4 [&_h1]:font-bold [&_h1]:uppercase [&_p>em]:mr-[0.90]">
+      <ContentToggle id={id} title={title}>
+        {children}
+      </ContentToggle>
     </div>
   );
 }
@@ -12,6 +25,7 @@ export function NewProductTypeChoiceButton({
   title,
   isSelected,
   setAsSelected,
+  numberToSet,
   imageSource,
   imageDescription = "",
   imageWidth,
@@ -20,7 +34,8 @@ export function NewProductTypeChoiceButton({
 }: {
   title: string;
   isSelected: boolean;
-  setAsSelected: Function;
+  setAsSelected: React.Dispatch<React.SetStateAction<number>>;
+  numberToSet: number;
   imageSource: string;
   imageDescription?: string;
   imageWidth: number;
@@ -29,20 +44,20 @@ export function NewProductTypeChoiceButton({
 }) {
   return (
     <button
-      className={`flex-1 pd-5 m-1 border-1 text-lg cursor-pointer uppercase ${isSelected ? "bg-slate-600" : ""}`}
-      onClick={() => {
-        setAsSelected();
-      }}
+      className={`flex-1 rounded-lg border-1 text-xs md:text-lg cursor-pointer uppercase ${isSelected ? "bg-slate-600" : ""}`}
+      onClick={() => setAsSelected(numberToSet)}
     >
       <div>
-        <Image
-          src={imageSource}
-          alt={imageDescription}
-          width={imageWidth}
-          height={imageHeight}
-          className={imageClassName}
-        />{" "}
-        {title}
+        <div className="min-h-14">
+          <Image
+            src={imageSource}
+            alt={imageDescription}
+            width={imageWidth}
+            height={imageHeight}
+            className={imageClassName}
+          />
+        </div>{" "}
+        <div className="text-xs md:text-lg w-full min-h-9 inline-block">{title}</div>
       </div>
     </button>
   );
