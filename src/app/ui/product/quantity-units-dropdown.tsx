@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionMeta, SingleValue } from "react-select";
+import { SingleValue } from "react-select";
 import { QuantityUnit } from "@/interfaces/grocy";
 import CustomSelect from "../custom-select";
 
@@ -53,7 +53,7 @@ export function QuantityUnitsDropdown({
   required?: boolean | undefined;
   isSearchable?: boolean;
 }) {
-  const [options, selected] = quantityUnitsToOptions({
+  const [options, /* selected */] = quantityUnitsToOptions({
     entityObjects: units,
     mode: mode,
   });
@@ -72,7 +72,7 @@ export function QuantityUnitsDropdown({
       //defaultOptions
       required={required}
       isSearchable={isSearchable}
-      onChange={(inputValue: SingleValue<Option>, action: ActionMeta<Option>) => {
+      onChange={(inputValue: SingleValue<Option>, /* action: ActionMeta<Option> */) => {
         if (
           inputValue !== null &&
           (selectedId === undefined || inputValue.value !== selectedId.toString())
@@ -104,11 +104,11 @@ function quantityUnitsToOptions({
 }): OptionsPlusSelected {
   if (entityObjects === undefined) return [[], undefined];
 
-  let options: any = [];
+  const options: any = [];
 
   if (mode !== "abstract") {
     quantityTypes.forEach((type: QuantityType) => {
-      let groupOptions: any = [];
+      const groupOptions: any = [];
       entityObjects.forEach((entity: QuantityUnit) => {
         if (
           entity !== undefined &&

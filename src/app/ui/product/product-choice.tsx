@@ -1,7 +1,6 @@
 import ContentToggle from "@/app/components/content-toggle";
 import Image from "next/image";
-import React, { MouseEventHandler, SetStateAction } from "react";
-import { SingleValue } from "react-select";
+import React from "react";
 
 export function NewProductTypeChoiceDescription({
   id,

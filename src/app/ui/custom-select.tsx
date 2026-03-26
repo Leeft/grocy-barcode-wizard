@@ -1,13 +1,6 @@
 "use client";
 
-import Select, {
-  StylesConfig,
-  GroupBase,
-  Props,
-  SelectInstance,
-  Theme,
-  ThemeConfig,
-} from "react-select";
+import Select, { StylesConfig, GroupBase, Props, SelectInstance, Theme } from "react-select";
 import { useRef, useState } from "react";
 import chroma from "chroma-js";
 
@@ -19,22 +12,22 @@ export interface ColourOption {
   readonly isDisabled?: boolean;
 }
 
-const dot = (color = "transparent") => ({
+/* const dot = (color = "transparent") => ({
   alignItems: "center",
   display: "flex",
 });
+ */
+// const optionColor: string = "#ddd";
 
-const optionColor: string = "#ddd";
-
-const colors = {
+/* const colors = {
   regular: "#bbb",
   focused: "#00f",
   error: "#fb2c36",
   background: "#024a70",
   backgroundError: "#68352c",
-};
+}; */
 
-const colourStyles: StylesConfig<ColourOption> = {
+/* const colourStyles: StylesConfig<ColourOption> = {
   control: (styles, state) => {
     let statusColor = colors.regular;
     let backgroundColor = colors.background;
@@ -116,7 +109,7 @@ const colourStyles: StylesConfig<ColourOption> = {
     color: "white",
     ...dot(optionColor),
   }),
-};
+}; */
 
 const colourStyles2: StylesConfig<ColourOption> = {
   menu: (styles) => ({
@@ -126,8 +119,8 @@ const colourStyles2: StylesConfig<ColourOption> = {
   }),
   groupHeading: (styles) => ({
     ...styles,
-    color: '#ccc',
-  })
+    color: "#ccc",
+  }),
 };
 
 export default function CustomSelect<
@@ -136,7 +129,7 @@ export default function CustomSelect<
   Group extends GroupBase<Option> = GroupBase<Option>,
 >(props: Props<Option, IsMulti, Group>) {
   // State hooks
-  const [defaultValue /*setStateValue*/] = useState(props.defaultValue); // Default, unchanged value
+  //const [defaultValue /*setStateValue*/] = useState(props.defaultValue); // Default, unchanged value
   const [stateValue, setStateValue] = useState(props.defaultValue); // Initial value
   const [stateInvalid, setStateInvalid] = useState(false); // Initial value
 

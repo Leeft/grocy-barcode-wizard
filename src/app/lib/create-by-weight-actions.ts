@@ -108,7 +108,7 @@ export async function createByWeightProduct(prevState: State, formData: FormData
   }
 
   // Prepare data for insertion into the database
-  const { mainQuantityId, mainQuantity } = validation.data;
+  //const { mainQuantityId, mainQuantity } = validation.data;
   //const amountInCents = amount * 100;
   //const date = new Date().toISOString().split("T")[0];
 

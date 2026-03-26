@@ -4,7 +4,7 @@ import QRCode from "@/app/components/qrcode";
 export default function BarcodeActions({
   barcode,
   className,
-  editing,
+  editing = false,
 }: {
   barcode: Barcode;
   className?: string;
@@ -13,7 +13,7 @@ export default function BarcodeActions({
   const logoWidth: number = 135 * 0.75;
   const logoHeight: number = 135 * 0.45;
 
-  if (barcode.product === undefined) {
+  if (barcode.product === undefined || editing) {
     return <></>;
   }
 
@@ -29,7 +29,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth}
               logoHeight={logoHeight}
               title="Consume"
-              barcode={barcode}
               description="Consume stock associated with the barcode"
               disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
@@ -41,7 +40,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth}
               logoHeight={logoHeight}
               title="Consume all"
-              barcode={barcode}
               description="Remove all remaining inventory as consumed"
               disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
@@ -53,7 +51,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth * 0.8}
               logoHeight={logoHeight * 0.8}
               title="Consume spoiled"
-              barcode={barcode}
               description="Remove remaining inventory and mark it as spoiled"
               disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"Q"}
@@ -65,7 +62,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth * 0.8}
               logoHeight={logoHeight * 0.8}
               title="Purchase"
-              barcode={barcode}
               description="Add the item to the inventory, and remove from shopping list if this is configured"
               ecLevel={"H"}
             />
@@ -76,7 +72,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth * 0.9}
               logoHeight={logoHeight * 0.9}
               title="Open"
-              barcode={barcode}
               description="Mark item as having been opened"
               disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
@@ -88,7 +83,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth * 0.9}
               logoHeight={logoHeight * 0.9}
               title="Inventory"
-              barcode={barcode}
               description="Refresh inventory information"
               ecLevel={"H"}
             />
@@ -99,7 +93,6 @@ export default function BarcodeActions({
               logoWidth={logoWidth * 0.9}
               logoHeight={logoHeight * 0.9}
               title="Add to shopping list"
-              barcode={barcode}
               description="Add the item to the shopping list for restocking"
               ecLevel={"H"}
             />
@@ -113,7 +106,6 @@ export default function BarcodeActions({
 function BarcodeAction({
   qr,
   qrBgColor,
-  barcode,
   title,
   description,
   disable,
@@ -124,7 +116,6 @@ function BarcodeAction({
 }: {
   qr: string;
   qrBgColor: string;
-  barcode: Barcode;
   title: string;
   description: string;
   disable?: boolean;

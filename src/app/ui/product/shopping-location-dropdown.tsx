@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionMeta, SingleValue, ThemeConfig } from "react-select";
+import { SingleValue } from "react-select";
 import CustomSelect from "../custom-select";
 import { ShoppingLocation as Location } from "@/interfaces/grocy";
 
@@ -14,7 +14,6 @@ export function ShoppingLocationDropdown({
   name,
   units,
   className,
-  selectedIndex,
   setSelectedId,
   optional = false,
   insert,
@@ -23,7 +22,6 @@ export function ShoppingLocationDropdown({
   name: string;
   units: Location[];
   className?: string;
-  selectedIndex?: number;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   optional?: boolean;
   insert?: Option;

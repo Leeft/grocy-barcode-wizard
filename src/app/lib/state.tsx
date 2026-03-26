@@ -78,6 +78,7 @@ type BarcodeState =
   | ProductInventoryState
   | ProductAddShoppinglistState;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type BarcodeEvent =
   | { type: "BARCODE_IDLE"; barcode: Barcode }
   | { type: "BARCODE_SCANNED"; barcode: Barcode; editing: boolean }
@@ -95,6 +96,7 @@ type BarcodeEvent =
   | { type: "PRODUCT_SHOPPING_LIST"; barcode: Barcode };
 
 // This function should never be called - it's just for type checking
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
 }

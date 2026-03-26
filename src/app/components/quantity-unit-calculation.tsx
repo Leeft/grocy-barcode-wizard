@@ -15,7 +15,6 @@ export function QuantityUnitCalculation({
   units,
   selectedUnit,
   selectedGroup,
-  factor,
   className,
   conversions,
   quantity,
@@ -23,7 +22,6 @@ export function QuantityUnitCalculation({
   units: QuantityUnit[];
   selectedUnit: number;
   selectedGroup: string;
-  factor: number;
   className?: string;
   conversions: QUConversion[];
   quantity: number;
@@ -81,7 +79,7 @@ function DisplayConversion({
   try {
     value = (/metric/.test(group))
       ? floatString(fraction)
-      : floatToFractions(fraction.toString(), 64);
+      : floatToFractions(fraction.toString());
   } catch (reason: any) {
     error = reason;
   }
@@ -182,7 +180,7 @@ const simplifyFraction = function (numerator: number, denominator: number = 64):
 };
 
 
-export function floatToFractions(_input: string, denominator: number = 64) {
+export function floatToFractions(_input: string, /* denominator: number = 64 */) {
   const input: number = Number.parseFloat(_input);
 
   if (Number.isNaN(input)) throw new Error(`Input ${input} is not a valid number`);

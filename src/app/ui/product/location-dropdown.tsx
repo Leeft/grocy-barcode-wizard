@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionMeta, SingleValue } from "react-select";
+import { SingleValue } from "react-select";
 import CustomSelect from "../custom-select";
 import { ProductLocation as Location } from "@/interfaces/grocy";
 
@@ -14,7 +14,6 @@ export function LocationDropdown({
   name,
   units,
   className,
-  selectedIndex,
   setSelectedId,
   optional = false,
   insert,
@@ -25,7 +24,6 @@ export function LocationDropdown({
   name: string;
   units: Location[];
   className?: string;
-  selectedIndex?: number;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   optional?: boolean;
   insert?: Option;
@@ -62,7 +60,7 @@ export function LocationDropdown({
       name={name}
       options={options}
       required={required}
-      onChange={(inputValue: SingleValue<Option>, action: ActionMeta<Option>) => {
+      onChange={(inputValue: SingleValue<Option>, /* action: ActionMeta<Option> */) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}

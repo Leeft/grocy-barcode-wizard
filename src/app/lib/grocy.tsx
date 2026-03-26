@@ -21,12 +21,14 @@ if (apiKey === undefined) {
 }
 
 const myMiddleware: Middleware = {
-  async onRequest({ request, options }) {
+  async onRequest({ request, /*options*/ }) {
     request.headers.set("GROCY-API-KEY", apiKey);
     request.headers.set("Accept", "application/json");
     return request;
   },
-  async onResponse({ request, response, options }) {
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async onResponse({ request, response, /*options*/ }) {
     const { body, ...resOptions } = response;
     // change status of response
     return new Response(body, { ...resOptions, status: 200 });

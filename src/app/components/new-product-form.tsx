@@ -10,9 +10,8 @@ import {
   ChoseByWeight,
 } from "@/app/components/new-product-form-server";
 import { NewProductTypeChoiceButton } from "../ui/product/product-choice";
-import Barcode from "../lib/barcode";
 
-export function NewProductForm({ barcode }: { barcode: Barcode }) {
+export function NewProductForm() {
   const [selectedMode, setSelectedMode] = useState<number>(0);
 
   return (

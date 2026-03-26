@@ -15,11 +15,11 @@ import { useEffect, useState } from "react";
 type ConnectionStatus = "connecting" | "connected" | "error";
 
 export default function BarcodeScannerApp() {
-  const [editing, setEditing] = useState(false);
+  const [editing, /*setEditing*/] = useState(false);
   const [barcode, setBarcode] = useState<Barcode | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [isFlashing, setIsFlashing] = useState(false);
-  const [retryCount, setRetryCount] = useState(3);
+  const [retryCount, /*setRetryCount*/] = useState(3);
 
   // const locationsPromise: Promise<ProductLocation>[] | null = useContext(LocationContext);
   // const productGroupPromise: Promise<ProductGroup>[] | null = useContext(ProductGroupContext);
@@ -77,20 +77,20 @@ export default function BarcodeScannerApp() {
             <BarcodeActions barcode={barcode} className="w-auto" editing={editing} />
           </>
         ) : (
-          <NewProductForm barcode={barcode} />
+          <NewProductForm />
         ))}
     </div>
   );
 }
 
-function StatusBadge({ status, onRetry }: { status: ConnectionStatus; onRetry: () => void }) {
-  if (status === "connecting")
-    return <span className="text-amber-500 text-xs font-bold uppercase">● Connecting</span>;
-  if (status === "error")
-    return (
-      <button onClick={onRetry} className="text-red-500 text-xs font-bold uppercase underline">
-        ● Disconnected - Retry?
-      </button>
-    );
-  return <span className="text-emerald-500 text-xs font-bold uppercase">● Live System</span>;
-}
+// function StatusBadge({ status, onRetry }: { status: ConnectionStatus; onRetry: () => void }) {
+//   if (status === "connecting")
+//     return <span className="text-amber-500 text-xs font-bold uppercase">● Connecting</span>;
+//   if (status === "error")
+//     return (
+//       <button onClick={onRetry} className="text-red-500 text-xs font-bold uppercase underline">
+//         ● Disconnected - Retry?
+//       </button>
+//     );
+//   return <span className="text-emerald-500 text-xs font-bold uppercase">● Live System</span>;
+// }

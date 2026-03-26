@@ -3,9 +3,9 @@
 import React, {
   ChangeEvent,
   ChangeEventHandler,
-  SubmitEventHandler,
   use,
   useActionState,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -29,8 +29,6 @@ import { addYears, dateToISODate } from "@/app/lib/date";
 import clsx from "clsx";
 import { Option } from "@/interfaces";
 import CustomSelect from "../custom-select";
-import { date } from "zod";
-import { Saira_Extra_Condensed } from "next/font/google";
 import { ProductGroupContext } from "@/app/providers/product-group-context";
 import { ProductGroupDropdown } from "./product-group-dropdown";
 
@@ -44,7 +42,6 @@ export function ByWeightApp() {
 
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [packagingDate, setPackagingDate] = useState<Date | null>(null);
-  const [dueDaysDifference, setDueDaysDifference] = useState<number | null>(null);
 
   const [defaultDueDays, setDefaultDueDays] = useState<number>(0);
   const [defaultDueAfterOpen, setDefaultDueAfterOpen] = useState<number>(0);
@@ -106,19 +103,19 @@ export function ByWeightApp() {
     e.preventDefault();
   }
 
-  function calculateDueDays(): void {
+  const calculateDueDays = useCallback(() => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
     const difference = Math.round(
       (packagingDate.getTime() - expiryDate.getTime()) / (1000 * 60 * 60 * 24),
     );
     setDefaultDueDays(Math.abs(difference));
-    setDueDaysDifference(Math.round(difference));
-  }
+  }, [expiryDate, packagingDate] );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     calculateDueDays();
-  }, [expiryDate, packagingDate]);
+  }, [expiryDate, packagingDate, calculateDueDays]);
 
   return (
     <form action={formAction} onSubmit={submitHandler} noValidate className="pt-3 w-auto">
@@ -330,7 +327,6 @@ export function ByWeightApp() {
                 selectedUnit={selectedWeightUnitId}
                 selectedGroup={selectedGroup}
                 quantity={Number.parseFloat(quantity)}
-                factor={1.0}
                 className="flex-2 text-lg pt-1.5"
               />
             </FormField>
@@ -557,13 +553,6 @@ export function ByWeightApp() {
                   }}
                 />
               </FormField>
-              {/* <div>
-                {dueDaysDifference !== null && (
-                  <p className="mt-2 text-sm text-red-500">
-                    There is a difference of {Math.abs(dueDaysDifference)} days
-                  </p>
-                )}
-              </div> */}
               <FormErrors id="packaging-date-error" state={state.properties?.packagingDate} />
             </div>
           </div>
@@ -813,40 +802,6 @@ function FormErrors({ id, state }: { id: string; state: any }) {
             {error}
           </p>
         ))}
-    </div>
-  );
-}
-
-function FormRadiobutton({
-  id,
-  name,
-  defaultValue,
-  className,
-  children,
-  defaultChecked = false,
-}: {
-  id: string;
-  name: string;
-  defaultValue?: string;
-  className?: string;
-  children: React.ReactNode;
-  defaultChecked?: boolean;
-}) {
-  return (
-    <div className="inline-flex flex-grow items-center">
-      <label className="relative flex-none items-center cursor-pointer w-8 pt-3" htmlFor={id}>
-        <input
-          name={name}
-          defaultValue={defaultValue}
-          type="radio"
-          className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border border-slate-300 checked:border-slate-400 transition-all"
-          id={id}
-        />
-        <span className="absolute bg-slate-300 w-3 h-3 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-200 top-[22px] left-[10px] transform -translate-x-1/2 -translate-y-1/2"></span>
-      </label>
-      <label className="text-slate-200 cursor-pointer text-sm float-left pt-1" htmlFor={id}>
-        {children}
-      </label>
     </div>
   );
 }
