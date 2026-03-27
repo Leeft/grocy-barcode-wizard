@@ -12,7 +12,7 @@ export function NewProductTypeChoiceDescription({
   children: React.ReactNode;
 }) {
   return (
-    <div className="text-slate-400 text-left [&_p]:mt-3 [&_p]:mb-4 [&_h1]:font-bold [&_h1]:uppercase [&_p>em]:mr-[0.90]">
+    <div className="text-left text-slate-400 [&_h1]:font-bold [&_h1]:uppercase [&_p]:mt-3 [&_p]:mb-4 [&_p>em]:mr-[0.90]">
       <ContentToggle id={id} title={title}>
         {children}
       </ContentToggle>
@@ -43,7 +43,7 @@ export function NewProductTypeChoiceButton({
 }) {
   return (
     <button
-      className={`flex-1 rounded-lg border-1 text-xs md:text-lg cursor-pointer uppercase ${isSelected ? "bg-slate-600" : ""}`}
+      className={`flex-1 cursor-pointer rounded-lg border-1 text-xs uppercase md:text-lg ${isSelected ? "bg-slate-600" : ""}`}
       onClick={() => setAsSelected(numberToSet)}
     >
       <div>
@@ -56,7 +56,9 @@ export function NewProductTypeChoiceButton({
             className={imageClassName}
           />
         </div>{" "}
-        <div className="text-xs md:text-lg w-full min-h-9 inline-block">{title}</div>
+        <div className="inline-block min-h-9 w-full text-xs md:text-lg">
+          {title}
+        </div>
       </div>
     </button>
   );

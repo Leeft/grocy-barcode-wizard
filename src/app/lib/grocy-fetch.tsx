@@ -2,12 +2,12 @@
 
 import { grocyClient } from "./grocy";
 
-export async function fetchQuantityUnitConversionsForUnit( unitId: number ) {
+export async function fetchQuantityUnitConversionsForUnit(unitId: number) {
   try {
     return grocyClient.GET("/objects/{entity}", {
       params: {
         path: { entity: "quantity_unit_conversions" },
-        query: { "query[]": ["product_id=null",`from_qu_id=${unitId}`] },
+        query: { "query[]": ["product_id=null", `from_qu_id=${unitId}`] },
       },
     });
   } catch (error) {

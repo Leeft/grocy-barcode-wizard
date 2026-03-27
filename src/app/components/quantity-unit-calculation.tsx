@@ -77,7 +77,7 @@ function DisplayConversion({
   let error;
 
   try {
-    value = (/metric/.test(group))
+    value = /metric/.test(group)
       ? floatString(fraction)
       : floatToFractions(fraction.toString());
   } catch (reason) {
@@ -85,7 +85,11 @@ function DisplayConversion({
   }
 
   if (Number.isNaN(value)) {
-    return <span className="text-slate-400">« Awaiting valid input {JSON.stringify(error)} »</span>;
+    return (
+      <span className="text-slate-400">
+        « Awaiting valid input {JSON.stringify(error)} »
+      </span>
+    );
   }
 
   //   =&nbsp;
@@ -97,12 +101,17 @@ function DisplayConversion({
   return (
     <span className={"mr-5"}>
       <>»&nbsp;</>
-      <>{/metric/.test(group) && false ? (
+      <>
+        {/metric/.test(group) && false ? (
           <>{floatString(fraction)}</>
-      ) : (
+        ) : (
           <>{value}</>
-      )}</>
-      &nbsp;{unit.factor! * fraction > 1 ? unit.target!.name_plural : unit.target!.name}
+        )}
+      </>
+      &nbsp;
+      {unit.factor! * fraction > 1
+        ? unit.target!.name_plural
+        : unit.target!.name}
     </span>
   );
 }
@@ -160,7 +169,10 @@ const SEP = `⁄`;
 
 const TO_FRACTION_64: number = 0.015625;
 
-const simplifyFraction = function (numerator: number, denominator: number = 64): string {
+const simplifyFraction = function (
+  numerator: number,
+  denominator: number = 64,
+): string {
   // if there is no denominator then there is no fraction
   if (numerator < 1) {
     return "";
@@ -179,11 +191,13 @@ const simplifyFraction = function (numerator: number, denominator: number = 64):
   return simplifyFraction(numerator / 2, denominator / 2);
 };
 
-
-export function floatToFractions(_input: string, /* denominator: number = 64 */) {
+export function floatToFractions(
+  _input: string /* denominator: number = 64 */,
+) {
   const input: number = Number.parseFloat(_input);
 
-  if (Number.isNaN(input)) throw new Error(`Input ${input} is not a valid number`);
+  if (Number.isNaN(input))
+    throw new Error(`Input ${input} is not a valid number`);
 
   const integerPart: number = Math.floor(input);
   // limit decimals to avoid "conflicts" (not sure what conflicts ...)

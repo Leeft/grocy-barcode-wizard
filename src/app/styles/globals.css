@@ -1,9 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap');
 @import "tailwindcss";
 
-@tailwind base;
+/* @import "tailwindcss/preflight"
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
+
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
 
 /* Force dark mode */
 @custom-variant dark (&:where(.dark, .dark *));

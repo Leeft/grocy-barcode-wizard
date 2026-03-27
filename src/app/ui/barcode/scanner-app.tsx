@@ -10,11 +10,11 @@ import { useEffect, useState } from "react";
 type ConnectionStatus = "connecting" | "connected" | "error";
 
 export default function BarcodeScannerApp() {
-  const [editing, /*setEditing*/] = useState(false);
+  const [editing /*setEditing*/] = useState(false);
   const [barcode, setBarcode] = useState<Barcode | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [isFlashing, setIsFlashing] = useState(false);
-  const [retryCount, /*setRetryCount*/] = useState(3);
+  const [retryCount /*setRetryCount*/] = useState(3);
 
   const debug = true;
 
@@ -53,16 +53,24 @@ export default function BarcodeScannerApp() {
       console.log("Closing product barcode stream connection");
       es.close();
     };
-  }, [debug,retryCount]); // Only re-run if we manually trigger a retry
+  }, [debug, retryCount]); // Only re-run if we manually trigger a retry
 
   return (
     <div className={`w-auto`}>
-      <BarcodeScanStatus barcode={barcode} isFlashing={isFlashing} connectionStatus={status} />
+      <BarcodeScanStatus
+        barcode={barcode}
+        isFlashing={isFlashing}
+        connectionStatus={status}
+      />
       {barcode &&
         (barcode !== null && barcode?.product !== undefined ? (
           <>
             <ExistingProductForm barcode={barcode} />
-            <BarcodeActions barcode={barcode} className="w-auto" editing={editing} />
+            <BarcodeActions
+              barcode={barcode}
+              className="w-auto"
+              editing={editing}
+            />
           </>
         ) : (
           <NewProductForm />

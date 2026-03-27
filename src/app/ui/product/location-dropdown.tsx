@@ -5,7 +5,7 @@ import CustomSelect from "../custom-select";
 import { ProductLocation as Location } from "@/interfaces/grocy";
 import { OptionType } from "@/interfaces/options";
 
-type Freezers = Record<string,OptionType>;
+type Freezers = Record<string, OptionType>;
 
 export function LocationDropdown({
   name,
@@ -57,7 +57,9 @@ export function LocationDropdown({
       name={name}
       options={options}
       required={required}
-      onChange={(inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */) => {
+      onChange={(
+        inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */,
+      ) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -65,7 +67,9 @@ export function LocationDropdown({
       isSearchable
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No locations found for "${inputValue}"` : "Start typing to pick..."
+        inputValue
+          ? `No locations found for "${inputValue}"`
+          : "Start typing to pick..."
       }
     />
   );
@@ -96,7 +100,10 @@ function locationsToOptions({
     options.push({
       value: entity.id?.toString(),
       label: entity.name,
-      isDisabled: noFreezers && entity.id !== undefined && entity.id in freezers ? true : false,
+      isDisabled:
+        noFreezers && entity.id !== undefined && entity.id in freezers
+          ? true
+          : false,
     });
   });
 

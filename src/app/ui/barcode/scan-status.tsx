@@ -13,11 +13,13 @@ export default function BarcodeScanStatus({
   isFlashing: boolean;
 }) {
   return (
-    <div className="pb-6 mt-1 sm:mt-0 transition-colors duration-250">
+    <div className="mt-1 pb-6 transition-colors duration-250 sm:mt-0">
       <div className="text-center">
         <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6">
           {/* Subtle inner flash indicator */}
-          {isFlashing && <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none" />}
+          {isFlashing && (
+            <div className="pointer-events-none absolute inset-0 bg-emerald-500/10" />
+          )}
 
           <div>
             {barcode ? (
@@ -26,7 +28,7 @@ export default function BarcodeScanStatus({
                 <div className="relative inline-block">
                   {/* The Visual Barcode */}
                   {barcode.type === "product" ? (
-                    <div className="font-barcode text-3xl md:text-6x1 leading-none text-slate-200 tracking-normal">
+                    <div className="font-barcode md:text-6x1 text-3xl leading-none tracking-normal text-slate-200">
                       {`*${barcode.barcode}*`}
                     </div>
                   ) : (
@@ -40,20 +42,22 @@ export default function BarcodeScanStatus({
                   )}
 
                   {/* The Red Laser Line */}
-                  <div className="absolute top-1/2 left-0 w-full h-0.5 bg-red-600 animate-laser pointer-events-none" />
+                  <div className="animate-laser pointer-events-none absolute top-1/2 left-0 h-0.5 w-full bg-red-600" />
                 </div>
 
                 {/* The Human Readable ID */}
-                <div className="mt-1 text-xl font-mono text-slate-500">{barcode.barcode}</div>
+                <div className="mt-1 font-mono text-xl text-slate-500">
+                  {barcode.barcode}
+                </div>
 
-                <p className="mt-4 text-emerald-600 text-xs font-mono font-bold tracking-widest">
+                <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
                   SCAN_SUCCESS // {barcode.scannedAt?.getUTCDate()}
                 </p>
               </div>
             ) : (
               <div
                 className={
-                  "py-6 font-mono text-1xl md:text-3x1 xl:text-1x1 text-gray-100 italic animate-pulse decoration-solid " +
+                  "text-1xl md:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-gray-100 italic decoration-solid " +
                   statusColour(connectionStatus)
                 }
               >

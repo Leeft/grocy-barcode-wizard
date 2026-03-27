@@ -25,17 +25,13 @@ const FormSchema = z.object({
     .number()
     .gt(0, { message: "Default product location must be set" }),
 
-  defaultConsumeLocationId: z.coerce
-    .number()
-    .gt(-1, {
-      message: "Consumption location must be unset or greater than zero",
-    }),
+  defaultConsumeLocationId: z.coerce.number().gt(-1, {
+    message: "Consumption location must be unset or greater than zero",
+  }),
 
-  defaultShopLocationId: z.coerce
-    .number()
-    .gt(-1, {
-      message: "Default shop location must be unset or greater than zero",
-    }),
+  defaultShopLocationId: z.coerce.number().gt(-1, {
+    message: "Default shop location must be unset or greater than zero",
+  }),
 
   dueOrExpiryDate: z.iso.date({ error: "Not a valid ISO-8601 date" }),
 
@@ -77,7 +73,7 @@ const CreateNewByWeightProduct = FormSchema.omit({
 });
 
 export type State = {
-  formErrors: string[],
+  formErrors: string[];
   fieldErrors: {
     name?: string[];
     productGroup?: string[];
@@ -99,7 +95,7 @@ export type State = {
     defaultDueDaysAfterOpen?: string[];
     defaultDueDaysAfterFreezing?: string[];
     defaultDueDaysAfterThawing?: string[];
-  }
+  };
 };
 
 export async function createByWeightProduct(
@@ -110,7 +106,7 @@ export async function createByWeightProduct(
 
   //console.log("raw form", rawFormDdata);
   const validation = CreateNewByWeightProduct.safeParse(rawFormDdata);
-  
+
   if (!validation.success) {
     return z.flattenError(validation.error);
   } else {

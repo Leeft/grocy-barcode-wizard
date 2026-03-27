@@ -12,20 +12,22 @@ export function ByAbstractUnitApp() {
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1.0);
 
-  const quantityUnitsPromise = useContext(QuantityUnitContext);
-  const quantityUnitConversionPromise = useContext(QuantityUnitConversionContext);
+  const quantityUnitsPromise = useContext(QuantityUnitContext) as Promise<
+    QuantityUnit[]
+  >;
+  const quantityUnitConversionPromise = useContext(
+    QuantityUnitConversionContext,
+  ) as Promise<QuantityUnitConversion[]>;
 
-  // @ts-expect-error: not quite sure yet if this is avoidable
-  const units: QuantityUnit[] = use(quantityUnitsPromise);
-  // @ts-expect-error: not quite sure yet if this is avoidable
-  const conversions: QuantityUnitConversion[] = use(quantityUnitConversionPromise);
+  const units = use(quantityUnitsPromise);
+  const conversions = use(quantityUnitConversionPromise);
 
   return (
     <div className="flex pt-3">
       <input
         name="purchase_quantity"
         type="number"
-        className="w-19 flex-none h-8 text-right text-lg mt-0.75 p-3 mr-4"
+        className="mt-0.75 mr-4 h-8 w-19 flex-none p-3 text-right text-lg"
         defaultValue={quantity}
         onChange={(e) => setQuantity(Number.parseFloat(e.target.value))}
       />
@@ -35,7 +37,7 @@ export function ByAbstractUnitApp() {
         selectedId={selectedId}
         setSelectedId={setSelectedId}
         setSelectedGroup={setSelectedGroup}
-        className="w-40 flex-2 mr-4"
+        className="mr-4 w-40 flex-2"
         mode="abstract"
       />
       <QuantityUnitCalculation
@@ -44,8 +46,7 @@ export function ByAbstractUnitApp() {
         selectedUnit={selectedId}
         selectedGroup={selectedGroup}
         quantity={quantity}
-        factor={1.0}
-        className="flex-2 text-lg pt-1.5"
+        className="flex-2 pt-1.5 text-lg"
       />
     </div>
   );

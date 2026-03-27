@@ -40,7 +40,9 @@ export function ProductGroupDropdown({
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/) => {
+      onChange={(
+        inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/,
+      ) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -49,7 +51,9 @@ export function ProductGroupDropdown({
       required={required}
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No product groups found for "${inputValue}"` : "Start typing to pick..."
+        inputValue
+          ? `No product groups found for "${inputValue}"`
+          : "Start typing to pick..."
       }
       loadingMessage={() => "Loading..."}
     />

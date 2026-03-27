@@ -328,7 +328,9 @@ export default class BarcodeStateMachine<State, Event> {
   }
 
   // Type-safe state matching
-  matches<T extends BarcodeState["type"]>(type: T): this is BarcodeStateMachine<Extract<State, { type: T }>, Event> {
+  matches<T extends BarcodeState["type"]>(
+    type: T,
+  ): this is BarcodeStateMachine<Extract<State, { type: T }>, Event> {
     return (this.state as { type: string }).type === type;
   }
 }

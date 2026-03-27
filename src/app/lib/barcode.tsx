@@ -103,7 +103,9 @@ export default class Barcode {
 }
 
 function parseProductBarcode(maybeProductBarcode: string): BarcodeProductType {
-  const barcode = productOnlyBarcodeTypes.find((validName) => validName === maybeProductBarcode);
+  const barcode = productOnlyBarcodeTypes.find(
+    (validName) => validName === maybeProductBarcode,
+  );
   if (barcode) {
     return barcode;
   }
@@ -111,7 +113,9 @@ function parseProductBarcode(maybeProductBarcode: string): BarcodeProductType {
 }
 
 function parseSpecialBarcode(maybeProductBarcode: string): BarcodeSpecialType {
-  const barcode = specialBarcodeTypes.find((validName) => validName === maybeProductBarcode);
+  const barcode = specialBarcodeTypes.find(
+    (validName) => validName === maybeProductBarcode,
+  );
   if (barcode) {
     return barcode;
   }

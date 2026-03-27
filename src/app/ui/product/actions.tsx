@@ -30,7 +30,11 @@ export default function BarcodeActions({
               logoHeight={logoHeight}
               title="Consume"
               description="Consume stock associated with the barcode"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+              disable={
+                barcode.quantity === undefined || barcode.quantity <= 0
+                  ? true
+                  : false
+              }
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -41,7 +45,11 @@ export default function BarcodeActions({
               logoHeight={logoHeight}
               title="Consume all"
               description="Remove all remaining inventory as consumed"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+              disable={
+                barcode.quantity === undefined || barcode.quantity <= 0
+                  ? true
+                  : false
+              }
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -52,7 +60,11 @@ export default function BarcodeActions({
               logoHeight={logoHeight * 0.8}
               title="Consume spoiled"
               description="Remove remaining inventory and mark it as spoiled"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+              disable={
+                barcode.quantity === undefined || barcode.quantity <= 0
+                  ? true
+                  : false
+              }
               ecLevel={"Q"}
             />
             <BarcodeAction
@@ -73,7 +85,11 @@ export default function BarcodeActions({
               logoHeight={logoHeight * 0.9}
               title="Open"
               description="Mark item as having been opened"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+              disable={
+                barcode.quantity === undefined || barcode.quantity <= 0
+                  ? true
+                  : false
+              }
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -130,13 +146,13 @@ function BarcodeAction({
     <button
       role="button"
       className={
-        "text-slate-800 flex w-full items-left rounded-md p-3 mt-2" +
+        "items-left mt-2 flex w-full rounded-md p-3 text-slate-800" +
         (disable
           ? " "
-          : " text-slate-800 flex w-full items-left rounded-md transition-all bg-slate-700 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 cursor-pointer")
+          : " items-left flex w-full cursor-pointer rounded-md bg-slate-700 text-slate-800 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100")
       }
     >
-      <div className="mr-5 grid place-items-left text-left">
+      <div className="place-items-left mr-5 grid text-left">
         <QRCode
           id={qr}
           style={{
@@ -157,9 +173,11 @@ function BarcodeAction({
           ecLevel={ecLevel}
         />
       </div>
-      <div className={disable ? "opacity-60 pr-4 line-through" : "pr-4"}>
-        <h6 className="text-slate-400 font-bold text-left uppercase">{title}</h6>
-        <p className="text-slate-500 text-sm text-left">{description}</p>
+      <div className={disable ? "pr-4 line-through opacity-60" : "pr-4"}>
+        <h6 className="text-left font-bold text-slate-400 uppercase">
+          {title}
+        </h6>
+        <p className="text-left text-sm text-slate-500">{description}</p>
       </div>
     </button>
   );

@@ -16,7 +16,7 @@ export function ExistingProductForm({ barcode }: { barcode: Barcode }) {
 
   return (
     <form className="text-left">
-      <div className="mt-3 pt-3 mb-0 sm:mb-2">
+      <div className="mt-3 mb-0 pt-3 sm:mb-2">
         <dl className="px-0">
           <BarcodeInfoRow heading="Name">
             <input

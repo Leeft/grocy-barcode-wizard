@@ -1,6 +1,9 @@
 "use client";
 
-import { ChevronDoubleDownIcon, ChevronDoubleUpIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+} from "@heroicons/react/16/solid";
 import React, { useState, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -22,7 +25,11 @@ function renderToString(component: React.ReactNode): string {
   return div.innerHTML;
 }
 
-export default function ContentToggle({ id, title, children }: ContentToggleProps) {
+export default function ContentToggle({
+  id,
+  title,
+  children,
+}: ContentToggleProps) {
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
@@ -75,16 +82,17 @@ export default function ContentToggle({ id, title, children }: ContentToggleProp
   };
 
   // Prevent layout shift/flash by not rendering until we know the storage state
-  if (!isLoaded) return <div className="h-10 animate-pulse bg-slate-500 rounded" />;
+  if (!isLoaded)
+    return <div className="h-10 animate-pulse rounded bg-slate-500" />;
 
   return (
-    <div className="border rounded-lg border-slate-500 overflow-hidden my-2">
+    <div className="my-2 overflow-hidden rounded-lg border border-slate-500">
       <button
         onClick={toggleVisibility}
-        className="w-full text-left text-xs flex items-center justify-between p-3 bg-slate-500 hover:bg-slate-400 transition-colors"
+        className="flex w-full items-center justify-between bg-slate-500 p-3 text-left text-xs transition-colors hover:bg-slate-400"
       >
         <span className="font-semibold text-slate-900 uppercase">{title}</span>
-        <span className="text-sm text-slate-900 font-medium">
+        <span className="text-sm font-medium text-slate-900">
           {isVisible ? (
             <ChevronDoubleUpIcon className="size-4 text-slate-800" />
           ) : (
@@ -94,7 +102,9 @@ export default function ContentToggle({ id, title, children }: ContentToggleProp
       </button>
 
       {isVisible && (
-        <div className="px-4 py-1 animate-in fade-in slide-in-from-top-1">{children}</div>
+        <div className="animate-in fade-in slide-in-from-top-1 px-4 py-1">
+          {children}
+        </div>
       )}
     </div>
   );

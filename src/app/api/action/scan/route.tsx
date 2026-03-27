@@ -4,7 +4,11 @@ import ProductLookup from "@/app/lib/lookup";
 import { grocyClient } from "@/app/lib/grocy";
 import Barcode from "@/app/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
-import { OpenFoodFactsProduct, OpenFoodFactsResult, ReceivedBarcode } from "@/interfaces/json-objects";
+import {
+  OpenFoodFactsProduct,
+  OpenFoodFactsResult,
+  ReceivedBarcode,
+} from "@/interfaces/json-objects";
 
 // TODO FIXME: Access control
 
@@ -21,12 +25,13 @@ export async function POST(req: Request) {
   if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
     const formData = await req.formData();
     const code = formData.get("barcode")?.toString();
-    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+    if (code !== undefined && code !== null)
+      return processReceivedBarcode(code);
   }
-  
+
   if (req.headers.get("content-type") === "application/json") {
-    const decoded = apiRequestDecoder.decode( await req.json() );
-    if ( decoded.isOk() ) {
+    const decoded = apiRequestDecoder.decode(await req.json());
+    if (decoded.isOk()) {
       return processReceivedBarcode(decoded.value.barcode);
     }
   }
@@ -37,17 +42,20 @@ export async function POST(req: Request) {
 export async function GET(req: NextRequest) {
   if (req.nextUrl.searchParams.get("barcode")) {
     const code = req.nextUrl.searchParams.get("barcode");
-    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+    if (code !== undefined && code !== null)
+      return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("add")) {
     const code = req.nextUrl.searchParams.get("add");
-    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+    if (code !== undefined && code !== null)
+      return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("text")) {
     const code = req.nextUrl.searchParams.get("text");
-    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+    if (code !== undefined && code !== null)
+      return processReceivedBarcode(code);
   }
 
   return processReceivedBarcode("");
@@ -76,7 +84,9 @@ async function processReceivedBarcode(code: string) {
     }
 
     globalEvents.emit("special-barcode-stream", barcode);
-    return bbuddySuccessResponse(`Special barcode processed. Barcode: ${barcode.barcode}`);
+    return bbuddySuccessResponse(
+      `Special barcode processed. Barcode: ${barcode.barcode}`,
+    );
   }
 
   // It's not a special barcode, so it must be a product barcode.
@@ -102,7 +112,9 @@ async function processReceivedBarcode(code: string) {
         findProductInOpenFoodFacts(barcode);
       });
 
-    return bbuddySuccessResponse(`Product barcode processed. Barcode: ${barcode.barcode}`);
+    return bbuddySuccessResponse(
+      `Product barcode processed. Barcode: ${barcode.barcode}`,
+    );
   } catch (err) {
     console.error("Couldn't fetch information from grocy:", err);
   }
@@ -118,7 +130,9 @@ async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
   const productNumber: number | null = barcode.grocyProductNumber();
 
   if (productNumber !== null && productNumber > 0) {
-    console.log(`Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`);
+    console.log(
+      `Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`,
+    );
 
     const {
       data, // only present if 2XX response
@@ -180,7 +194,6 @@ async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
   }
 }
 
-
 const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
   {
     product_name_en: JsonDecoder.string(),
@@ -208,7 +221,9 @@ function findProductInOpenFoodFacts(barcode: Barcode): void {
         console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
         globalEvents.emit("product-barcode-stream", foundBarcode);
       } else {
-        console.log(`Barcode ${barcode.barcode} was not found at openfoodfacts API`);
+        console.log(
+          `Barcode ${barcode.barcode} was not found at openfoodfacts API`,
+        );
       }
     })
     .catch((error) => {

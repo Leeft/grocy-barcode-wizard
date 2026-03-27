@@ -3,7 +3,9 @@
 import { QuantityUnit } from "@/interfaces/grocy";
 import { createContext } from "react";
 
-export const QuantityUnitContext = createContext<Promise<QuantityUnit[]> | null>(null);
+export const QuantityUnitContext = createContext<Promise<
+  QuantityUnit[]
+> | null>(null);
 
 export default function QuantityUnitProvider({
   children,

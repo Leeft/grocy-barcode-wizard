@@ -1,6 +1,12 @@
 "use client";
 
-import Select, { StylesConfig, GroupBase, Props, SelectInstance, Theme } from "react-select";
+import Select, {
+  StylesConfig,
+  GroupBase,
+  Props,
+  SelectInstance,
+  Theme,
+} from "react-select";
 import { useRef, useState } from "react";
 import chroma from "chroma-js";
 import { OptionOrGroupArray, OptionType } from "@/interfaces/options";
@@ -138,7 +144,10 @@ export default function CustomSelect<
   const refReactSelect = useRef<SelectInstance<Option> | null>(null);
 
   // modifyInvalidState because we don't want to set invalid until onChange
-  function customValidity(value: OptionOrGroupArray | OptionType, modifyInvalidState?: boolean | undefined) {
+  function customValidity(
+    value: OptionOrGroupArray | OptionType,
+    modifyInvalidState?: boolean | undefined,
+  ) {
     modifyInvalidState = modifyInvalidState === true;
 
     if (!(refReactSelect && refReactSelect.current)) {
@@ -166,7 +175,7 @@ export default function CustomSelect<
   };
 
   return (
-    <div className={`dropdown${stateInvalid ? " invalid" : ""}`}>
+    <div className={`dropdown${stateInvalid ? "invalid" : ""}`}>
       <Select
         // @ts-expect-error: something something typescript
         ref={refReactSelect}

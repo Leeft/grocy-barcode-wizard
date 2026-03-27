@@ -3,7 +3,9 @@
 import { ProductLocation } from "@/interfaces/grocy";
 import { createContext } from "react";
 
-export const LocationContext = createContext<Promise<ProductLocation[]> | null>(null);
+export const LocationContext = createContext<Promise<ProductLocation[]> | null>(
+  null,
+);
 
 export default function LocationProvider({
   children,

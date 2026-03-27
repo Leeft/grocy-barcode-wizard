@@ -14,5 +14,9 @@ export default function QuantityUnitConversionProvider({
   children: React.ReactNode;
   promise: Promise<QuantityUnitConversion[]> | null;
 }) {
-  return <QuantityUnitConversionContext value={promise}>{children}</QuantityUnitConversionContext>;
+  return (
+    <QuantityUnitConversionContext value={promise}>
+      {children}
+    </QuantityUnitConversionContext>
+  );
 }

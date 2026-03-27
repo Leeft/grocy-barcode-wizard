@@ -21,8 +21,10 @@ export type ProductGroup = {
   active: 0 | 1;
 };
 
-export type ObjectByIdParams = paths["/objects/{entity}/{objectId}"]["parameters"];
-export type ProductByBarcodeParams = paths["/stock/products/by-barcode/{barcode}"]["parameters"];
+export type ObjectByIdParams =
+  paths["/objects/{entity}/{objectId}"]["parameters"];
+export type ProductByBarcodeParams =
+  paths["/stock/products/by-barcode/{barcode}"]["parameters"];
 
 export type ObjectSuccessResponse =
   paths["/objects/{entity}/{objectId}"]["get"]["responses"]["200"]["content"]["application/json"];

@@ -39,7 +39,9 @@ export function ShoppingLocationDropdown({
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */) => {
+      onChange={(
+        inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */,
+      ) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -47,13 +49,19 @@ export function ShoppingLocationDropdown({
       isSearchable
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No locations found for "${inputValue}"` : "Start typing to pick..."
+        inputValue
+          ? `No locations found for "${inputValue}"`
+          : "Start typing to pick..."
       }
     />
   );
 }
 
-function locationsToOptions({ entityObjects }: { entityObjects: Location[] }): OptionType[] {
+function locationsToOptions({
+  entityObjects,
+}: {
+  entityObjects: Location[];
+}): OptionType[] {
   if (entityObjects === undefined) return [];
 
   const options: OptionType[] = [];

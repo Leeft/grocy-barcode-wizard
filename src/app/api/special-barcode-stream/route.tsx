@@ -18,12 +18,15 @@ export async function GET(req: Request) {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
           );
-        } catch ( e ) {
+        } catch (e) {
           // If enqueuing fails, the controller is likely closed
-          console.error("Stream controller closed, removing special listener", e);
+          console.error(
+            "Stream controller closed, removing special listener",
+            e,
+          );
           globalEvents.off("special-barcode-stream", specialHandler);
         }
-      };      
+      };
 
       // 2. Listen for the event
       globalEvents.on("special-barcode-stream", specialHandler);

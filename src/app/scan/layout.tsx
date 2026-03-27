@@ -26,17 +26,21 @@ export default function ScanLayout({
   const shoppingLocationsPromise = fetchShoppingLocations();
 
   return (
-    <div className="flex ">
-      <div className="w-10 md:flex-auto hidden lg:block"></div>
+    <div className="flex">
+      <div className="hidden w-10 md:flex-auto lg:block"></div>
 
-      <div className="w-auto lg:w-160 xl:w-180 p-2 grow text-sm relative lg:mt-4 lg:mb-20 lg:rounded-lg bg-slate-800">
+      <div className="relative w-auto grow bg-slate-800 p-2 text-sm lg:mt-4 lg:mb-20 lg:w-160 lg:rounded-lg xl:w-180">
         <div className="w-full p-2">
           <QuantityUnitProvider promise={quantityUnitPromise}>
-            <QuantityUnitConversionProvider promise={quantityUnitConversionsPromise}>
+            <QuantityUnitConversionProvider
+              promise={quantityUnitConversionsPromise}
+            >
               <ProductGroupProvider promise={productGroupsPromise}>
                 <ProductProvider promise={productPromise}>
                   <ShoppingLocationProvider promise={shoppingLocationsPromise}>
-                    <LocationProvider promise={locationsPromise}>{children}</LocationProvider>
+                    <LocationProvider promise={locationsPromise}>
+                      {children}
+                    </LocationProvider>
                   </ShoppingLocationProvider>
                 </ProductProvider>
               </ProductGroupProvider>
@@ -45,7 +49,7 @@ export default function ScanLayout({
         </div>
       </div>
 
-      <div className="w-10 md:flex-auto hidden lg:block"></div>
+      <div className="hidden w-10 md:flex-auto lg:block"></div>
     </div>
   );
 }

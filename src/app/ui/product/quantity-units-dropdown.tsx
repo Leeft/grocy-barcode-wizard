@@ -62,7 +62,8 @@ export function QuantityUnitsDropdown({
       onChange={(inputValue: SingleValue<OptionType> /* action */) => {
         if (
           inputValue !== null &&
-          (selectedId === undefined || inputValue.value !== selectedId.toString())
+          (selectedId === undefined ||
+            inputValue.value !== selectedId.toString())
         ) {
           if (setSelectedId && inputValue?.value !== undefined) {
             setSelectedId(Number.parseInt(inputValue?.value));
@@ -74,7 +75,9 @@ export function QuantityUnitsDropdown({
       }}
       placeholder="Pick..."
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No quantity units found for "${inputValue}"` : "Start typing to pick..."
+        inputValue
+          ? `No quantity units found for "${inputValue}"`
+          : "Start typing to pick..."
       }
     />
   );

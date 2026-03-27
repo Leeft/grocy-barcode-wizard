@@ -16,7 +16,7 @@ export function NewProductForm() {
 
   return (
     <div>
-      <div className="flex mt-3 gap-x-3">
+      <div className="mt-3 flex gap-x-3">
         <NewProductTypeChoiceButton
           title="By weight"
           numberToSet={0}
@@ -42,7 +42,7 @@ export function NewProductForm() {
           imageWidth={32}
         />
       </div>
-      <div className="text-left pt-3">
+      <div className="pt-3 text-left">
         {selectedMode === 0 && (
           <>
             <ChoseByWeight />
@@ -59,7 +59,7 @@ export function NewProductForm() {
           </>
         )}
       </div>
-      <div className="flex min-h-60 mt-3 gap-x-3"></div>
+      <div className="mt-3 flex min-h-60 gap-x-3"></div>
     </div>
   );
 }
