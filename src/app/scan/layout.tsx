@@ -29,7 +29,7 @@ export default function ScanLayout({
     <div className="flex ">
       <div className="w-10 md:flex-auto hidden lg:block"></div>
 
-      <div className="w-auto lg:w-160 xl:w-180 p-2 flex-grow text-sm relative lg:mt-4 lg:mb-20 lg:rounded-lg bg-slate-800">
+      <div className="w-auto lg:w-160 xl:w-180 p-2 grow text-sm relative lg:mt-4 lg:mb-20 lg:rounded-lg bg-slate-800">
         <div className="w-full p-2">
           <QuantityUnitProvider promise={quantityUnitPromise}>
             <QuantityUnitConversionProvider promise={quantityUnitConversionsPromise}>

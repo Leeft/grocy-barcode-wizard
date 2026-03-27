@@ -1,11 +1,6 @@
 "use server";
 
 import { z } from "zod";
-// import { revalidatePath } from "next/cache";
-// import { redirect } from "next/navigation";
-// import { addYears, dateToISODate } from "@/app/lib/date";
-
-// eslint @typescript-eslint/no-unused-vars: "off"
 
 const FormSchema = z.object({
   name: z
@@ -16,7 +11,9 @@ const FormSchema = z.object({
 
   productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
 
-  mainQuantityId: z.coerce.number().gt(0, { message: "Select a unit from the list" }),
+  mainQuantityId: z.coerce
+    .number()
+    .gt(0, { message: "Select a unit from the list" }),
 
   mainQuantity: z.coerce.number().gt(0, { message: `Must be above 0` }),
 
@@ -30,11 +27,15 @@ const FormSchema = z.object({
 
   defaultConsumeLocationId: z.coerce
     .number()
-    .gt(-1, { message: "Consumption location must be unset or greater than zero" }),
+    .gt(-1, {
+      message: "Consumption location must be unset or greater than zero",
+    }),
 
   defaultShopLocationId: z.coerce
     .number()
-    .gt(-1, { message: "Default shop location must be unset or greater than zero" }),
+    .gt(-1, {
+      message: "Default shop location must be unset or greater than zero",
+    }),
 
   dueOrExpiryDate: z.iso.date({ error: "Not a valid ISO-8601 date" }),
 
@@ -56,20 +57,28 @@ const FormSchema = z.object({
 
   defaultDueDays: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
 
-  defaultDueDaysAfterOpen: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+  defaultDueDaysAfterOpen: z.coerce
+    .number()
+    .gt(-1, { message: `Must be 0 or greater` }),
 
-  defaultDueDaysAfterFreezing: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+  defaultDueDaysAfterFreezing: z.coerce
+    .number()
+    .gt(-1, { message: `Must be 0 or greater` }),
 
-  defaultDueDaysAfterThawing: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
-
+  defaultDueDaysAfterThawing: z.coerce
+    .number()
+    .gt(-1, { message: `Must be 0 or greater` }),
 });
+
+export type AddProductForm = z.infer<typeof FormSchema>;
 
 const CreateNewByWeightProduct = FormSchema.omit({
   // id: true, date: true
 });
 
 export type State = {
-  errors?: {
+  formErrors: string[],
+  fieldErrors: {
     name?: string[];
     productGroup?: string[];
     mainQuantityId?: string[];
@@ -78,8 +87,8 @@ export type State = {
     defaultProductLocationId?: string[];
     defaultConsumeLocationId?: string[];
     defaultShopLocationId?: string[];
-    dueDateType?: string[];
     dueOrExpiryDate?: string[];
+    dueDateType?: string[];
     packagingDate?: string[];
     shouldNotBeFrozen?: string[];
     noStockCheck?: string[];
@@ -90,19 +99,20 @@ export type State = {
     defaultDueDaysAfterOpen?: string[];
     defaultDueDaysAfterFreezing?: string[];
     defaultDueDaysAfterThawing?: string[];
-    //status?: string[];
-  };
-  message?: string | null;
+  }
 };
 
-export async function createByWeightProduct(prevState: State, formData: FormData) {
+export async function createByWeightProduct(
+  prevState: State,
+  formData: FormData,
+): Promise<State> {
   const rawFormDdata = Object.fromEntries(formData.entries());
 
-  console.log("raw form", rawFormDdata);
+  //console.log("raw form", rawFormDdata);
   const validation = CreateNewByWeightProduct.safeParse(rawFormDdata);
+  
   if (!validation.success) {
-    const tree = z.treeifyError(validation.error);
-    return tree;
+    return z.flattenError(validation.error);
   } else {
     console.log("validated", validation.data);
   }
@@ -129,8 +139,8 @@ export async function createByWeightProduct(prevState: State, formData: FormData
   //revalidatePath("/dashboard/invoices");
   //redirect("/dashboard/invoices");
   return {
-    errors: [],
-    properties: {},
+    formErrors: [],
+    fieldErrors: {},
   };
 }
 

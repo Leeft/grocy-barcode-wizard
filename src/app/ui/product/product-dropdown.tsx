@@ -39,7 +39,9 @@ export function ProductDropdown({
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/) => {
+      onChange={(
+        inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/,
+      ) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -47,13 +49,19 @@ export function ProductDropdown({
       isSearchable
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
-        inputValue ? `No quantity units found for "${inputValue}"` : "Start typing to pick..."
+        inputValue
+          ? `No quantity units found for "${inputValue}"`
+          : "Start typing to pick..."
       }
     />
   );
 }
 
-function productsToOptions({ entityObjects }: { entityObjects: Product[] }): OptionType[] {
+function productsToOptions({
+  entityObjects,
+}: {
+  entityObjects: Product[];
+}): OptionType[] {
   if (entityObjects === undefined) return [];
 
   const options: OptionType[] = [];
