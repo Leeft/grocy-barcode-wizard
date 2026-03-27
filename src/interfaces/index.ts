@@ -1,3 +1,5 @@
+import { Product as GrocyProduct } from "@/interfaces/grocy";
+
 export interface Option {
   value: string;
   label: string;
@@ -11,6 +13,15 @@ export type QUConversion = {
   product_id: number | undefined;
   row_created_timestamp: string | undefined;
 };
+
+export interface SerialisedBarcode {
+  barcode: string;
+  type: string;
+  name?: string;
+  quantity?: number;
+  product?: GrocyProduct;
+};
+
 
 export const allBarcodeTypes = [
   "product",

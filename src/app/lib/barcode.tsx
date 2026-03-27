@@ -1,4 +1,6 @@
 import { Product as GrocyProduct } from "@/interfaces/grocy";
+import { SerialisedBarcode } from "@/interfaces";
+
 import {
   BarcodeAnyType,
   BarcodeProductType,
@@ -8,14 +10,6 @@ import {
 } from "@/interfaces";
 
 let nextId: number = 1;
-
-export interface SerialisedBarcode {
-  barcode: string;
-  type: string;
-  name?: string;
-  quantity?: number;
-  product?: GrocyProduct;
-}
 
 export default class Barcode {
   #id: number; // immutable; uniqueness not at all guaranteed atm
