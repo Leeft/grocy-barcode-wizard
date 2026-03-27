@@ -14,7 +14,7 @@ export default function FormRadiobutton({
   defaultChecked?: boolean;
 }) {
   return (
-    <div className={`inline-flex flex-grow items-center ${className}`}>
+    <div className={`inline-flex grow items-center ${className}`}>
       <label
         className="relative w-8 flex-none cursor-pointer items-center pt-3"
         htmlFor={id}
@@ -27,7 +27,7 @@ export default function FormRadiobutton({
           className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border border-slate-300 transition-all checked:border-slate-400"
           id={id}
         />
-        <span className="absolute top-[22px] left-[10px] h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-slate-300 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"></span>
+        <span className="absolute top-5.5 left-2.5 h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-slate-300 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"></span>
       </label>
       <label
         className="float-left cursor-pointer pt-1 text-sm text-slate-200"

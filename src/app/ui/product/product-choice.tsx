@@ -43,7 +43,7 @@ export function NewProductTypeChoiceButton({
 }) {
   return (
     <button
-      className={`flex-1 cursor-pointer rounded-lg border-1 text-xs uppercase md:text-lg ${isSelected ? "bg-slate-600" : ""}`}
+      className={`flex-1 cursor-pointer rounded-lg border text-xs uppercase md:text-lg ${isSelected ? "bg-slate-600" : ""}`}
       onClick={() => setAsSelected(numberToSet)}
     >
       <div>
