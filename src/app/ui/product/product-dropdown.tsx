@@ -1,11 +1,9 @@
 "use client";
 
-import { Option } from "@/interfaces";
 import { SingleValue } from "react-select";
 import CustomSelect from "../custom-select";
 import { Product } from "@/interfaces/grocy";
-
-type OptionsPlusSelected = [Option[], Option | undefined];
+import { OptionType } from "@/interfaces/options";
 
 export function ProductDropdown({
   name,
@@ -21,10 +19,10 @@ export function ProductDropdown({
   className?: string;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   optional?: boolean;
-  insert?: Option;
+  insert?: OptionType;
   placeholder?: string;
 }) {
-  const [options, /*selected*/] = productsToOptions({
+  const options = productsToOptions({
     entityObjects: units,
   });
 
@@ -36,17 +34,16 @@ export function ProductDropdown({
   }
 
   return (
-    <CustomSelect<Option>
+    <CustomSelect
       className={className}
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<Option>, /*action: ActionMeta<Option>*/) => {
+      onChange={(inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
       defaultValue={defaultValue}
-      //   defaultValue={options[0]}
       isSearchable
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
@@ -56,23 +53,11 @@ export function ProductDropdown({
   );
 }
 
-function productsToOptions({ entityObjects }: { entityObjects: Product[] }): OptionsPlusSelected {
-  if (entityObjects === undefined) return [[], undefined];
+function productsToOptions({ entityObjects }: { entityObjects: Product[] }): OptionType[] {
+  if (entityObjects === undefined) return [];
 
-  const options: any = [];
+  const options: OptionType[] = [];
 
-  // options.push({
-  //   value: 300,
-  //   label: 'æg',
-  //   type: null,
-  // });
-  //var arr = ['Aalborg', 'Sorø']; // array to sort
-  //var myLocale = 'da-DK'; // danish locale
-
-  //var sortedArr = arr.sort(function(a,b) { return a.localeCompare(b, myLocale); }); // sort
-
-  //console.log(sortedArr);
-  //function(a,b) { return a.localeCompare(b, myLocale); }
   function compareWords(a: Product, b: Product) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
       return -1;
@@ -82,10 +67,10 @@ function productsToOptions({ entityObjects }: { entityObjects: Product[] }): Opt
   }
   entityObjects.sort(compareWords).forEach((entity: Product) => {
     options.push({
-      value: entity.id,
+      value: entity.id?.toString(),
       label: entity.name,
     });
   });
 
-  return [options, undefined];
+  return options;
 }

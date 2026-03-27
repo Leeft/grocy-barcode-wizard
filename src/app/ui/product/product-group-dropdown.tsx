@@ -1,12 +1,10 @@
 "use client";
 
-import { Option } from "@/interfaces";
 import React from "react";
 import { ProductGroup } from "@/interfaces/grocy";
 import CustomSelect from "../custom-select";
+import { OptionType } from "@/interfaces/options";
 import { SingleValue } from "react-select";
-
-type OptionsPlusSelected = [Option[], Option | undefined];
 
 export function ProductGroupDropdown({
   name,
@@ -15,17 +13,17 @@ export function ProductGroupDropdown({
   setSelectedId,
   required = false,
   insert,
-  placeholder = 'Select or search for a product category...',
+  placeholder = "Select or search for a product category...",
 }: {
   name: string;
   units: ProductGroup[];
   className?: string;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   required?: boolean;
-  insert?: Option;
+  insert?: OptionType;
   placeholder?: string;
 }) {
-  const [options, /* selected */] = productGroupsToOptions({
+  const options = productGroupsToOptions({
     entityObjects: units,
   });
 
@@ -37,32 +35,35 @@ export function ProductGroupDropdown({
   }
 
   return (
-    <CustomSelect<Option>
+    <CustomSelect
       className={className}
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<Option>, /*action: ActionMeta<Option>*/) => {
+      onChange={(inputValue: SingleValue<OptionType> /*action: ActionMeta<Option>*/) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
       defaultValue={defaultValue}
-      //   defaultValue={options[0]}
       isSearchable
       required={required}
       placeholder={placeholder}
       noOptionsMessage={({ inputValue }) =>
         inputValue ? `No product groups found for "${inputValue}"` : "Start typing to pick..."
       }
-       loadingMessage={() => "Loading..."}
+      loadingMessage={() => "Loading..."}
     />
   );
 }
 
-function productGroupsToOptions({ entityObjects }: { entityObjects: ProductGroup[] }): OptionsPlusSelected {
-  if (entityObjects === undefined) return [[], undefined];
+function productGroupsToOptions({
+  entityObjects,
+}: {
+  entityObjects: ProductGroup[];
+}): OptionType[] {
+  if (entityObjects === undefined) return [];
 
-  const options: any = [];
+  const options: OptionType[] = [];
 
   function compareWords(a: ProductGroup, b: ProductGroup) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
@@ -73,10 +74,10 @@ function productGroupsToOptions({ entityObjects }: { entityObjects: ProductGroup
   }
   entityObjects.sort(compareWords).forEach((entity: ProductGroup) => {
     options.push({
-      value: entity.id,
+      value: entity.id.toString(),
       label: entity.name,
     });
   });
 
-  return [options, undefined];
+  return options;
 }

@@ -69,7 +69,7 @@ export function ByWeightApp() {
   const locations: Location[] = use(locationsPromise);
   // @ts-expect-error: not quite sure yet if this is avoidable
   const shoppingLocations: ShoppingLocation[] = use(shoppingLocationsPromise);
-// @ts-expect-error: not quite sure yet if this is avoidable
+  // @ts-expect-error: not quite sure yet if this is avoidable
   const productGroups: ProductGroup[] = use(productGroupPromise);
 
   const inputCommonStyles: string = clsx(
@@ -99,8 +99,9 @@ export function ByWeightApp() {
     "min-h-[38px]",
   );
 
-  function submitHandler(e: any) {
-    e.preventDefault();
+  // @ts-expect-error can't find the right type for event
+  function submitHandler(event): void {
+    event.preventDefault();
   }
 
   const calculateDueDays = useCallback(() => {
@@ -110,7 +111,7 @@ export function ByWeightApp() {
       (packagingDate.getTime() - expiryDate.getTime()) / (1000 * 60 * 60 * 24),
     );
     setDefaultDueDays(Math.abs(difference));
-  }, [expiryDate, packagingDate] );
+  }, [expiryDate, packagingDate]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -120,7 +121,6 @@ export function ByWeightApp() {
   return (
     <form action={formAction} onSubmit={submitHandler} noValidate className="pt-3 w-auto">
       <div className="flex flex-col">
-
         {/* row: name */}
         <div className="flex flex-row gap-5">
           {/* name */}
@@ -147,7 +147,7 @@ export function ByWeightApp() {
                 required
               />
             </FormField>
-            <FormErrors id="name-error" state={state.properties?.name} />
+            <FormErrors id="name-error" errors={state.properties?.name?.errors} />
           </div>
         </div>
 
@@ -161,16 +161,15 @@ export function ByWeightApp() {
                 name="productGroup"
                 units={productGroups}
                 setSelectedId={setselectedWeightUnitId}
-                insert={{ value: "0", label: " " }}                
+                insert={{ value: "0", label: " " }}
                 className="w-auto flex-2"
-//                isSearchable={false}
+                //                isSearchable={false}
                 aria-describedby="product-group-error"
               />
             </FormField>
-            <FormErrors id="product-group-error" state={state.properties?.productGroup} />
+            <FormErrors id="product-group-error" errors={state.properties?.productGroup?.errors} />
           </div>
         </div>
-
 
         {/* row: form driving options */}
         <div className="flex flex-row gap-5">
@@ -191,7 +190,7 @@ export function ByWeightApp() {
                 </FormField>
                 <FormErrors
                   id="should-not-be-frozen-error"
-                  state={state.properties?.shouldNotBeFrozen}
+                  errors={state.properties?.shouldNotBeFrozen?.errors}
                 />
               </div>
 
@@ -210,11 +209,16 @@ export function ByWeightApp() {
                       <InformationCircleIcon className="size-5 inline text-slate-300" />
                     </a>
                     <Tooltip id="no-stock-check-tooltip" className="info-tooltip">
-                      Default setting which is used only when<br />adding this product to a recipe.
+                      Default setting which is used only when
+                      <br />
+                      adding this product to a recipe.
                     </Tooltip>
                   </label>
                 </FormField>
-                <FormErrors id="no-stock-check-error" state={state.properties?.noStockCheck} />
+                <FormErrors
+                  id="no-stock-check-error"
+                  errors={state.properties?.noStockCheck?.errors}
+                />
               </div>
               {/* can't be opened */}
               <div>
@@ -227,7 +231,7 @@ export function ByWeightApp() {
                   />
                   <label htmlFor="canNotOpen">Product can&apos;t be opened</label>
                 </FormField>
-                <FormErrors id="can-not-open-error" state={state.properties?.canNotOpen} />
+                <FormErrors id="can-not-open-error" errors={state.properties?.canNotOpen?.errors} />
               </div>
               {/* move on open */}
               <div className={canNotOpen ? "hidden" : ""}>
@@ -242,7 +246,7 @@ export function ByWeightApp() {
                     Move stock to &quot;consume first from&quot; location when opening
                   </label>
                 </FormField>
-                <FormErrors id="move-on-open-error" state={state.properties?.moveOnOpen} />
+                <FormErrors id="move-on-open-error" errors={state.properties?.moveOnOpen?.errors} />
               </div>
               {/* hide from stock overview */}
               <div>
@@ -255,7 +259,10 @@ export function ByWeightApp() {
                   />
                   <label htmlFor="hideFromStock">Never show on the stock overview</label>
                 </FormField>
-                <FormErrors id="hide-from-stock-error" state={state.properties?.hideFromStock} />
+                <FormErrors
+                  id="hide-from-stock-error"
+                  errors={state.properties?.hideFromStock?.errors}
+                />
               </div>
             </div>
           </div>
@@ -292,7 +299,7 @@ export function ByWeightApp() {
                 required
               />
             </FormField>
-            <FormErrors id="main-quantity-error" state={state.properties?.mainQuantity} />
+            <FormErrors id="main-quantity-error" errors={state.properties?.mainQuantity?.errors} />
           </div>
 
           {/* weight quantity unit */}
@@ -312,7 +319,10 @@ export function ByWeightApp() {
                 required
               />
             </FormField>
-            <FormErrors id="main-quantity-id-error" state={state.properties?.mainQuantityId} />
+            <FormErrors
+              id="main-quantity-id-error"
+              errors={state.properties?.mainQuantityId?.errors}
+            />
           </div>
 
           {/* configured conversions preview */}
@@ -349,7 +359,10 @@ export function ByWeightApp() {
                 insert={{ value: "0", label: "[no parent product] " }}
               />
             </FormField>
-            <FormErrors id="parent-product-id-error" state={state.properties?.parentProductId} />
+            <FormErrors
+              id="parent-product-id-error"
+              errors={state.properties?.parentProductId?.errors}
+            />
           </div>
         </div>
 
@@ -374,7 +387,7 @@ export function ByWeightApp() {
             </FormField>
             <FormErrors
               id="default-product-location-error"
-              state={state.properties?.defaultProductLocationId}
+              errors={state.properties?.defaultProductLocationId?.errors}
             />
           </div>
         </div>
@@ -416,7 +429,7 @@ export function ByWeightApp() {
             </FormField>
             <FormErrors
               id="default-consume-location-error"
-              state={state.properties?.defaultConsumeLocationId}
+              errors={state.properties?.defaultConsumeLocationId?.errors}
             />
           </div>
         </div>
@@ -439,7 +452,7 @@ export function ByWeightApp() {
             </FormField>
             <FormErrors
               id="default-shop-location-error"
-              state={state.properties?.defaultShopLocationId}
+              errors={state.properties?.defaultShopLocationId?.errors}
             />
           </div>
         </div>
@@ -478,7 +491,7 @@ export function ByWeightApp() {
                 }}
               />
             </FormField>
-            <FormErrors id="due-date-type-error" state={state.properties?.dueDateType} />
+            <FormErrors id="due-date-type-error" errors={state.properties?.dueDateType?.errors} />
           </div>
         </div>
 
@@ -509,7 +522,10 @@ export function ByWeightApp() {
                   }}
                 />
               </FormField>
-              <FormErrors id="due-or-expiry-date-error" state={state.properties?.dueOrExpiryDate} />
+              <FormErrors
+                id="due-or-expiry-date-error"
+                errors={state.properties?.dueOrExpiryDate?.errors}
+              />
             </div>
             {/* packaging date */}
             <div className="flex-none mb-4">
@@ -553,7 +569,10 @@ export function ByWeightApp() {
                   }}
                 />
               </FormField>
-              <FormErrors id="packaging-date-error" state={state.properties?.packagingDate} />
+              <FormErrors
+                id="packaging-date-error"
+                errors={state.properties?.packagingDate?.errors}
+              />
             </div>
           </div>
         )}
@@ -595,7 +614,10 @@ export function ByWeightApp() {
                     required
                   />
                 </FormField>
-                <FormErrors id="default-due-days-error" state={state.properties?.defaultDueDays} />
+                <FormErrors
+                  id="default-due-days-error"
+                  errors={state.properties?.defaultDueDays?.errors}
+                />
               </div>
               {/* default due days after opened */}
               <div className="flex-auto basis-1/2">
@@ -632,7 +654,7 @@ export function ByWeightApp() {
                 </FormField>
                 <FormErrors
                   id="default-due-days-after-open-error"
-                  state={state.properties?.defaultDueDaysAfterOpen}
+                  errors={state.properties?.defaultDueDaysAfterOpen?.errors}
                 />
               </div>
             </div>
@@ -674,7 +696,7 @@ export function ByWeightApp() {
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-freezing-error"
-                    state={state.properties?.defaultDueDaysAfterFreezing}
+                    errors={state.properties?.defaultDueDaysAfterFreezing?.errors}
                   />
                 </div>
                 {/* default due days after thawing */}
@@ -712,7 +734,7 @@ export function ByWeightApp() {
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-thawing-error"
-                    state={state.properties?.defaultDueDaysAfterThawing}
+                    errors={state.properties?.defaultDueDaysAfterThawing?.errors}
                   />
                 </div>
               </div>
@@ -793,11 +815,14 @@ function FormCheckbox({
   );
 }
 
-function FormErrors({ id, state }: { id: string; state: any }) {
+function FormErrors({ id, errors }: { id: string; errors: string[] | undefined }) {
+  if (errors === undefined) {
+    return <></>;
+  }
   return (
     <div id={id} aria-live="polite" aria-atomic="true">
-      {state &&
-        state?.errors.map((error: string) => (
+      {errors &&
+        errors?.map((error: string) => (
           <p className="mt-2 text-sm text-red-500" key={error}>
             {error}
           </p>

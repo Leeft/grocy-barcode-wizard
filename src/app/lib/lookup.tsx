@@ -1,8 +1,9 @@
 import Barcode from "@/app/lib/barcode";
+import { OpenFoodFactsResult } from "@/interfaces/json-objects";
 
 export default class ProductLookup {
   //
-  lookupOpenFoodFacts(barcode: Barcode): Promise<any> {
+  lookupOpenFoodFacts(barcode: Barcode): Promise<OpenFoodFactsResult> {
     //
     return fetch(
       `${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${encodeURIComponent(barcode.barcode)}?product_type=all`,

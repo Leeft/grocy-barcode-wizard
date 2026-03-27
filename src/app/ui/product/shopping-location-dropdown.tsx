@@ -3,12 +3,7 @@
 import { SingleValue } from "react-select";
 import CustomSelect from "../custom-select";
 import { ShoppingLocation as Location } from "@/interfaces/grocy";
-
-interface Option {
-  value: string | undefined;
-  label: string | undefined;
-}
-type OptionsPlusSelected = [Option[], Option | undefined];
+import { OptionType } from "@/interfaces/options";
 
 export function ShoppingLocationDropdown({
   name,
@@ -24,10 +19,10 @@ export function ShoppingLocationDropdown({
   className?: string;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   optional?: boolean;
-  insert?: Option;
+  insert?: OptionType;
   placeholder?: string;
 }) {
-  const [options, /*selected*/] = locationsToOptions({
+  const options: OptionType[] = locationsToOptions({
     entityObjects: units,
   });
 
@@ -39,12 +34,12 @@ export function ShoppingLocationDropdown({
   }
 
   return (
-    <CustomSelect<Option>
+    <CustomSelect
       className={className}
       maxMenuHeight={500}
       name={name}
       options={options}
-      onChange={(inputValue: SingleValue<Option>, /* action: ActionMeta<Option> */) => {
+      onChange={(inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -58,23 +53,11 @@ export function ShoppingLocationDropdown({
   );
 }
 
-function locationsToOptions({ entityObjects }: { entityObjects: Location[] }): OptionsPlusSelected {
-  if (entityObjects === undefined) return [[], undefined];
+function locationsToOptions({ entityObjects }: { entityObjects: Location[] }): OptionType[] {
+  if (entityObjects === undefined) return [];
 
-  const options: any = [];
+  const options: OptionType[] = [];
 
-  // options.push({
-  //   value: 300,
-  //   label: 'æg',
-  //   type: null,
-  // });
-  //var arr = ['Aalborg', 'Sorø']; // array to sort
-  //var myLocale = 'da-DK'; // danish locale
-
-  //var sortedArr = arr.sort(function(a,b) { return a.localeCompare(b, myLocale); }); // sort
-
-  //console.log(sortedArr);
-  //function(a,b) { return a.localeCompare(b, myLocale); }
   function compareWords(a: Location, b: Location) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
       return -1;
@@ -82,13 +65,13 @@ function locationsToOptions({ entityObjects }: { entityObjects: Location[] }): O
       return 1;
     }
   }
-  
+
   entityObjects.sort(compareWords).forEach((entity: Location) => {
     options.push({
-      value: entity.id,
+      value: entity.id?.toString(),
       label: entity.name,
     });
   });
 
-  return [options, undefined];
+  return options;
 }

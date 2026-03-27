@@ -80,7 +80,7 @@ function DisplayConversion({
     value = (/metric/.test(group))
       ? floatString(fraction)
       : floatToFractions(fraction.toString());
-  } catch (reason: any) {
+  } catch (reason) {
     error = reason;
   }
 

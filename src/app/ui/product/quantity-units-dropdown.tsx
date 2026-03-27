@@ -1,13 +1,9 @@
 "use client";
 
-import { SingleValue } from "react-select";
 import { QuantityUnit } from "@/interfaces/grocy";
 import CustomSelect from "../custom-select";
-
-interface Option {
-  value: string | undefined;
-  label: string | undefined;
-}
+import { OptionOrGroupArray, OptionType } from "@/interfaces/options";
+import { SingleValue } from "react-select";
 
 const quantityTypes = [
   "weight-metric",
@@ -28,11 +24,8 @@ const quantityGroupLabels: Record<QuantityType, string> = {
   "volume-us-dry": "Volume (US; dry)",
 };
 
-type OptionsPlusSelected = [Option[], Option | undefined];
-
 export function QuantityUnitsDropdown({
   name,
-  // size,
   units,
   className,
   mode,
@@ -43,7 +36,6 @@ export function QuantityUnitsDropdown({
   isSearchable = true,
 }: {
   name: string;
-  // size?: number;
   units: QuantityUnit[];
   className?: string;
   mode: ModeType;
@@ -53,26 +45,21 @@ export function QuantityUnitsDropdown({
   required?: boolean | undefined;
   isSearchable?: boolean;
 }) {
-  const [options, /* selected */] = quantityUnitsToOptions({
+  const options = quantityUnitsToOptions({
     entityObjects: units,
     mode: mode,
   });
 
   return (
-    <CustomSelect<Option>
-      //styles={dropdownStyles}
+    <CustomSelect
       id={name}
       className={className}
       maxMenuHeight={320}
       name={name}
-      //key={mode + "-" + selectedId}
-      //defaultValue={selectedOption}
       options={options}
-      //defaultValue={selected}
-      //defaultOptions
       required={required}
       isSearchable={isSearchable}
-      onChange={(inputValue: SingleValue<Option>, /* action: ActionMeta<Option> */) => {
+      onChange={(inputValue: SingleValue<OptionType> /* action */) => {
         if (
           inputValue !== null &&
           (selectedId === undefined || inputValue.value !== selectedId.toString())
@@ -80,9 +67,7 @@ export function QuantityUnitsDropdown({
           if (setSelectedId && inputValue?.value !== undefined) {
             setSelectedId(Number.parseInt(inputValue?.value));
           }
-          // @ts-expect-error: type does not exist on the type
           if (setSelectedGroup && inputValue?.type !== undefined) {
-            // @ts-expect-error: type does not exist on the type
             setSelectedGroup(inputValue.type);
           }
         }
@@ -101,14 +86,14 @@ function quantityUnitsToOptions({
 }: {
   entityObjects: QuantityUnit[];
   mode: ModeType;
-}): OptionsPlusSelected {
-  if (entityObjects === undefined) return [[], undefined];
+}) {
+  if (entityObjects === undefined) return [];
 
-  const options: any = [];
+  const options: OptionOrGroupArray = [];
 
   if (mode !== "abstract") {
     quantityTypes.forEach((type: QuantityType) => {
-      const groupOptions: any = [];
+      const groupOptions: OptionType[] = [];
       entityObjects.forEach((entity: QuantityUnit) => {
         if (
           entity !== undefined &&
@@ -119,7 +104,7 @@ function quantityUnitsToOptions({
         ) {
           if (entity.userfields.type == type) {
             groupOptions.push({
-              value: entity.id,
+              value: entity.id?.toString(),
               label: entity.name,
               type: entity.userfields.type,
             });
@@ -133,18 +118,6 @@ function quantityUnitsToOptions({
       });
     });
   } else {
-    // options.push({
-    //   value: 300,
-    //   label: 'æg',
-    //   type: null,
-    // });
-    //var arr = ['Aalborg', 'Sorø']; // array to sort
-    //var myLocale = 'da-DK'; // danish locale
-
-    //var sortedArr = arr.sort(function(a,b) { return a.localeCompare(b, myLocale); }); // sort
-
-    //console.log(sortedArr);
-    //function(a,b) { return a.localeCompare(b, myLocale); }
     function compareWords(a: QuantityUnit, b: QuantityUnit) {
       if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
         return -1;
@@ -162,7 +135,7 @@ function quantityUnitsToOptions({
           !RegExp(/(volume|weight)/).test(entity.userfields.type))
       ) {
         options.push({
-          value: entity.id,
+          value: entity.id?.toString(),
           label: entity.name,
           type: entity.userfields.type,
         });
@@ -170,5 +143,5 @@ function quantityUnitsToOptions({
     });
   }
 
-  return [options, undefined];
+  return options;
 }

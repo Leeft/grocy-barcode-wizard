@@ -3,8 +3,17 @@ import { NextRequest } from "next/server";
 import ProductLookup from "@/app/lib/lookup";
 import { grocyClient } from "@/app/lib/grocy";
 import Barcode from "@/app/lib/barcode";
+import * as JsonDecoder from "ts.data.json";
+import { OpenFoodFactsProduct, OpenFoodFactsResult, ReceivedBarcode } from "@/interfaces/json-objects";
 
 // TODO FIXME: Access control
+
+const apiRequestDecoder = JsonDecoder.object<ReceivedBarcode>(
+  {
+    barcode: JsonDecoder.string(),
+  },
+  "ReceivedBarcode",
+);
 
 /************************** endpoints ****************************/
 
@@ -14,16 +23,12 @@ export async function POST(req: Request) {
     const code = formData.get("barcode")?.toString();
     if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
-
+  
   if (req.headers.get("content-type") === "application/json") {
-    const json: any = (await req.json());
-    if (
-      typeof json === "object" &&
-      json !== null &&
-      json.barcode !== undefined &&
-      json.barcode !== null
-    )
-      return processReceivedBarcode(json.barcode);
+    const decoded = apiRequestDecoder.decode( await req.json() );
+    if ( decoded.isOk() ) {
+      return processReceivedBarcode(decoded.value.barcode);
+    }
   }
 
   return processReceivedBarcode("");
@@ -56,7 +61,7 @@ async function processReceivedBarcode(code: string) {
   try {
     barcode = new Barcode({ barcode: code });
   } catch (err) {
-    return bbuddyErrorResponse(400, `No valid barcode supplied: ${err}` );
+    return bbuddyErrorResponse(400, `No valid barcode supplied: ${err}`);
   }
 
   // Special non-product barcodes are intercepted first. When so identified
@@ -175,19 +180,40 @@ async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
   }
 }
 
+
+const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
+  {
+    product_name_en: JsonDecoder.string(),
+  },
+  "OpenFoodFactsProduct",
+);
+
+const openFoodFactsDecoder = JsonDecoder.object<OpenFoodFactsResult>(
+  {
+    status: JsonDecoder.number(),
+    product: openFoodFactsProductDecoder,
+  },
+  "OpenFoodFactsResult",
+);
+
 function findProductInOpenFoodFacts(barcode: Barcode): void {
-  new ProductLookup().lookupOpenFoodFacts(barcode).then((json: any) => {
-    if (json.status) {
-      const foundBarcode: Barcode = new Barcode({
-        barcode: barcode.barcode,
-        name: json.product.product_name_en,
-      });
-      console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
-      globalEvents.emit("product-barcode-stream", foundBarcode);
-    } else {
-      console.log(`Barcode ${barcode.barcode} was not found at openfoodfacts API`);
-    }
-  });
+  openFoodFactsDecoder
+    .decodePromise(new ProductLookup().lookupOpenFoodFacts(barcode))
+    .then((openFoodFactsResult: OpenFoodFactsResult) => {
+      if (openFoodFactsResult.status) {
+        const foundBarcode: Barcode = new Barcode({
+          barcode: barcode.barcode,
+          name: openFoodFactsResult.product.product_name_en,
+        });
+        console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
+        globalEvents.emit("product-barcode-stream", foundBarcode);
+      } else {
+        console.log(`Barcode ${barcode.barcode} was not found at openfoodfacts API`);
+      }
+    })
+    .catch((error) => {
+      console.error("Could not decode openfoodfacts response:", error);
+    });
 }
 
 function bbuddySuccessResponse(message: string): Response {

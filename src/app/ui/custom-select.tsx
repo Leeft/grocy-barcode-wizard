@@ -3,6 +3,7 @@
 import Select, { StylesConfig, GroupBase, Props, SelectInstance, Theme } from "react-select";
 import { useRef, useState } from "react";
 import chroma from "chroma-js";
+import { OptionOrGroupArray, OptionType } from "@/interfaces/options";
 
 export interface ColourOption {
   readonly value: string;
@@ -137,7 +138,7 @@ export default function CustomSelect<
   const refReactSelect = useRef<SelectInstance<Option> | null>(null);
 
   // modifyInvalidState because we don't want to set invalid until onChange
-  function customValidity(value: Option | undefined, modifyInvalidState?: boolean | undefined) {
+  function customValidity(value: OptionOrGroupArray | OptionType, modifyInvalidState?: boolean | undefined) {
     modifyInvalidState = modifyInvalidState === true;
 
     if (!(refReactSelect && refReactSelect.current)) {
@@ -225,9 +226,10 @@ export default function CustomSelect<
 }
 
 // Get a value from the options
-function normalizeValue(selection: any) {
+function normalizeValue(selection: OptionOrGroupArray | OptionType) {
   if (Array.isArray(selection)) {
     if (selection.length) {
+      // @ts-expect-error types are not advanced enough
       return selection.map((keyPair) => keyPair.value);
     }
   } else if (selection && typeof selection.value !== typeof undefined) {

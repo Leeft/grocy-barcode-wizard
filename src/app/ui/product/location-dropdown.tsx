@@ -3,12 +3,9 @@
 import { SingleValue } from "react-select";
 import CustomSelect from "../custom-select";
 import { ProductLocation as Location } from "@/interfaces/grocy";
+import { OptionType } from "@/interfaces/options";
 
-interface Option {
-  value: string | undefined;
-  label: string | undefined;
-}
-type OptionsPlusSelected = [Option[], Option | undefined];
+type Freezers = Record<string,OptionType>;
 
 export function LocationDropdown({
   name,
@@ -26,19 +23,19 @@ export function LocationDropdown({
   className?: string;
   setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   optional?: boolean;
-  insert?: Option;
+  insert?: OptionType;
   placeholder?: string;
   noFreezers?: boolean;
   required?: boolean | undefined;
 }) {
-  const freezers: any = {};
+  const freezers: Freezers = {};
 
   units.map((unit) => {
     // @ts-expect-error : is_freezer does not exist in the generated type
     if (unit.id !== undefined && unit.is_freezer) freezers[unit.id] = unit;
   });
 
-  const [options, /* selected */] = locationsToOptions({
+  const options = locationsToOptions({
     entityObjects: units,
     freezers: freezers,
     noFreezers: noFreezers,
@@ -54,13 +51,13 @@ export function LocationDropdown({
   }
 
   return (
-    <CustomSelect<Option>
+    <CustomSelect
       className={className}
       maxMenuHeight={500}
       name={name}
       options={options}
       required={required}
-      onChange={(inputValue: SingleValue<Option>, /* action: ActionMeta<Option> */) => {
+      onChange={(inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */) => {
         if (setSelectedId && inputValue?.value !== undefined)
           setSelectedId(Number.parseInt(inputValue?.value));
       }}
@@ -80,12 +77,12 @@ function locationsToOptions({
   noFreezers,
 }: {
   entityObjects: Location[];
-  freezers: any;
+  freezers: Freezers;
   noFreezers: boolean;
-}): OptionsPlusSelected {
-  if (entityObjects === undefined) return [[], undefined];
+}): OptionType[] {
+  if (entityObjects === undefined) return [];
 
-  const options: any = [];
+  const options: OptionType[] = [];
 
   function compareWords(a: Location, b: Location) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
@@ -94,13 +91,14 @@ function locationsToOptions({
       return 1;
     }
   }
+
   entityObjects.sort(compareWords).forEach((entity: Location) => {
     options.push({
-      value: entity.id,
+      value: entity.id?.toString(),
       label: entity.name,
       isDisabled: noFreezers && entity.id !== undefined && entity.id in freezers ? true : false,
     });
   });
 
-  return [options, undefined];
+  return options;
 }
