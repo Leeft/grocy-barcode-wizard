@@ -3,7 +3,7 @@
 import Barcode from "@/app/lib/barcode";
 import BarcodeActions from "@/app/ui/product/actions";
 import BarcodeScanStatus from "@/app/ui/barcode/scan-status";
-import { ExistingProductForm } from "@/app/ui/product/existing-product-form";
+import { ExistingProductForm } from "@/app/ui/forms/existing-product-form";
 import { useEffect, useState } from "react";
 import { NewProductForm } from "@/app/ui/forms/new-product-form";
 
