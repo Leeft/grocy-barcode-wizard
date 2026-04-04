@@ -98,7 +98,7 @@ export type State = {
   };
 };
 
-export async function createByWeightProduct(
+export async function newProductFormSubmit(
   prevState: State,
   formData: FormData,
 ): Promise<State> {

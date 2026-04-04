@@ -1,5 +1,5 @@
-import { SerialisedBarcode } from "@/app/lib/barcode";
 import { globalEvents } from "@/app/lib/events";
+import { SerialisedBarcode } from "@/interfaces";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs"; // Ensure we aren't using "edge" if using globalEvents

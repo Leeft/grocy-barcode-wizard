@@ -9,6 +9,7 @@ import {
   ShoppingLocation,
 } from "@/interfaces/grocy";
 import { cache } from "react";
+import Barcode from "@/app/lib/barcode";
 
 let baseUrl = process.env.GROCY_API_URL;
 if (baseUrl === undefined) {
@@ -137,3 +138,75 @@ export const fetchProducts = cache(async () => {
     throw new Error("Could not fetch products.");
   }
 });
+
+export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
+  // GRCY:P:* codes contain a product number and potentially other data
+  // but for most purposes they'll be treated as a "regular" product
+  // barcode, sent to the products data stream. They just need a
+  // different API call for the lookup.
+  const productNumber: number | null = barcode.grocyProductNumber();
+
+  if (productNumber !== null && productNumber > 0) {
+    console.log(
+      `Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`,
+    );
+
+    const {
+      data, // only present if 2XX response
+      error, // only present if 4XX or 5XX response
+    } = await grocyClient.GET("/stock/products/{productId}", {
+      params: { path: { productId: productNumber } },
+    });
+
+    // Might get an inactive code, which isn't "wrong" for us (still
+    // need to use it) but it needs special handling. Just return the
+    // barcode we have already and use that, pretend all is well.
+    if (
+      data === undefined &&
+      error !== undefined &&
+      error?.error_message !== undefined &&
+      /does not exist or is inactive/.test(error.error_message)
+    ) {
+      return Promise.reject(barcode);
+    }
+
+    if (data !== undefined) {
+      return Promise.resolve(
+        new Barcode({
+          barcode: barcode.barcode,
+          name: data.product?.name,
+          product: data.product,
+          // @ts-expect-error : not in OpenAPI spec, no typescript here
+          quantity: data.stock_amount_aggregated,
+        }),
+      );
+    }
+  }
+
+  // There is no productnumber, but there may be a barcode for it
+
+  const {
+    data, // only present if 2XX response
+    error, // only present if 4XX or 5XX response
+  } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
+    params: { path: { barcode: barcode.barcode } },
+  });
+
+  if (error) {
+    console.error("Could not retrieve by barcode from grocy:", error);
+  }
+
+  if (data !== undefined) {
+    return Promise.resolve(
+      new Barcode({
+        barcode: barcode.barcode,
+        name: data.product?.name,
+        product: data.product,
+        // @ts-expect-error : not in OpenAPI spec, no typescript here
+        quantity: data.stock_amount_aggregated,
+      }),
+    );
+  } else {
+    return Promise.reject(barcode);
+  }
+}

@@ -1,23 +1,12 @@
 import { globalEvents } from "@/app/lib/events";
 import { NextRequest } from "next/server";
-import ProductLookup from "@/app/lib/lookup";
-import { grocyClient } from "@/app/lib/grocy";
+import { findProductInGrocy } from "@/app/lib/grocy";
 import Barcode from "@/app/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
-import {
-  OpenFoodFactsProduct,
-  OpenFoodFactsResult,
-  ReceivedBarcode,
-} from "@/interfaces/json-objects";
+import { ReceivedBarcode } from "@/interfaces/json-objects";
+import { findProductInOpenFoodFacts } from "@/app/lib/open-food-facts";
 
 // TODO FIXME: Access control
-
-const apiRequestDecoder = JsonDecoder.object<ReceivedBarcode>(
-  {
-    barcode: JsonDecoder.string(),
-  },
-  "ReceivedBarcode",
-);
 
 /************************** endpoints ****************************/
 
@@ -30,6 +19,13 @@ export async function POST(req: Request) {
   }
 
   if (req.headers.get("content-type") === "application/json") {
+    const apiRequestDecoder = JsonDecoder.object<ReceivedBarcode>(
+      {
+        barcode: JsonDecoder.string(),
+      },
+      "ReceivedBarcode",
+    );
+
     const decoded = apiRequestDecoder.decode(await req.json());
     if (decoded.isOk()) {
       return processReceivedBarcode(decoded.value.barcode);
@@ -120,115 +116,6 @@ async function processReceivedBarcode(code: string) {
   }
 
   return bbuddyErrorResponse(400, "Invalid request");
-}
-
-async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
-  // GRCY:P:* codes contain a product number and potentially other data
-  // but for most purposes they'll be treated as a "regular" product
-  // barcode, sent to the products data stream. They just need a
-  // different API call for the lookup.
-  const productNumber: number | null = barcode.grocyProductNumber();
-
-  if (productNumber !== null && productNumber > 0) {
-    console.log(
-      `Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`,
-    );
-
-    const {
-      data, // only present if 2XX response
-      error, // only present if 4XX or 5XX response
-    } = await grocyClient.GET("/stock/products/{productId}", {
-      params: { path: { productId: productNumber } },
-    });
-
-    // Might get an inactive code, which isn't "wrong" for us (still
-    // need to use it) but it needs special handling. Just return the
-    // barcode we have already and use that, pretend all is well.
-    if (
-      data === undefined &&
-      error !== undefined &&
-      error?.error_message !== undefined &&
-      /does not exist or is inactive/.test(error.error_message)
-    ) {
-      return Promise.reject(barcode);
-    }
-
-    if (data !== undefined) {
-      return Promise.resolve(
-        new Barcode({
-          barcode: barcode.barcode,
-          name: data.product?.name,
-          product: data.product,
-          // @ts-expect-error : not in OpenAPI spec, no typescript here
-          quantity: data.stock_amount_aggregated,
-        }),
-      );
-    }
-  }
-
-  // There is no productnumber, but there may be a barcode for it
-
-  const {
-    data, // only present if 2XX response
-    error, // only present if 4XX or 5XX response
-  } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
-    params: { path: { barcode: barcode.barcode } },
-  });
-
-  if (error) {
-    console.error("Could not retrieve by barcode from grocy:", error);
-  }
-
-  if (data !== undefined) {
-    return Promise.resolve(
-      new Barcode({
-        barcode: barcode.barcode,
-        name: data.product?.name,
-        product: data.product,
-        // @ts-expect-error : not in OpenAPI spec, no typescript here
-        quantity: data.stock_amount_aggregated,
-      }),
-    );
-  } else {
-    return Promise.reject(barcode);
-  }
-}
-
-const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
-  {
-    product_name_en: JsonDecoder.string(),
-  },
-  "OpenFoodFactsProduct",
-);
-
-const openFoodFactsDecoder = JsonDecoder.object<OpenFoodFactsResult>(
-  {
-    status: JsonDecoder.number(),
-    product: openFoodFactsProductDecoder,
-  },
-  "OpenFoodFactsResult",
-);
-
-function findProductInOpenFoodFacts(barcode: Barcode): void {
-  openFoodFactsDecoder
-    .decodePromise(new ProductLookup().lookupOpenFoodFacts(barcode))
-    .then((openFoodFactsResult: OpenFoodFactsResult) => {
-      if (openFoodFactsResult.status) {
-        const foundBarcode: Barcode = new Barcode({
-          barcode: barcode.barcode,
-          name: openFoodFactsResult.product.product_name_en,
-        });
-        console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
-        globalEvents.emit("product-barcode-stream", foundBarcode);
-      } else {
-        console.log(
-          `Barcode ${barcode.barcode} was not found at openfoodfacts API`,
-        );
-      }
-    })
-    .catch((error) => {
-      console.error("Could not decode openfoodfacts response:", error);
-    });
 }
 
 function bbuddySuccessResponse(message: string): Response {

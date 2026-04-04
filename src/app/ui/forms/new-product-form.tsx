@@ -10,7 +10,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { QuantityUnitsDropdown } from "./quantity-units-dropdown";
+import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import { QuantityUnitCalculation } from "@/app/components/quantity-unit-calculation";
 import {
   Product,
@@ -23,15 +23,12 @@ import {
 import { QuantityUnitContext } from "@/app/providers/quantity-unit-context";
 import { ShoppingLocationContext } from "@/app/providers/shopping-location-context";
 import { QuantityUnitConversionContext } from "@/app/providers/quantity-unit-conversion-context";
-import {
-  createByWeightProduct,
-  State,
-} from "@/app/lib/create-by-weight-actions";
+import { newProductFormSubmit, State } from "@/app/forms/new-product-form-submit";
 import { Button } from "../button";
 import { ProductContext } from "@/app/providers/product-context";
-import { ProductDropdown } from "./product-dropdown";
+import { ProductDropdown } from "../product/product-dropdown";
 import { LocationContext } from "@/app/providers/location-context";
-import { LocationDropdown } from "./location-dropdown";
+import { LocationDropdown } from "../product/location-dropdown";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "react-tooltip";
 import { addYears, dateToISODate } from "@/app/lib/date";
@@ -39,9 +36,9 @@ import clsx from "clsx";
 import { Option } from "@/interfaces";
 import CustomSelect from "../custom-select";
 import { ProductGroupContext } from "@/app/providers/product-group-context";
-import { ProductGroupDropdown } from "./product-group-dropdown";
+import { ProductGroupDropdown } from "../product/product-group-dropdown";
 
-export function ByWeightApp() {
+export function NewProductForm() {
   const [selectedWeightUnitId, setselectedWeightUnitId] = useState<number>(0);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
@@ -59,7 +56,7 @@ export function ByWeightApp() {
 
   const initialState: State = { formErrors: [], fieldErrors: {} };
   const [state, formAction /*submitIsPending*/] = useActionState(
-    createByWeightProduct,
+    newProductFormSubmit,
     initialState,
   );
 
