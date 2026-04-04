@@ -37,6 +37,10 @@ import { Option } from "@/interfaces";
 import CustomSelect from "../custom-select";
 import { ProductGroupContext } from "@/app/providers/product-group-context";
 import { ProductGroupDropdown } from "../product/product-group-dropdown";
+import { FormLabel } from "./inputs/form-label";
+import { FormField } from "./inputs/form-field";
+import { FormErrors } from "./inputs/form-errors";
+import { FormCheckbox } from "./inputs/form-checkbox";
 
 export function NewProductForm() {
   const [selectedWeightUnitId, setselectedWeightUnitId] = useState<number>(0);
@@ -860,78 +864,3 @@ export function NewProductForm() {
   );
 }
 
-function FormLabel({
-  htmlFor,
-  className = "text-sm",
-  children,
-  title,
-}: {
-  htmlFor: string;
-  className?: string;
-  title: React.ReactNode;
-  children?: React.ReactNode;
-}) {
-  return (
-    <span className="inline-flex">
-      <label
-        htmlFor={htmlFor}
-        className={`mb-2 block text-sm font-medium text-slate-400 ${className}`}
-      >
-        {title}
-      </label>
-      {children && <>&nbsp;&nbsp;{children}</>}
-    </span>
-  );
-}
-function FormField({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={`relative mt-2 rounded-md`}>
-      <div className="${className} relative">{children}</div>
-    </div>
-  );
-}
-
-function FormCheckbox({
-  id,
-  ariaDescribedBy,
-  onChange,
-}: {
-  id: string;
-  ariaDescribedBy: string;
-  onChange?: ChangeEventHandler;
-}): React.ReactNode {
-  return (
-    <input
-      id={id}
-      name={id}
-      type="checkbox"
-      // className="peer block w-30 rounded-md my-[9.5] py-[6] px-2 border-3 border-[#cccccc] text-base font-bold outline-3 outline-[#cecece] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
-      className="mr-3"
-      aria-describedby={ariaDescribedBy}
-      defaultValue="true"
-      onChange={onChange}
-    />
-  );
-}
-
-function FormErrors({
-  id,
-  errors,
-}: {
-  id: string;
-  errors: string[] | undefined;
-}) {
-  if (errors === undefined) {
-    return <></>;
-  }
-  return (
-    <div id={id} aria-live="polite" aria-atomic="true">
-      {errors &&
-        errors?.map((error: string) => (
-          <p className="mt-2 text-sm text-red-500" key={error}>
-            {error}
-          </p>
-        ))}
-    </div>
-  );
-}
