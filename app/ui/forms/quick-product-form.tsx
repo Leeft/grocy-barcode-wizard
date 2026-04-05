@@ -128,15 +128,16 @@ export function QuickProductForm() {
 
   const quSelectRef = useRef<CustomSelectHandle>(null);
 
+// form  className="w-auto p-0 m-0"
+
   return (
     <form
       action={formAction}
       onSubmit={submitHandler}
       noValidate
-      className="w-auto pt-3"
+      className="pb-25"
     >
       <div className="flex flex-col">
-        {/* row: form name */}
         <div className="flex flex-row gap-5">
           <div className="flex-auto">
             <h1 className="mb-3 inline-block text-lg font-bold text-slate-400 uppercase">
@@ -161,9 +162,7 @@ export function QuickProductForm() {
           </div>
         </div>
 
-        {/* row: name */}
         <div className="flex flex-row gap-5">
-          {/* name */}
           <div className="mb-4 flex-auto">
             <FormLabel htmlFor="name" title="Product name *" />
             <FormField>
@@ -183,12 +182,9 @@ export function QuickProductForm() {
           </div>
         </div>
 
-        {/* row: form driving options */}
         <div className="flex flex-row gap-5">
-          {/* should not be frozen */}
           <div className="mb-4 flex-auto">
             <div className="flex flex-col">
-              {/* should not be frozen */}
               <FormField>
                 <FormCheckbox
                   id="shouldNotBeFrozen"
@@ -209,9 +205,7 @@ export function QuickProductForm() {
           </div>
         </div>
 
-        {/* row: unit system + amount + quantity unit */}
-        <div className="flex flex-row gap-5">
-          {/* unit system */}
+        <div className="flex flex-row flex-wrap gap-x-5">
           <div className="mb-3 flex-none">
             <FormLabel htmlFor="unit-system" title="Unit system *"></FormLabel>
             <FormField>
@@ -227,8 +221,6 @@ export function QuickProductForm() {
               errors={state.fieldErrors?.unitSystem}
             />
           </div>
-
-          {/* weight quantity amount */}
           <div className="mb-4 flex-none">
             <FormLabel
               htmlFor="mainQuantity"
@@ -278,8 +270,6 @@ export function QuickProductForm() {
               errors={state.fieldErrors?.mainQuantity}
             />
           </div>
-
-          {/* weight quantity unit */}
           <div className="mb-4 grow">
             <FormLabel
               htmlFor="mainQuantityId"
@@ -291,7 +281,7 @@ export function QuickProductForm() {
                 name="mainQuantityId"
                 units={units}
                 selectedId={selectedWeightUnitId}
-                className="w-auto flex-2"
+                className="w-46"
                 mode={selectedUnitMode}
                 isSearchable={false}
                 aria-describedby="main-quantity-id-error"
@@ -306,9 +296,7 @@ export function QuickProductForm() {
           </div>
         </div>
 
-        {/* row: default location*/}
         <div className="flex flex-row gap-5">
-          {/* default location dropdown */}
           <div className="mb-4 grow">
             <FormLabel
               htmlFor="defaultProductLocationId"
@@ -332,9 +320,7 @@ export function QuickProductForm() {
           </div>
         </div>
 
-        {/* row: due/expiry date mode */}
-        <div className="flex flex-row gap-5">
-          {/* due date type */}
+        <div className="flex flex-row flex-wrap gap-x-5">
           <div className="mb-4 flex-none">
             <FormLabel htmlFor="dueDateType" title="Due date type"></FormLabel>
             <FormField>
@@ -345,7 +331,7 @@ export function QuickProductForm() {
                   { value: "expiry-date", label: "Expires at" },
                   { value: "no-expiry", label: "Does not expire" },
                 ]}
-                className="w-46 flex-none"
+                className="w-40 flex-none"
                 aria-describedby="default-shop-location-error"
                 placeholder="Expiry..."
                 defaultValue={expiryMode}
@@ -367,200 +353,195 @@ export function QuickProductForm() {
               errors={state.fieldErrors?.dueDateType}
             />
           </div>
+
+          {expiryMode !== null && expiryMode.value !== "no-expiry" && (
+            <>
+              <div className="mb-4 flex-none">
+                <FormLabel
+                  htmlFor="dueOrExpiryDate"
+                  title={
+                    expiryMode.value === "best-before"
+                      ? "Best before *"
+                      : "Expires at *"
+                  }
+                ></FormLabel>
+                <FormField>
+                  <input
+                    type="date"
+                    id="dueOrExpiryDate"
+                    name="dueOrExpiryDate"
+                    defaultValue=""
+                    // defaultValue={name}
+                    min={dateToISODate(addYears(new Date(), -1))}
+                    max={dateToISODate(addYears(new Date(), 10))}
+                    required
+                    className={clsx(
+                      "w-38",
+                      inputCommonStyles,
+                      "relative",
+                      "top-[-1]",
+                    )}
+                    //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
+                    aria-describedby="due-or-expiry-date-error"
+                    onChange={(e) => {
+                      setExpiryDate(new Date(e.target.valueAsNumber));
+                    }}
+                  />
+                </FormField>
+                <FormErrors
+                  id="due-or-expiry-date-error"
+                  errors={state.fieldErrors?.dueOrExpiryDate}
+                />
+              </div>
+              <div className="mb-4 flex-none">
+                <FormLabel
+                  htmlFor="packagingDate"
+                  title="Packaging date"
+                  className="inline"
+                >
+                  <a
+                    className="w-10 cursor-help pl-2"
+                    data-tooltip-id="packaging-date-tooltip"
+                  >
+                    <InformationCircleIcon className="inline size-5 text-slate-300" />
+                  </a>
+                  <Tooltip id="packaging-date-tooltip" className="info-tooltip">
+                    When you set or change both due and
+                    <br />
+                    packaging date, default due days will
+                    <br />
+                    be set to the difference between these
+                    <br />
+                    two dates.
+                    <br />
+                    <br />
+                    The packaging date input has no function
+                    <br />
+                    other than to calculate this for you.
+                  </Tooltip>
+                </FormLabel>
+                <FormField>
+                  <input
+                    type="date"
+                    id="packagingDate"
+                    name="packagingDate"
+                    defaultValue=""
+                    // defaultValue={name}
+                    min={dateToISODate(addYears(new Date(), -1))}
+                    max={
+                      expiryDate !== null
+                        ? dateToISODate(expiryDate)
+                        : dateToISODate(addYears(new Date(), 10))
+                    }
+                    className={clsx(
+                      "w-38",
+                      inputCommonStyles,
+                      "relative",
+                      "top-[-1]",
+                    )}
+                    //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
+                    aria-describedby="packaging-date-error"
+                    onChange={(e) => {
+                      setPackagingDate(new Date(e.target.valueAsNumber));
+                    }}
+                  />
+                </FormField>
+                <FormErrors
+                  id="packaging-date-error"
+                  errors={state.fieldErrors?.packagingDate}
+                />
+              </div>
+            </>
+          )}
         </div>
 
-        {/* row: due/expiry and packaging date */}
         {expiryMode !== null && expiryMode.value !== "no-expiry" && (
-          <div className="flex flex-row gap-5">
-            {/* due date / expiry date */}
-            <div className="mb-4 flex-none">
+          <div className="flex flex-row flex-wrap gap-5">
+            <div className="flex-1">
               <FormLabel
-                htmlFor="dueOrExpiryDate"
-                title={
-                  expiryMode.value === "best-before"
-                    ? "Best before *"
-                    : "Expires at *"
-                }
+                htmlFor="defaultDueDays"
+                className="w-46 text-xs text-wrap"
+                title="Default due days *"
               ></FormLabel>
               <FormField>
                 <input
-                  type="date"
-                  id="dueOrExpiryDate"
-                  name="dueOrExpiryDate"
-                  defaultValue=""
-                  // defaultValue={name}
-                  min={dateToISODate(addYears(new Date(), -1))}
-                  max={dateToISODate(addYears(new Date(), 10))}
-                  required
-                  className={clsx(
-                    "w-38",
-                    inputCommonStyles,
-                    "relative",
-                    "top-[-1]",
-                  )}
-                  //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
-                  aria-describedby="due-or-expiry-date-error"
-                  onChange={(e) => {
-                    setExpiryDate(new Date(e.target.valueAsNumber));
-                  }}
-                />
-              </FormField>
-              <FormErrors
-                id="due-or-expiry-date-error"
-                errors={state.fieldErrors?.dueOrExpiryDate}
-              />
-            </div>
-            {/* packaging date */}
-            <div className="mb-4 flex-none">
-              <FormLabel htmlFor="packagingDate" title="Packaging date" className="inline">
-                <a
-                  className="w-10 cursor-help pl-2"
-                  data-tooltip-id="packaging-date-tooltip"
-                >
-                  <InformationCircleIcon className="inline size-5 text-slate-300" />
-                </a>
-                <Tooltip id="packaging-date-tooltip" className="info-tooltip">
-                  When you set or change both due and
-                  <br />
-                  packaging date, default due days will
-                  <br />
-                  be set to the difference between these
-                  <br />
-                  two dates.
-                  <br />
-                  <br />
-                  The packaging date input has no function
-                  <br />
-                  other than to calculate this for you.
-                </Tooltip>
-              </FormLabel>
-              <FormField>
-                <input
-                  type="date"
-                  id="packagingDate"
-                  name="packagingDate"
-                  defaultValue=""
-                  // defaultValue={name}
-                  min={dateToISODate(addYears(new Date(), -1))}
-                  max={
-                    expiryDate !== null
-                      ? dateToISODate(expiryDate)
-                      : dateToISODate(addYears(new Date(), 10))
+                  id="defaultDueDays"
+                  name="defaultDueDays"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  step={1}
+                  placeholder="due days"
+                  value={defaultDueDays}
+                  onChange={(e) =>
+                    setDefaultDueDays(Number.parseInt(e.target.value))
                   }
                   className={clsx(
-                    "w-38",
+                    "peer",
+                    "w-45",
                     inputCommonStyles,
+                    "rounded-md!",
                     "relative",
                     "top-[-1]",
+                    //"focus:invalid:border-[#e75f5f]!",
+                    "mb-[-3]",
                   )}
-                  //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
-                  aria-describedby="packging-date-error"
-                  onChange={(e) => {
-                    setPackagingDate(new Date(e.target.valueAsNumber));
-                  }}
+                  aria-describedby="default-due-days-error"
+                  // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
+                  required
                 />
               </FormField>
               <FormErrors
-                id="packaging-date-error"
-                errors={state.fieldErrors?.packagingDate}
+                id="default-due-days-error"
+                errors={state.fieldErrors?.defaultDueDays}
               />
             </div>
-          </div>
-        )}
-
-        {/* row: due days */}
-        {expiryMode !== null && expiryMode.value !== "no-expiry" && (
-          <div className="flex flex-col flex-wrap gap-x-5">
-            <div className="flex flex-auto flex-row gap-5">
-              {/* default due days */}
-              <div className="flex-auto basis-1/2">
-                <FormLabel
-                  htmlFor="defaultDueDays"
-                  className="w-full text-xs text-wrap"
-                  title="Default due days *"
-                ></FormLabel>
-                <FormField>
-                  <input
-                    id="defaultDueDays"
-                    name="defaultDueDays"
-                    type="number"
-                    min={0}
-                    max={10000}
-                    step={1}
-                    placeholder="due days"
-                    value={defaultDueDays}
-                    onChange={(e) =>
-                      setDefaultDueDays(Number.parseInt(e.target.value))
-                    }
-                    className={clsx(
-                      "peer",
-                      "w-full",
-                      inputCommonStyles,
-                      "rounded-md!",
-                      "relative",
-                      "top-[-1]",
-                      //"focus:invalid:border-[#e75f5f]!",
-                      "mb-[-3]",
-                    )}
-                    aria-describedby="default-due-days-error"
-                    // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
-                    required
-                  />
-                </FormField>
-                <FormErrors
-                  id="default-due-days-error"
-                  errors={state.fieldErrors?.defaultDueDays}
+            <div className="flex-1">
+              <FormLabel
+                htmlFor="defaultDueDaysAfterOpen"
+                className="w-46 text-xs text-wrap"
+                title="Default due days after open "
+              ></FormLabel>
+              <FormField>
+                <input
+                  id="defaultDueDaysAfterOpen"
+                  name="defaultDueDaysAfterOpen"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  step={1}
+                  placeholder="days after open"
+                  value={defaultDueAfterOpen}
+                  onChange={(e) =>
+                    setDefaultDueAfterOpen(Number.parseInt(e.target.value))
+                  }
+                  className={clsx(
+                    "peer",
+                    "w-45",
+                    inputCommonStyles,
+                    "rounded-md!",
+                    "relative",
+                    "top-[-1]",
+                    //"focus:invalid:border-[#e75f5f]!",
+                    "mb-[-3]",
+                  )}
+                  aria-describedby="default-due-days-after-open-error"
+                  // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
+                  required
                 />
-              </div>
-              {/* default due days after opened */}
-              <div className="flex-auto basis-1/2">
-                <FormLabel
-                  htmlFor="defaultDueDaysAfterOpen"
-                  className="w-full text-xs text-wrap"
-                  title="Default due days after open "
-                ></FormLabel>
-                <FormField>
-                  <input
-                    id="defaultDueDaysAfterOpen"
-                    name="defaultDueDaysAfterOpen"
-                    type="number"
-                    min={0}
-                    max={10000}
-                    step={1}
-                    placeholder="days after open"
-                    value={defaultDueAfterOpen}
-                    onChange={(e) =>
-                      setDefaultDueAfterOpen(Number.parseInt(e.target.value))
-                    }
-                    className={clsx(
-                      "peer",
-                      "w-full",
-                      inputCommonStyles,
-                      "rounded-md!",
-                      "relative",
-                      "top-[-1]",
-                      //"focus:invalid:border-[#e75f5f]!",
-                      "mb-[-3]",
-                    )}
-                    aria-describedby="default-due-days-after-open-error"
-                    // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
-                    required
-                  />
-                </FormField>
-                <FormErrors
-                  id="default-due-days-after-open-error"
-                  errors={state.fieldErrors?.defaultDueDaysAfterOpen}
-                />
-              </div>
+              </FormField>
+              <FormErrors
+                id="default-due-days-after-open-error"
+                errors={state.fieldErrors?.defaultDueDaysAfterOpen}
+              />
             </div>
 
             {!shouldNotBeFrozen && (
-              <div className="flex grow flex-row gap-5">
-                {/* default due days after freezing */}
-                <div className="flex-auto basis-1/2">
+              <>
+                <div className="flex-1">
                   <FormLabel
                     htmlFor="defaultDueDaysAfterFreezing"
-                    className="w-full text-xs text-wrap"
+                    className="w-46 text-xs text-wrap"
                     title="Default due days after freezing *"
                   ></FormLabel>
                   <FormField>
@@ -580,7 +561,7 @@ export function QuickProductForm() {
                       }
                       className={clsx(
                         "peer",
-                        "w-full",
+                        "w-45",
                         inputCommonStyles,
                         "rounded-md!",
                         "relative",
@@ -598,11 +579,10 @@ export function QuickProductForm() {
                     errors={state.fieldErrors?.defaultDueDaysAfterFreezing}
                   />
                 </div>
-                {/* default due days after thawing */}
-                <div className="flex-auto basis-1/2">
+                <div className="flex-1">
                   <FormLabel
                     htmlFor="defaultDueDaysAfterThawing"
-                    className="w-full text-xs text-wrap"
+                    className="w-46 text-xs text-wrap"
                     title="Default due days after thawing *"
                   ></FormLabel>
                   <FormField>
@@ -622,7 +602,7 @@ export function QuickProductForm() {
                       }
                       className={clsx(
                         "peer",
-                        "w-full",
+                        "w-45",
                         inputCommonStyles,
                         "rounded-md!",
                         "relative",
@@ -640,22 +620,13 @@ export function QuickProductForm() {
                     errors={state.fieldErrors?.defaultDueDaysAfterThawing}
                   />
                 </div>
-              </div>
+              </>
             )}
           </div>
         )}
 
-        {/* row: form actions */}
         <div className="flex flex-row gap-5">
-          {/* submit and cancel */}
           <div className="mt-6 flex-none">
-            {/* -justify-end gap-4" */}
-            {/* <Link
-          href="/dashboard/invoices"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link> */}
             <Button type="submit">Create product</Button>
           </div>
         </div>
