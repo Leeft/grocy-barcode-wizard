@@ -10,7 +10,6 @@ import Select, {
 } from "react-select";
 import { forwardRef, ReactElement, useImperativeHandle, useRef, useState } from "react";
 import chroma from "chroma-js";
-import { OptionOrGroupArray, OptionType } from "@/interfaces/options";
 
 export interface CustomSelectHandle {
   clear: () => void;
