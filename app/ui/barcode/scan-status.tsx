@@ -51,7 +51,7 @@ export default function BarcodeScanStatus({
                 </div>
 
                 <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
-                  SCAN_SUCCESS // {barcode.scannedAt?.getUTCDate()}
+                  SCAN_SUCCESS // {barcode.scannedAt?.toLocaleString()}
                 </p>
               </div>
             ) : (
