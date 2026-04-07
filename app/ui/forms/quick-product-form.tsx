@@ -31,6 +31,7 @@ import { FormField } from "./inputs/form-field";
 import { FormErrors } from "./inputs/form-errors";
 import { FormCheckbox } from "./inputs/form-checkbox";
 import { UnitModeDropdown } from "../product/unit-mode-dropdown";
+import { CameraApp } from "../camera-app";
 
 export function QuickProductForm() {
   const [selectedWeightUnitId, setSelectedWeightUnitId] = useState<
@@ -128,7 +129,7 @@ export function QuickProductForm() {
 
   const quSelectRef = useRef<CustomSelectHandle>(null);
 
-// form  className="w-auto p-0 m-0"
+  // form  className="w-auto p-0 m-0"
 
   return (
     <form
@@ -151,13 +152,13 @@ export function QuickProductForm() {
               <InformationCircleIcon className="inline size-5 text-slate-300" />
             </a>
             <Tooltip id="form-purpose-tooltip" className="info-tooltip">
-              This form captures a few essentials for a product quickly
+              This form captures the essentials for a product quickly
               <br />
-              without adding it to Grocy. It&apos;ll be queued for completion
+              while you have the product at hand, only queueing it to be
               <br />
-              after when you are not under pressure from not having your
+              completed and added to Grocy when your products are
               <br />
-              your products refrigerated or even thawing during entry.
+              safely back under refrigeration or freezing conditions.
             </Tooltip>
           </div>
         </div>
@@ -231,7 +232,7 @@ export function QuickProductForm() {
                   case "volume":
                     return "Volume *";
                   case "abstract":
-                    return "Amount *";
+                    return "Unit Amount *";
                   default:
                     return "Amount *";
                 }
@@ -273,7 +274,18 @@ export function QuickProductForm() {
           <div className="mb-4 grow">
             <FormLabel
               htmlFor="mainQuantityId"
-              title="Weight unit *"
+              title={(() => {
+                switch (selectedUnitMode) {
+                  case "weight":
+                    return "Weight unit *";
+                  case "volume":
+                    return "Volume unit *";
+                  case "abstract":
+                    return "Abstract/discrete unit *";
+                  default:
+                    return "Unit *";
+                }
+              })()}
             ></FormLabel>
             <FormField>
               <QuantityUnitsDropdown
@@ -300,7 +312,7 @@ export function QuickProductForm() {
           <div className="mb-4 grow">
             <FormLabel
               htmlFor="defaultProductLocationId"
-              title="Default product location *"
+              title="Initial product location *"
             ></FormLabel>
             <FormField>
               <LocationDropdown
@@ -456,7 +468,7 @@ export function QuickProductForm() {
         </div>
 
         {expiryMode !== null && expiryMode.value !== "no-expiry" && (
-          <div className="flex flex-row flex-wrap gap-5">
+          <div className="mb-5 flex flex-row flex-wrap gap-5">
             <div className="flex-1">
               <FormLabel
                 htmlFor="defaultDueDays"
@@ -624,6 +636,8 @@ export function QuickProductForm() {
             )}
           </div>
         )}
+
+        <CameraApp />
 
         <div className="flex flex-row gap-5">
           <div className="mt-6 flex-none">
