@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UnitSystem {
+  WEIGHT
+  VOLUME
+  ABSTRACT
+}
+
+enum DueDateType {
+  BEST_BEFORE
+  EXPIRY_DATE
+  NO_EXPIRY
+}
+
+model Product {
+  id                          Int           @id @default(autoincrement())
+  name                        String
+  barcodes                    Barcode[]
+  grocyProductId              Int?
+  pending                     Boolean
+  canBeFrozen                 Boolean
+  unitSystem                  UnitSystem    @default(WEIGHT)
+  unitAmount                  Decimal
+  unitChosen                  Int
+  dueDateType                 DueDateType   @default(BEST_BEFORE)
+  expiresAt                   DateTime?
+  packagingDate               DateTime?
+  defaultDueDays              Int?
+  defaultDueDaysAfterOpen     Int?
+  defaultDueDaysAfterFreezing Int?
+  defaultDueDaysAfterThawing  Int?
+  productPhoto                ProductPhoto?
+}
+
+model Barcode {
+  id        Int      @id @default(autoincrement())
+  barcode   String   @unique
+  productId Int?
+  scannedAt DateTime
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+enum GrocyFileGroup {
+  recipepictures
+  productpictures
+  userfiles
+  userpictures
+}
+
+model ProductPhoto {
+  id             Int            @id @default(autoincrement())
+  productId      Int            @unique
+  product        Product        @relation(fields: [productId], references: [id])
+  filename       String
+  grocyFileGroup GrocyFileGroup @default(productpictures)
+  grocyFileName  String
+  data           Bytes
+}
