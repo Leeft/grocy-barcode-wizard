@@ -92,7 +92,7 @@ async function processReceivedBarcode(code: string) {
   // doing this async in the UI).
 
   try {
-    writeBarcode(barcode);
+    writeBarcode({ barcode: barcode.barcode });
 
     findProductInGrocy(barcode)
       .then((productBarcode) => {
