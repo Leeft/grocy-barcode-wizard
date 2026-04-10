@@ -5,7 +5,7 @@ import { WebCamera, WebCameraHandler } from "@shivantra/react-web-camera";
 import { fileToBase64 } from "file64";
 import { RotateCw, Trash, SwitchCamera, Camera } from "lucide-react";
 import clsx from "clsx";
-import { OneOffSound, OneOffSoundHandler } from "./one-off-sound";
+import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
 
 type CapturedImage = {
   width?: number;
@@ -19,6 +19,7 @@ export function CameraApp() {
   const [images, setImages] = useState<CapturedImage[]>([]);
 
   async function handleCapture() {
+    shutterHandler.current?.play();
     const file = await cameraHandler.current?.capture();
     if (file) {
       const base64 = await fileToBase64(file);

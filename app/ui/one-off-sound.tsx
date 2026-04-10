@@ -1,24 +1,33 @@
 "use client";
 
-import { forwardRef, useCallback, useRef } from "react";
+import React, { useRef, useImperativeHandle, forwardRef } from "react";
 
-export interface OneOffSoundProps {
+export interface OneOffSoundHandler {
+  play: () => void;
+}
+
+interface OneOffSoundProps {
   src: string;
 }
 
-export type OneOffSoundHandler = {
-  play: () => void;
-};
-
-export const OneOffSound = forwardRef<OneOffSoundHandler, OneOffSoundProps>(
+const OneOffSound = forwardRef<OneOffSoundHandler, OneOffSoundProps>(
   ({ src }, ref) => {
     const audioRef = useRef<HTMLAudioElement>(null);
 
-    const play = useCallback(() => {
-      console.log("supposed to be playing sound now ...");
-      audioRef.current?.play();
-    }, []);
+    useImperativeHandle(ref, () => ({
+      play: () => {
+        if (audioRef.current) {
+          audioRef.current.play().catch((error) => {
+            console.error("Playback failed:", error);
+          });
+        }
+      },
+    }));
 
-    return <audio src={src} autoPlay={false} loop={false} />;
+    return <audio ref={audioRef} src={src} preload="auto" />;
   },
 );
+
+OneOffSound.displayName = "OneOffSound";
+
+export default OneOffSound;
