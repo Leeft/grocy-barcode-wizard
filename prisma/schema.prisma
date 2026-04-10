@@ -35,8 +35,8 @@ model Product {
   unitAmount                  Decimal
   unitChosen                  Int
   dueDateType                 DueDateType   @default(BEST_BEFORE)
-  expiresAt                   DateTime?
-  packagingDate               DateTime?
+  expiresAt                   String?
+  packagingDate               String?
   defaultDueDays              Int?
   defaultDueDaysAfterOpen     Int?
   defaultDueDaysAfterFreezing Int?
@@ -70,7 +70,7 @@ model ProductPhoto {
   productId      Int            @unique
   product        Product        @relation(fields: [productId], references: [id])
   filename       String
-  grocyFileGroup GrocyFileGroup @default(productpictures)
-  grocyFileName  String
+  grocyFileGroup GrocyFileGroup? @default(productpictures)
+  grocyFileName  String?
   data           Bytes
 }

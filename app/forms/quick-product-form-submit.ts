@@ -1,6 +1,12 @@
 "use server";
 
+import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
+import {
+  ProductCreateInput,
+  ProductPhotoUncheckedCreateInput,
+} from "@/generated/prisma/models";
 import { dateToISODate } from "@/lib/date";
+import prisma from "@/lib/prisma";
 import { z } from "zod";
 
 const FormSchema = z
@@ -76,6 +82,8 @@ const FormSchema = z
       .number()
       .gt(-1, { message: `Must be 0 or greater` })
       .optional(),
+
+    image: z.string().optional(),
   })
   .refine(
     ({ dueDateType, dueOrExpiryDate, packagingDate }) => {
@@ -133,6 +141,18 @@ export type QueueProductState = {
   };
 };
 
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(",");
+  const mime = arr[0]!.match(/:(.*?);/)![1];
+  const bstr = atob(arr[arr.length - 1]!);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
 export async function quickProductFormSubmit(
   _prev: QueueProductState,
   formData: FormData,
@@ -160,31 +180,70 @@ export async function quickProductFormSubmit(
     //console.log("validated", validation.data);
   }
 
-  // Prepare data for insertion into the database
-  //const { mainQuantityUnitId, mainQuantity } = validation.data;
-  //const amountInCents = amount * 100;
-  //const date = new Date().toISOString().split("T")[0];
-
-  // Insert data into the database
-  // try {
-  //   await sql`
-  //     INSERT INTO invoices (customer_id, amount, status, date)
-  //     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  //   `;
-  // } catch (error) {
-  //   // If a database error occurs, return a more specific error.
-  //   return {
-  //     message: "Database Error: Failed to Create Invoice.",
-  //   };
+  // validated {
+  //   name: 'This is a product name',
+  //   unitSystem: 'abstract',
+  //   mainQuantityUnitId: 16,
+  //   mainQuantity: 1,
+  //   defaultProductLocationId: 14,
+  //   dueDateType: 'expiry-date',
+  //   dueOrExpiryDate: '2026-04-30',
+  //   packagingDate: '2026-04-08',
+  //   shouldNotBeFrozen: true,
+  //   defaultDueDays: 22,
+  //   defaultDueDaysAfterOpen: 0
   // }
+
+  let dueDateType = "BEST_BEFORE";
+  if (validation.data.dueDateType === "expiry-date")
+    dueDateType = "EXPIRY_DATE";
+  else if (validation.data.dueDateType === "no-expiry")
+    dueDateType = "NO_EXPIRY";
+
+  const canExpire = dueDateType !== DueDateType.NO_EXPIRY;
+  const data = validation.data;
+
+  const queuedProduct = await prisma.product.create({
+    data: {
+      name: data.name,
+      pending: true,
+      canBeFrozen: !data.shouldNotBeFrozen,
+      unitSystem: data.unitSystem.toUpperCase() as UnitSystem,
+      unitAmount: data.mainQuantity,
+      unitChosen: data.mainQuantityUnitId,
+      dueDateType: dueDateType as DueDateType,
+      expiresAt: canExpire ? data.dueOrExpiryDate! : null,
+      packagingDate: canExpire ? data.packagingDate! : null,
+      defaultDueDays: canExpire ? data.defaultDueDays : null,
+      defaultDueDaysAfterOpen: canExpire ? data.defaultDueDaysAfterOpen : null,
+      defaultDueDaysAfterFreezing: canExpire
+        ? data.defaultDueDaysAfterFreezing
+        : null,
+      defaultDueDaysAfterThawing: canExpire
+        ? data.defaultDueDaysAfterThawing
+        : null,
+    } as ProductCreateInput,
+  });
+
+  console.log("queued product is", queuedProduct);
+
+  if (data.image) {
+    const file = dataURLtoFile(data.image, "filename-not-used-yet");
+    const arr = new Uint8Array(await file.arrayBuffer());
+    const queuedProductPhoto = await prisma.productPhoto.create({
+      data: {
+        filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+        data: arr,
+        productId: queuedProduct.id,
+        grocyFileGroup: "productpictures",
+      } as ProductPhotoUncheckedCreateInput,
+    });
+  }
 
   // Revalidate the cache for the invoices page and redirect the user.
   //revalidatePath("/dashboard/invoices");
   //redirect("/dashboard/invoices");
-  // return {
-  //   formErrors: [],
-  //   fieldErrors: {},
-  // };
+
   return {
     message: "",
     form: {
@@ -195,44 +254,3 @@ export async function quickProductFormSubmit(
     },
   };
 }
-
-// // Use Zod to update the expected types
-// const UpdateInvoice = FormSchema.omit({ id: true, date: true });
-
-// export async function updateInvoice(id: string, prevState: State, formData: FormData) {
-//   const validation = UpdateInvoice.safeParse({
-//     customerId: formData.get('customerId'),
-//     amount: formData.get('amount'),
-//     status: formData.get('status'),
-//   });
-
-//   if (!validation.success) {
-//     return {
-//       errors: validation.error.flatten().fieldErrors,
-//       message: 'Missing Fields. Failed to Update Invoice.',
-//     };
-//   }
-
-//   const { customerId, amount, status } = validation.data;
-//   const amountInCents = amount * 100;
-
-//   try {
-//     await sql`
-//         UPDATE invoices
-//         SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-//         WHERE id = ${id}
-//       `;
-//   } catch (error) {
-//     // We'll also log the error to the console for now
-//     console.error(error);
-//     return { message: 'Database Error: Failed to Update Invoice.' };
-//   }
-
-//   revalidatePath('/dashboard/invoices');
-//   redirect('/dashboard/invoices');
-// }
-
-// export async function deleteInvoice(id: string) {
-//   await sql`DELETE FROM invoices WHERE id = ${id}`;
-//   revalidatePath('/dashboard/invoices');
-// }

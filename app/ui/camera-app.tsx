@@ -160,6 +160,7 @@ export function CameraApp() {
                 //height: aspectRatio(image) * 320 * 2.1,
               }}
             />
+            <input type="hidden" name="image" value={image.dataUrl} />
           </div>
         ))}
       </div>

@@ -5,4 +5,9 @@ module.exports = {
     root: path.join(__dirname, '..'),
   },
   typedRoutes: true,  
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },  
 }
