@@ -8,6 +8,7 @@ export function FormErrors({
   if (errors === undefined) {
     return <></>;
   }
+  
   return (
     <div id={id} aria-live="polite" aria-atomic="true">
       {errors &&

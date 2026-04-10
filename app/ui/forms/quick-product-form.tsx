@@ -9,13 +9,16 @@ import React, {
   useEffect,
   useRef,
   useState,
+  SubmitEvent,
+  KeyboardEvent,
 } from "react";
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import { ProductLocation, QuantityUnit } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import {
+  AddProductFormData,
   quickProductFormSubmit,
-  State,
+  QueueProductState,
 } from "@/forms/quick-product-form-submit";
 import { Button } from "../button";
 import { LocationContext } from "@/providers/location-context";
@@ -32,6 +35,15 @@ import { FormErrors } from "./inputs/form-errors";
 import { FormCheckbox } from "./inputs/form-checkbox";
 import { UnitModeDropdown } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
+
+const initialState: QueueProductState = {
+  form: {
+    name: '',
+    dueOrExpiryDate: '',
+    packagingDate: '',
+  },
+  message: '',
+}
 
 export function QuickProductForm() {
   const [selectedWeightUnitId, setSelectedWeightUnitId] = useState<
@@ -52,11 +64,12 @@ export function QuickProductForm() {
   const [defaultDueAfterThawing, setDefaultDueAfterThawing] =
     useState<number>(0);
 
-  const initialState: State = { formErrors: [], fieldErrors: {} };
-  const [state, formAction /*submitIsPending*/] = useActionState(
-    quickProductFormSubmit,
-    initialState,
-  );
+  // const initialState: QueueProductState = { form: {} };
+  // const [state, formAction /*submitIsPending*/] = useActionState(
+  //   quickProductFormSubmit,
+  //   initialState,
+  // );
+  const [state, formAction, pending] = useActionState(quickProductFormSubmit, initialState)
 
   const quantityUnitsPromise = useContext(QuantityUnitContext) as Promise<
     QuantityUnit[]
@@ -95,11 +108,6 @@ export function QuickProductForm() {
     "min-h-[38px]",
   );
 
-  // @ts-expect-error can't find the right type for event
-  function submitHandler(event): void {
-    event.preventDefault();
-  }
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedWeightUnitId(null);
@@ -129,12 +137,25 @@ export function QuickProductForm() {
 
   const quSelectRef = useRef<CustomSelectHandle>(null);
 
-  // form  className="w-auto p-0 m-0"
+  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
+    // Cast target as an HTMLElement to access the tagName property
+    const target = e.target as HTMLElement;
+
+    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  };
+
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    //e.preventDefault();
+    // Your submission logic
+  };
 
   return (
     <form
       action={formAction}
-      onSubmit={submitHandler}
+      onSubmit={handleSubmit}
+      onKeyDown={handleKeyDown}
       noValidate
       className="pb-25"
     >
@@ -171,6 +192,7 @@ export function QuickProductForm() {
                 id="name"
                 name="name"
                 type="text"
+                defaultValue={state.form?.name}
                 minLength={2}
                 maxLength={64}
                 placeholder="Name of the product to create, 2 to 64 characters long"
@@ -179,7 +201,7 @@ export function QuickProductForm() {
                 required
               />
             </FormField>
-            <FormErrors id="name-error" errors={state.fieldErrors?.name} />
+            <FormErrors id="name-error" errors={state.errors?.name} />
           </div>
         </div>
 
@@ -193,6 +215,7 @@ export function QuickProductForm() {
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setShouldNotBeFrozen(e.target.checked)
                   }
+                  checked={state.form?.shouldNotBeFrozen ? true : false}
                 />
                 <label htmlFor="shouldNotBeFrozen">
                   This product should not be frozen
@@ -200,7 +223,7 @@ export function QuickProductForm() {
               </FormField>
               <FormErrors
                 id="should-not-be-frozen-error"
-                errors={state.fieldErrors?.shouldNotBeFrozen}
+                errors={state.errors?.shouldNotBeFrozen}
               />
             </div>
           </div>
@@ -208,10 +231,10 @@ export function QuickProductForm() {
 
         <div className="flex flex-row flex-wrap gap-x-5">
           <div className="mb-3 flex-none">
-            <FormLabel htmlFor="unit-system" title="Unit system *"></FormLabel>
+            <FormLabel htmlFor="unitSystem" title="Unit system *"></FormLabel>
             <FormField>
               <UnitModeDropdown
-                name="unit-system"
+                name="unitSystem"
                 className="w-45 flex-2"
                 aria-describedby="unit-system-error"
                 setSelectedMode={setSelectedUnitMode}
@@ -219,7 +242,7 @@ export function QuickProductForm() {
             </FormField>
             <FormErrors
               id="unit-system-error"
-              errors={state.fieldErrors?.unitSystem}
+              errors={state.errors?.unitSystem}
             />
           </div>
           <div className="mb-4 flex-none">
@@ -268,12 +291,12 @@ export function QuickProductForm() {
             </FormField>
             <FormErrors
               id="main-quantity-error"
-              errors={state.fieldErrors?.mainQuantity}
+              errors={state.errors?.mainQuantity}
             />
           </div>
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor="mainQuantityId"
+              htmlFor="mainQuantityUnitId"
               title={(() => {
                 switch (selectedUnitMode) {
                   case "weight":
@@ -290,7 +313,7 @@ export function QuickProductForm() {
             <FormField>
               <QuantityUnitsDropdown
                 ref={quSelectRef}
-                name="mainQuantityId"
+                name="mainQuantityUnitId"
                 units={units}
                 selectedId={selectedWeightUnitId}
                 className="w-46"
@@ -303,7 +326,7 @@ export function QuickProductForm() {
             </FormField>
             <FormErrors
               id="main-quantity-id-error"
-              errors={state.fieldErrors?.mainQuantityId}
+              errors={state.errors?.mainQuantityUnitId}
             />
           </div>
         </div>
@@ -327,7 +350,7 @@ export function QuickProductForm() {
             </FormField>
             <FormErrors
               id="default-product-location-error"
-              errors={state.fieldErrors?.defaultProductLocationId}
+              errors={state.errors?.defaultProductLocationId}
             />
           </div>
         </div>
@@ -362,7 +385,7 @@ export function QuickProductForm() {
             </FormField>
             <FormErrors
               id="due-date-type-error"
-              errors={state.fieldErrors?.dueDateType}
+              errors={state.errors?.dueDateType}
             />
           </div>
 
@@ -382,8 +405,7 @@ export function QuickProductForm() {
                     type="date"
                     id="dueOrExpiryDate"
                     name="dueOrExpiryDate"
-                    defaultValue=""
-                    // defaultValue={name}
+                    defaultValue={state.form?.dueOrExpiryDate}
                     min={dateToISODate(addYears(new Date(), -1))}
                     max={dateToISODate(addYears(new Date(), 10))}
                     required
@@ -402,7 +424,7 @@ export function QuickProductForm() {
                 </FormField>
                 <FormErrors
                   id="due-or-expiry-date-error"
-                  errors={state.fieldErrors?.dueOrExpiryDate}
+                  errors={state.errors?.dueOrExpiryDate}
                 />
               </div>
               <div className="mb-4 flex-none">
@@ -437,8 +459,7 @@ export function QuickProductForm() {
                     type="date"
                     id="packagingDate"
                     name="packagingDate"
-                    defaultValue=""
-                    // defaultValue={name}
+                    defaultValue={state.form?.packagingDate}
                     min={dateToISODate(addYears(new Date(), -1))}
                     max={
                       expiryDate !== null
@@ -460,7 +481,7 @@ export function QuickProductForm() {
                 </FormField>
                 <FormErrors
                   id="packaging-date-error"
-                  errors={state.fieldErrors?.packagingDate}
+                  errors={state.errors?.packagingDate}
                 />
               </div>
             </>
@@ -505,7 +526,7 @@ export function QuickProductForm() {
               </FormField>
               <FormErrors
                 id="default-due-days-error"
-                errors={state.fieldErrors?.defaultDueDays}
+                errors={state.errors?.defaultDueDays}
               />
             </div>
             <div className="flex-1">
@@ -544,7 +565,7 @@ export function QuickProductForm() {
               </FormField>
               <FormErrors
                 id="default-due-days-after-open-error"
-                errors={state.fieldErrors?.defaultDueDaysAfterOpen}
+                errors={state.errors?.defaultDueDaysAfterOpen}
               />
             </div>
 
@@ -588,7 +609,7 @@ export function QuickProductForm() {
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-freezing-error"
-                    errors={state.fieldErrors?.defaultDueDaysAfterFreezing}
+                    errors={state.errors?.defaultDueDaysAfterFreezing}
                   />
                 </div>
                 <div className="flex-1">
@@ -629,7 +650,7 @@ export function QuickProductForm() {
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-thawing-error"
-                    errors={state.fieldErrors?.defaultDueDaysAfterThawing}
+                    errors={state.errors?.defaultDueDaysAfterThawing}
                   />
                 </div>
               </>

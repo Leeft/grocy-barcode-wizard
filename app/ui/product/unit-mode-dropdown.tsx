@@ -24,15 +24,15 @@ export function UnitModeDropdown({
       options={[
         {
           value: "weight",
-          label: "By weight ...",
+          label: "By weight",
         },
         {
           value: "volume",
-          label: "By volume ...",
+          label: "By volume",
         },
         {
           value: "abstract",
-          label: "Abstract/discrete ...",
+          label: "Abstract/discrete",
         },
       ]}
       required={true}

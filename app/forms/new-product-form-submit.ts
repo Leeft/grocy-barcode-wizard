@@ -11,7 +11,7 @@ const FormSchema = z.object({
 
   productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
 
-  mainQuantityId: z.coerce
+  mainQuantityUnitId: z.coerce
     .number()
     .gt(0, { message: "Select a unit from the list" }),
 
@@ -77,7 +77,7 @@ export type State = {
   fieldErrors: {
     name?: string[];
     productGroup?: string[];
-    mainQuantityId?: string[];
+    mainQuantityUnitId?: string[];
     mainQuantity?: string[];
     parentProductId?: string[];
     defaultProductLocationId?: string[];
@@ -114,7 +114,7 @@ export async function newProductFormSubmit(
   }
 
   // Prepare data for insertion into the database
-  //const { mainQuantityId, mainQuantity } = validation.data;
+  //const { mainQuantityUnitId, mainQuantity } = validation.data;
   //const amountInCents = amount * 100;
   //const date = new Date().toISOString().split("T")[0];
 

@@ -355,12 +355,12 @@ export function NewProductForm() {
           {/* weight quantity unit */}
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor="mainQuantityId"
+              htmlFor="mainQuantityUnitId"
               title="Weight unit *"
             ></FormLabel>
             <FormField>
               <QuantityUnitsDropdown
-                name="mainQuantityId"
+                name="mainQuantityUnitId"
                 units={units}
                 selectedId={selectedWeightUnitId}
                 className="w-auto flex-2"
@@ -372,7 +372,7 @@ export function NewProductForm() {
             </FormField>
             <FormErrors
               id="main-quantity-id-error"
-              errors={state.fieldErrors?.mainQuantityId}
+              errors={state.fieldErrors?.mainQuantityUnitId}
             />
           </div>
 

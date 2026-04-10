@@ -1,87 +1,121 @@
 "use server";
 
+import { dateToISODate } from "@/lib/date";
 import { z } from "zod";
 
-const FormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, "Expecting at least 2 characters")
-    .max(64, "Keep the product name under 64 characters"), // Grocy can handle longer though
+const FormSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, "Expecting at least 2 characters")
+      .max(64, "Keep the product name under 64 characters"), // Grocy can handle longer though
 
-  productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+    // productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
 
-  mainQuantityId: z.coerce
-    .number()
-    .gt(0, { message: "Select a unit from the list" }),
+    unitSystem: z.enum(["weight", "volume", "abstract"], {
+      message: "The unit system to use must be chosen",
+    }),
 
-  mainQuantity: z.coerce.number().gt(0, { message: `Must be above 0` }),
+    mainQuantityUnitId: z.coerce
+      .number()
+      .gt(0, { message: "Select a unit from the list" }),
 
-  parentProductId: z.coerce
-    .number()
-    .gt(-1, { message: "Parent product must be unset or greater than zero" }),
+    mainQuantity: z.coerce.number().gt(0, { message: `Must be above 0` }),
 
-  defaultProductLocationId: z.coerce
-    .number()
-    .gt(0, { message: "Default product location must be set" }),
+    // parentProductId: z.coerce
+    //   .number()
+    //   .gt(-1, { message: "Parent product must be unset or greater than zero" }),
 
-  defaultConsumeLocationId: z.coerce.number().gt(-1, {
-    message: "Consumption location must be unset or greater than zero",
-  }),
+    defaultProductLocationId: z.coerce
+      .number()
+      .gt(0, { message: "Default product location must be set" }),
 
-  defaultShopLocationId: z.coerce.number().gt(-1, {
-    message: "Default shop location must be unset or greater than zero",
-  }),
+    // defaultConsumeLocationId: z.coerce.number().gt(-1, {
+    //   message: "Consumption location must be unset or greater than zero",
+    // }),
 
-  dueOrExpiryDate: z.iso.date({ error: "Not a valid ISO-8601 date" }),
+    // defaultShopLocationId: z.coerce.number().gt(-1, {
+    //   message: "Default shop location must be unset or greater than zero",
+    // }),
 
-  dueDateType: z.enum(["best-before", "due-date", "no-expiry"], {
-    message: "Due- or expiry-date type must be chosen",
-  }),
+    dueDateType: z.enum(["best-before", "expiry-date", "no-expiry"], {
+      message: "Due- or expiry-date type must be chosen",
+    }),
 
-  unitSystem: z.enum(["weight", "volume", "abstract"], {
-    message: "The unit system to use must be chosen",
-  }),
+    dueOrExpiryDate: z.iso.date({ error: "Not a valid date" }).optional(),
 
-  packagingDate: z.iso.date({ error: "Not a valid ISO-8601 date" }),
+    packagingDate: z.iso.date({ error: "Not a valid date" }).optional(),
 
-  shouldNotBeFrozen: z.coerce.boolean(),
+    shouldNotBeFrozen: z.coerce.boolean(),
 
-  noStockCheck: z.coerce.boolean(),
+    // noStockCheck: z.coerce.boolean(),
 
-  canNotOpen: z.coerce.boolean(),
+    // canNotOpen: z.coerce.boolean(),
 
-  moveOnOpen: z.coerce.boolean(),
+    // moveOnOpen: z.coerce.boolean(),
 
-  hideFromStock: z.coerce.boolean(),
+    // hideFromStock: z.coerce.boolean(),
 
-  defaultDueDays: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+    defaultDueDays: z.coerce
+      .number()
+      .gt(-1, { message: `Must be 0 or greater` })
+      .optional(),
 
-  defaultDueDaysAfterOpen: z.coerce
-    .number()
-    .gt(-1, { message: `Must be 0 or greater` }),
+    defaultDueDaysAfterOpen: z.coerce
+      .number()
+      .gt(-1, { message: `Must be 0 or greater` })
+      .optional(),
 
-  defaultDueDaysAfterFreezing: z.coerce
-    .number()
-    .gt(-1, { message: `Must be 0 or greater` }),
+    defaultDueDaysAfterFreezing: z.coerce
+      .number()
+      .gt(-1, { message: `Must be 0 or greater` })
+      .optional(),
 
-  defaultDueDaysAfterThawing: z.coerce
-    .number()
-    .gt(-1, { message: `Must be 0 or greater` }),
-});
+    defaultDueDaysAfterThawing: z.coerce
+      .number()
+      .gt(-1, { message: `Must be 0 or greater` })
+      .optional(),
+  })
+  .refine(
+    ({ dueDateType, dueOrExpiryDate, packagingDate }) => {
+      // No need to check anything for no-expiry
+      if (dueDateType === "no-expiry") return true;
+      if (!dueOrExpiryDate) return false;
+      if (!packagingDate) return true;
+      return packagingDate < dueOrExpiryDate;
+    },
+    {
+      message: "Due date must be after packaging date",
+      path: ["dueOrExpiryDate"],
+    },
+  )
+  .refine(
+    ({ dueDateType, packagingDate }) => {
+      // No need to check anything for no-expiry
+      if (dueDateType === "no-expiry") return true;
+      if (!packagingDate) return true;
+      const today = dateToISODate(new Date());
+      return packagingDate <= today;
+    },
+    {
+      message: "Packaging date must be in the past",
+      path: ["packagingDate"],
+    },
+  );
+export type AddProductFormData = z.infer<typeof FormSchema>;
 
-export type AddProductForm = z.infer<typeof FormSchema>;
-
-const CreateNewByWeightProduct = FormSchema.omit({
-  // id: true, date: true
-});
-
-export type State = {
-  formErrors: string[];
-  fieldErrors: {
+export type QueueProductState = {
+  message: string;
+  form: {
+    name: string;
+    dueOrExpiryDate: string;
+    packagingDate: string;
+    [k: string]: FormDataEntryValue;
+  };
+  errors?: {
     name?: string[];
-    productGroup?: string[];
-    mainQuantityId?: string[];
+    mainQuantityUnitId?: string[];
     mainQuantity?: string[];
     parentProductId?: string[];
     defaultProductLocationId?: string[];
@@ -92,10 +126,6 @@ export type State = {
     unitSystem?: string[];
     packagingDate?: string[];
     shouldNotBeFrozen?: string[];
-    noStockCheck?: string[];
-    canNotOpen?: string[];
-    moveOnOpen?: string[];
-    hideFromStock?: string[];
     defaultDueDays?: string[];
     defaultDueDaysAfterOpen?: string[];
     defaultDueDaysAfterFreezing?: string[];
@@ -104,22 +134,34 @@ export type State = {
 };
 
 export async function quickProductFormSubmit(
-  prevState: State,
+  _prev: QueueProductState,
   formData: FormData,
-): Promise<State> {
-  const rawFormDdata = Object.fromEntries(formData.entries());
-
-  //console.log("raw form", rawFormDdata);
-  const validation = CreateNewByWeightProduct.safeParse(rawFormDdata);
+): Promise<QueueProductState> {
+  const rawFormData = Object.fromEntries(formData.entries());
+  const validation = FormSchema.safeParse(rawFormData);
 
   if (!validation.success) {
-    return z.flattenError(validation.error);
+    // console.error(
+    //   "form validation errors",
+    //   validation.error.flatten().fieldErrors,
+    // );
+    //console.log("form data state", rawFormData);
+    return {
+      message: "",
+      form: {
+        name: "",
+        dueOrExpiryDate: "",
+        packagingDate: "",
+        ...rawFormData,
+      },
+      errors: validation.error.flatten().fieldErrors,
+    };
   } else {
-    console.log("validated", validation.data);
+    //console.log("validated", validation.data);
   }
 
   // Prepare data for insertion into the database
-  //const { mainQuantityId, mainQuantity } = validation.data;
+  //const { mainQuantityUnitId, mainQuantity } = validation.data;
   //const amountInCents = amount * 100;
   //const date = new Date().toISOString().split("T")[0];
 
@@ -139,9 +181,18 @@ export async function quickProductFormSubmit(
   // Revalidate the cache for the invoices page and redirect the user.
   //revalidatePath("/dashboard/invoices");
   //redirect("/dashboard/invoices");
+  // return {
+  //   formErrors: [],
+  //   fieldErrors: {},
+  // };
   return {
-    formErrors: [],
-    fieldErrors: {},
+    message: "",
+    form: {
+      name: "",
+      dueOrExpiryDate: "",
+      packagingDate: "",
+      ...rawFormData,
+    },
   };
 }
 

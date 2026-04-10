@@ -4,10 +4,12 @@ export function FormCheckbox({
   id,
   ariaDescribedBy,
   onChange,
+  checked,
 }: {
   id: string;
   ariaDescribedBy: string;
   onChange?: ChangeEventHandler;
+  checked: boolean;
 }): React.ReactNode {
   return (
     <input
@@ -19,6 +21,7 @@ export function FormCheckbox({
       aria-describedby={ariaDescribedBy}
       defaultValue="true"
       onChange={onChange}
+      defaultChecked={checked}
     />
   );
 }
