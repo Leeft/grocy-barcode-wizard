@@ -48,8 +48,14 @@ model Barcode {
   id        Int      @id @default(autoincrement())
   barcode   String   @unique
   productId Int?
-  scannedAt DateTime
   product   Product? @relation(fields: [productId], references: [id])
+  scannedAt DateTime
+  // "queued" flag means the scanner app actually accepted the barcode and it
+  // was not simply received by the API. The API is indiscriminate, but the app
+  // may filter requests based on state. Thus selecting for queued status one
+  // does not end up with a lot of random queued codes to process without an
+  // app open to see something about them.
+  queued    Boolean  @default(false)
 }
 
 enum GrocyFileGroup {

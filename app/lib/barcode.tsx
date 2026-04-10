@@ -11,6 +11,10 @@ import {
 
 let nextId: number = 1;
 
+export type SimpleBarcodeObject = {
+  barcode: string;
+};
+
 export default class Barcode {
   #id: number; // immutable; uniqueness not at all guaranteed atm
   #barcode: string; // immutable

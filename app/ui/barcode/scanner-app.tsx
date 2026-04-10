@@ -6,6 +6,7 @@ import BarcodeScanStatus from "@/ui/barcode/scan-status";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { useEffect, useState } from "react";
 import { QuickProductForm } from "@/ui/forms/quick-product-form";
+import { queueBarcode } from "@/lib/barcode-db";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 
@@ -32,11 +33,16 @@ export default function BarcodeScannerApp() {
     es.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (debug) console.log("Received barcode data:", data);
-        setBarcode(Barcode.fromJSON(data));
+        const barcode = Barcode.fromJSON(data);
+        if (debug)
+          console.log("Received barcode data:", data, "barcode:", barcode);
+        setBarcode(barcode);
         setIsFlashing(true);
         window.scrollTo(0, 0);
         setTimeout(() => setIsFlashing(false), 1500);
+        if (barcode !== null) {
+          await queueBarcode({ barcode: barcode.barcode });
+        }
       } catch (err) {
         console.error("JSON Parse Error:", err, "from data", event.data);
       }
