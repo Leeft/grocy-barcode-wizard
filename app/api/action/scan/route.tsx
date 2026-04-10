@@ -5,6 +5,7 @@ import Barcode from "@/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
 import { ReceivedBarcode } from "@/interfaces/json-objects";
 import { findProductInOpenFoodFacts } from "@/lib/open-food-facts";
+import { writeBarcode } from "@/lib/barcode-db";
 
 // TODO FIXME: Access control
 
@@ -91,6 +92,8 @@ async function processReceivedBarcode(code: string) {
   // doing this async in the UI).
 
   try {
+    writeBarcode(barcode);
+
     findProductInGrocy(barcode)
       .then((productBarcode) => {
         globalEvents.emit("product-barcode-stream", productBarcode);

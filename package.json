@@ -11,6 +11,11 @@
     "pushdb": "prisma db push",
     "studio": "prisma studio"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@prisma/adapter-better-sqlite3": "^7.7.0",
