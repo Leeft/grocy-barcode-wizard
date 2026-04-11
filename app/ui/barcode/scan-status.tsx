@@ -50,14 +50,16 @@ export default function BarcodeScanStatus({
                   {barcode.barcode}
                 </div>
 
-                <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
-                  SCAN_SUCCESS // {barcode.scannedAt?.toLocaleString()}
-                </p>
+                {barcode.scannedAt && (
+                  <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
+                    <>SCAN_SUCCESS // {barcode.scannedAt?.toLocaleString()}</>
+                  </p>
+                )}
               </div>
             ) : (
               <div
                 className={
-                  "text-2xl md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-gray-100 italic decoration-solid " +
+                  "md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-2xl text-gray-100 italic decoration-solid " +
                   statusColour(connectionStatus)
                 }
               >

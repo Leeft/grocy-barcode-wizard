@@ -19,24 +19,20 @@ export async function getProduct(id: number): Promise<ProductModel> {
 
 export async function getProductByBarcode(
   barcode: string,
-) {
+): Promise<ProductModel[]> {
   "use server";
 
   if (barcode === undefined) throw new Error("No barcode given");
 
-  const result = await prisma.product.findMany({
-    where: {},
-    include: {
+  return await prisma.product.findMany({
+    where: {
       barcodes: {
-        where: {
-          barcode: barcode,
-          queued: true,
+        some: {
+          barcode: {
+            equals: barcode,
+          },
         },
       },
     },
   });
-
-  if (result === null || result.length === 0) throw new Error("Product not found");
-
-  return result;
 }

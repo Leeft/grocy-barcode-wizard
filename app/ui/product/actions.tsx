@@ -25,7 +25,7 @@ export default function BarcodeActions({
             <BarcodeAction
               qr="sho:c"
               qrBgColor="#61e6d0"
-              logoImage={"http://192.168.10.48:3000/icons/consume.png"}
+              logoImage={"/icons/consume.png"}
               logoWidth={logoWidth}
               logoHeight={logoHeight}
               title="Consume"
