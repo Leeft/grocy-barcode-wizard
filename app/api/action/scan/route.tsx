@@ -6,6 +6,7 @@ import * as JsonDecoder from "ts.data.json";
 import { ReceivedBarcode } from "@/interfaces/json-objects";
 import { findProductInOpenFoodFacts } from "@/lib/open-food-facts";
 import { getBarcode, writeBarcode } from "@/lib/barcode-db";
+import { NotFoundError } from "@/lib/errors";
 
 // TODO FIXME: Access control
 
@@ -102,8 +103,10 @@ async function processReceivedBarcode(code: string) {
     if (model.productId !== undefined && model.productId !== null) {
       barcode.queuedProductId = model.productId;
     }
-  } catch (e) {
-    console.error("Could not fetch barcode from database:", e);
+  } catch (err) {
+    if (!(err instanceof NotFoundError)) {
+      console.error("Could not fetch barcode from database:", err);
+    }
   }
 
   // It's not a special barcode, so it must be a product barcode.

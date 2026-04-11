@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { BasicBarcode } from "@/lib/barcode";
 import { BarcodeModel } from "@/generated/prisma/models";
+import { NotFoundError } from "@/lib/errors";
 
 export async function writeBarcode(
   barcode: BasicBarcode,
@@ -32,7 +33,7 @@ export async function getBarcode(barcode: BasicBarcode): Promise<BarcodeModel> {
     where: { barcode: barcode.barcode },
   });
 
-  if (model === null) throw new Error("Barcode not found");
+  if (model === null) throw new NotFoundError("Barcode not found");
 
   return model;
 }
