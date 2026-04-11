@@ -7,6 +7,7 @@ import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { useEffect, useState } from "react";
 import { QuickProductForm } from "@/ui/forms/quick-product-form";
 import { queueBarcode } from "@/lib/barcode-db";
+import QueuedProduct from "../product/queued-product";
 
 type ConnectionStatus = "connecting" | "connected" | "error";
 
@@ -17,7 +18,7 @@ export default function BarcodeScannerApp() {
   const [isFlashing, setIsFlashing] = useState(false);
   const [retryCount /*setRetryCount*/] = useState(3);
 
-  const debug = true;
+  const debug = false;
 
   useEffect(() => {
     const es = new EventSource("/api/product-barcode-stream");
@@ -35,13 +36,19 @@ export default function BarcodeScannerApp() {
         const data = JSON.parse(event.data);
         const barcode = Barcode.fromJSON(data);
         if (debug)
-          console.log("Received barcode data:", data, "barcode:", barcode);
+          console.log(
+            "Received barcode data:",
+            event.data,
+            "barcode:",
+            barcode,
+          );
         setBarcode(barcode);
         setIsFlashing(true);
         window.scrollTo(0, 0);
         setTimeout(() => setIsFlashing(false), 1500);
-        if (barcode !== null) {
-          await queueBarcode({ barcode: barcode.barcode });
+        if (barcode) {
+          const basic = barcode.toBasic();
+          await queueBarcode(basic);
         }
       } catch (err) {
         console.error("JSON Parse Error:", err, "from data", event.data);
@@ -78,8 +85,10 @@ export default function BarcodeScannerApp() {
               editing={editing}
             />
           </>
+        ) : typeof barcode.queuedProductId === "number" ? (
+          <QueuedProduct barcode={barcode} />
         ) : (
-          <QuickProductForm />
+          <QuickProductForm barcode={barcode} />
         ))}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   ChangeEvent,
   use,
   useActionState,
@@ -9,14 +9,12 @@ import React, {
   useEffect,
   useRef,
   useState,
-  SubmitEvent,
   KeyboardEvent,
 } from "react";
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import { ProductLocation, QuantityUnit } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import {
-  AddProductFormData,
   quickProductFormSubmit,
   QueueProductState,
 } from "@/forms/quick-product-form-submit";
@@ -26,7 +24,6 @@ import { LocationDropdown } from "../product/location-dropdown";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "react-tooltip";
 import { addYears, dateToISODate } from "@/lib/date";
-import clsx from "clsx";
 import { ModeType, Option } from "@/interfaces";
 import CustomSelect, { CustomSelectHandle } from "../custom-select";
 import { FormLabel } from "./inputs/form-label";
@@ -35,23 +32,19 @@ import { FormErrors } from "./inputs/form-errors";
 import { FormCheckbox } from "./inputs/form-checkbox";
 import { UnitModeDropdown } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
+import clsx from "clsx";
+import Barcode from "@/lib/barcode";
 
 const initialState: QueueProductState = {
   form: {
-    name: '',
-    dueOrExpiryDate: '',
-    packagingDate: '',
+    name: "",
+    dueOrExpiryDate: "",
+    packagingDate: "",
   },
-  message: '',
-}
+  message: "",
+};
 
-export function QuickProductForm() {
-  const [selectedWeightUnitId, setSelectedWeightUnitId] = useState<
-    number | null
-  >(null);
-  const [selectedUnitMode, setSelectedUnitMode] = useState<
-    ModeType | undefined
-  >(undefined);
+export function QuickProductForm({ barcode }: { barcode: Barcode }) {
   const [quantity, setQuantity] = useState<string>("");
   const [shouldNotBeFrozen, setShouldNotBeFrozen] = useState<boolean>(false);
   const [expiryMode, setExpiryMode] = useState<Option | null>(null);
@@ -59,27 +52,31 @@ export function QuickProductForm() {
   const [packagingDate, setPackagingDate] = useState<Date | null>(null);
   const [defaultDueDays, setDefaultDueDays] = useState<number>(0);
   const [defaultDueAfterOpen, setDefaultDueAfterOpen] = useState<number>(0);
+  const quSelectRef = useRef<CustomSelectHandle>(null);
+
   const [defaultDueAfterFreezing, setDefaultDueAfterFreezing] =
     useState<number>(0);
+
   const [defaultDueAfterThawing, setDefaultDueAfterThawing] =
     useState<number>(0);
 
-  // const initialState: QueueProductState = { form: {} };
-  // const [state, formAction /*submitIsPending*/] = useActionState(
-  //   quickProductFormSubmit,
-  //   initialState,
-  // );
-  const [state, formAction, pending] = useActionState(quickProductFormSubmit, initialState)
+  const [selectedWeightUnitId, setSelectedWeightUnitId] = useState<
+    number | null
+  >(null);
 
-  const quantityUnitsPromise = useContext(QuantityUnitContext) as Promise<
-    QuantityUnit[]
-  >;
-  const locationsPromise = useContext(LocationContext) as Promise<
-    ProductLocation[]
-  >;
+  const [selectedUnitMode, setSelectedUnitMode] = useState<
+    ModeType | undefined
+  >(undefined);
 
-  const units = use(quantityUnitsPromise);
-  const locations = use(locationsPromise);
+  const [state, formAction, submitPending] = useActionState(
+    quickProductFormSubmit,
+    initialState,
+  );
+
+  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
+  const locations = use(
+    useContext(LocationContext) as Promise<ProductLocation[]>,
+  );
 
   const inputCommonStyles: string = clsx(
     "block",
@@ -108,57 +105,48 @@ export function QuickProductForm() {
     "min-h-[38px]",
   );
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedWeightUnitId(null);
-
-    if (selectedUnitMode === "abstract") {
-      setQuantity("1.0");
-    } else {
-      setQuantity("");
-    }
-
-    quSelectRef.current?.clear();
-  }, [selectedUnitMode]);
-
   const calculateDueDays = useCallback(() => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
-    const difference = Math.round(
-      (packagingDate.getTime() - expiryDate.getTime()) / (1000 * 60 * 60 * 24),
+    setDefaultDueDays(
+      Math.abs(
+        Math.round(
+          (packagingDate.getTime() - expiryDate.getTime()) /
+            (1000 * 60 * 60 * 24),
+        ),
+      ),
     );
-    setDefaultDueDays(Math.abs(difference));
   }, [expiryDate, packagingDate]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    calculateDueDays();
-  }, [expiryDate, packagingDate, calculateDueDays]);
-
-  const quSelectRef = useRef<CustomSelectHandle>(null);
-
   const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    // Cast target as an HTMLElement to access the tagName property
     const target = e.target as HTMLElement;
-
     if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
       e.preventDefault();
     }
   };
 
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    //e.preventDefault();
-    // Your submission logic
-  };
+  // Clear unit selection dropdown and amount input when the unit type is changed
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedWeightUnitId(null);
+    setQuantity(selectedUnitMode === "abstract" ? "1.0" : "");
+    quSelectRef.current?.clear();
+  }, [selectedUnitMode]);
+
+  // Set the due days when a packing date and due/expiry dates are set
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    calculateDueDays();
+  }, [expiryDate, packagingDate, calculateDueDays]);
 
   return (
     <form
       action={formAction}
-      onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
       noValidate
       className="pb-25"
     >
+      <input name="barcode" type="hidden" value={barcode.barcode} />
       <div className="flex flex-col">
         <div className="flex flex-row gap-5">
           <div className="flex-auto">
@@ -662,7 +650,9 @@ export function QuickProductForm() {
 
         <div className="flex flex-row gap-5">
           <div className="mt-6 flex-none">
-            <Button type="submit">Create product</Button>
+            <Button type="submit" disabled={submitPending}>
+              Create product
+            </Button>
           </div>
         </div>
       </div>

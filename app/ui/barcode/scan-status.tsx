@@ -57,7 +57,7 @@ export default function BarcodeScanStatus({
             ) : (
               <div
                 className={
-                  "text-1xl md:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-gray-100 italic decoration-solid " +
+                  "text-2xl md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-gray-100 italic decoration-solid " +
                   statusColour(connectionStatus)
                 }
               >
@@ -77,7 +77,7 @@ function statusInfo(status: string): string {
       return "ATTEMPTING CONNECTION TO BARCODE STREAM";
     }
     case "connected": {
-      return "SYSTEM_READY; AWAITING_BARCODE_SCAN";
+      return "SYSTEM READY; AWAITING BARCODE SCAN";
     }
     default: {
       return "CONNECTION ERROR";

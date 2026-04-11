@@ -1,6 +1,5 @@
 import { Product as GrocyProduct } from "@/interfaces/grocy";
 import { SerialisedBarcode } from "@/interfaces";
-
 import {
   BarcodeAnyType,
   BarcodeProductType,
@@ -11,8 +10,11 @@ import {
 
 let nextId: number = 1;
 
-export type SimpleBarcodeObject = {
+// An object with methods can't be serialised between next.js server and client
+// so this little one serves that purpose.
+export type BasicBarcode = {
   barcode: string;
+  queuedProductId?: number;
 };
 
 export default class Barcode {
@@ -23,30 +25,29 @@ export default class Barcode {
   quantity?: number;
   product?: GrocyProduct;
   scannedAt?: Date;
+  queuedProductId?: number;
 
   constructor({
     barcode,
     name,
     quantity,
     product,
+    queuedProductId,
   }: {
     barcode: string;
     name?: string;
     quantity?: number;
     product?: GrocyProduct;
+    queuedProductId?: number;
   }) {
     this.#id = nextId += 1;
     this.#barcode = barcode.trim();
 
     if (name !== undefined) this.name = name.trim();
     if (product !== undefined) this.product = product;
+    if (queuedProductId !== undefined) this.queuedProductId = queuedProductId;
 
-    if (quantity !== undefined && quantity >= 0) {
-      this.quantity = quantity;
-    } else {
-      this.quantity = 1;
-    }
-
+    this.quantity = quantity !== undefined && quantity >= 0 ? quantity : 1;
     this.#type = barcodeToType(barcode);
   }
 
@@ -57,7 +58,13 @@ export default class Barcode {
       quantity: json.quantity,
       product: json.product,
     });
+
     barcode.scannedAt = new Date(Date.now());
+
+    if (json.queuedProductId !== undefined && json.queuedProductId !== null) {
+      barcode.queuedProductId = json.queuedProductId;
+    }
+
     return barcode;
   }
 
@@ -68,6 +75,14 @@ export default class Barcode {
       name: this.name,
       quantity: this.quantity,
       product: this.product,
+      queuedProductId: this.queuedProductId,
+    };
+  }
+
+  toBasic(): BasicBarcode {
+    return {
+      barcode: this.barcode,
+      queuedProductId: this.queuedProductId,
     };
   }
 

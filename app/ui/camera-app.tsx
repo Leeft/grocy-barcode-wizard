@@ -73,17 +73,6 @@ export function CameraApp() {
     return <h1>Camera not available; needs https connection</h1>;
   }
 
-  // navigator.mediaDevices
-  //   .enumerateDevices()
-  //   .then((devices) => {
-  //     devices.forEach((device) => {
-  //       console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
-  //     });
-  //   })
-  //   .catch((err) => {
-  //     console.error(`${err.name}: ${err.message}`);
-  //   });
-
   const buttonClassCommon = clsx(
     "flex-row",
     "relative",
@@ -106,6 +95,7 @@ export function CameraApp() {
               className={clsx(buttonClassCommon, "bg-slate-600")}
               onClick={handleCapture}
               title="Take snapshot"
+              type="button"
             >
               <Camera size="28" className="relative top-2.5" />
             </button>
@@ -113,6 +103,7 @@ export function CameraApp() {
               className={clsx(buttonClassCommon, "bg-amber-600")}
               onClick={handleSwitch}
               title="Switch camera"
+              type="button"
             >
               <SwitchCamera size="28" className="relative top-2.5" />
             </button>
@@ -139,6 +130,7 @@ export function CameraApp() {
                 className={clsx(buttonClassCommon, "bg-red-600")}
                 onClick={() => handleDelete(ind)}
                 title="Discard this image"
+                type="button"
               >
                 <Trash size="28" className="relative top-2.5" />
               </button>
@@ -146,6 +138,7 @@ export function CameraApp() {
                 onClick={() => handleRotateRight(ind)}
                 className={clsx(buttonClassCommon, "bg-amber-600")}
                 title="Rotate 90 degrees clockwise"
+                type="button"
               >
                 <RotateCw size="28" className="relative top-2.5" />
               </button>
@@ -155,10 +148,6 @@ export function CameraApp() {
               key={`captured-image-${ind}`}
               src={image.dataUrl}
               alt="Captured image from camera"
-              style={{
-                //width: 320 * 2.1,
-                //height: aspectRatio(image) * 320 * 2.1,
-              }}
             />
             <input type="hidden" name="image" value={image.dataUrl} />
           </div>

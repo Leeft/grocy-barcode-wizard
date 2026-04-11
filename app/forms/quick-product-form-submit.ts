@@ -6,11 +6,15 @@ import {
   ProductPhotoUncheckedCreateInput,
 } from "@/generated/prisma/models";
 import { dateToISODate } from "@/lib/date";
-import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+import prisma from "@/lib/prisma";
 
 const FormSchema = z
   .object({
+    barcode: z.string().trim(),
+
     name: z
       .string()
       .trim()
@@ -122,6 +126,7 @@ export type QueueProductState = {
     [k: string]: FormDataEntryValue;
   };
   errors?: {
+    barcode?: string[];
     name?: string[];
     mainQuantityUnitId?: string[];
     mainQuantity?: string[];
@@ -161,10 +166,10 @@ export async function quickProductFormSubmit(
   const validation = FormSchema.safeParse(rawFormData);
 
   if (!validation.success) {
-    // console.error(
-    //   "form validation errors",
-    //   validation.error.flatten().fieldErrors,
-    // );
+    console.error(
+      "Form validation errors",
+      validation.error.flatten().fieldErrors,
+    );
     //console.log("form data state", rawFormData);
     return {
       message: "",
@@ -230,7 +235,7 @@ export async function quickProductFormSubmit(
   if (data.image) {
     const file = dataURLtoFile(data.image, "filename-not-used-yet");
     const arr = new Uint8Array(await file.arrayBuffer());
-    const queuedProductPhoto = await prisma.productPhoto.create({
+    await prisma.productPhoto.create({
       data: {
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
         data: arr,
@@ -240,17 +245,12 @@ export async function quickProductFormSubmit(
     });
   }
 
-  // Revalidate the cache for the invoices page and redirect the user.
-  //revalidatePath("/dashboard/invoices");
-  //redirect("/dashboard/invoices");
+  await prisma.barcode.update({
+    where: { barcode: data.barcode },
+    data: { productId: queuedProduct.id },
+  });
 
-  return {
-    message: "",
-    form: {
-      name: "",
-      dueOrExpiryDate: "",
-      packagingDate: "",
-      ...rawFormData,
-    },
-  };
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath("/scan");
+  redirect("/scan");
 }

@@ -27,6 +27,7 @@ export function findProductInOpenFoodFacts(barcode: Barcode): void {
         const foundBarcode: Barcode = new Barcode({
           barcode: barcode.barcode,
           name: openFoodFactsResult.product.product_name_en,
+          queuedProductId: barcode.queuedProductId,
         });
         console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
         globalEvents.emit("product-barcode-stream", foundBarcode);

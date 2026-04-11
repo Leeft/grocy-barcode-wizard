@@ -20,8 +20,8 @@ export interface SerialisedBarcode {
   name?: string;
   quantity?: number;
   product?: GrocyProduct;
-};
-
+  queuedProductId?: number;
+}
 
 export const allBarcodeTypes = [
   "product",
@@ -39,8 +39,6 @@ export const specialBarcodeTypes = [
   "bbuddy-quantity",
   "sho-operation",
 ] as const;
-
-
 
 export const productOnlyBarcodeTypes = ["product", "grocy-product"] as const;
 

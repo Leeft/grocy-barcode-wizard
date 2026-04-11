@@ -26,7 +26,8 @@ export default function ScanLayout({
   const productPromise = fetchProducts();
   const shoppingLocationsPromise = fetchShoppingLocations();
 
-  const classes = clsx(`relative w-auto grow bg-slate-800 p-2 text-sm`,
+  const classes = clsx(
+    `relative w-auto grow bg-slate-800 p-2 text-sm max-w-240`,
     // lg:mt-4 lg:mb-20 lg:w-160 lg:rounded-lg xl:w-180`,
   );
 

@@ -202,6 +202,7 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
         barcode: barcode.barcode,
         name: data.product?.name,
         product: data.product,
+        queuedProductId: barcode.queuedProductId,
         // @ts-expect-error : not in OpenAPI spec, no typescript here
         quantity: data.stock_amount_aggregated,
       }),
