@@ -207,6 +207,26 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 />
                 <label htmlFor="shouldNotBeFrozen">
                   This product should not be frozen
+                  <a
+                    className="relative top-[-3] inline-block w-10 cursor-help pl-3"
+                    data-tooltip-id="not-frozen-tooltip"
+                  >
+                    &nbsp;
+                    <InformationCircleIcon className="inline size-5 text-slate-300" />
+                  </a>
+                  <Tooltip id="not-frozen-tooltip" className="info-tooltip">
+                    Checking this checkbox will hide some options from you,
+                    <br />
+                    making it a bit easier to fill out this form.
+                    <br />
+                    <br />
+                    Note that the dropdowns may have entries that are disabled
+                    <br />
+                    by activating this so if you don&apos;t fill out the form in
+                    order you
+                    <br />
+                    may need to correct the choices after.
+                  </Tooltip>
                 </label>
               </FormField>
               <FormErrors
@@ -219,7 +239,32 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
         <div className="flex flex-row flex-wrap gap-x-5">
           <div className="mb-3 flex-none">
-            <FormLabel htmlFor="unitSystem" title="Unit system *"></FormLabel>
+            <FormLabel
+              htmlFor="unitSystem"
+              title="Unit system *"
+              className="inline"
+            >
+              <a
+                className="relative top-[-5] inline-block w-10 cursor-help"
+                data-tooltip-id="weight-mode-tooltip"
+              >
+                &nbsp;
+                <InformationCircleIcon className="inline size-5 text-slate-300" />
+              </a>
+              <Tooltip id="weight-mode-tooltip" className="info-tooltip">
+                For the units specify the discrete weight, volume or more
+                <br />
+                abstract unit you buy this product at. E.g. if you buy it in
+                <br />
+                a 450g package, specify just that. Or your bell peppers might
+                <br />
+                come in a bag of 3 without listing the weight, so you specify
+                <br />
+                "1 bag" as the abstract unit here. We will refine the details
+                <br />
+                when submitting the data to Grocy.
+              </Tooltip>
+            </FormLabel>
             <FormField>
               <UnitModeDropdown
                 name="unitSystem"
