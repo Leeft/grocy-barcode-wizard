@@ -9,7 +9,7 @@ interface TextWrapperProps {
 
 const TooltipWrapper: React.FC<TextWrapperProps> = ({ id, children }) => {
   return (
-    <>
+    <span onClick={(e) => e.preventDefault()}>
       <a
         className="relative top-[-3] inline-block w-10 cursor-help pl-1"
         data-tooltip-id={id}
@@ -20,7 +20,7 @@ const TooltipWrapper: React.FC<TextWrapperProps> = ({ id, children }) => {
       <Tooltip id={id} className="info-tooltip">
         {children}
       </Tooltip>
-    </>
+    </span>
   );
 };
 

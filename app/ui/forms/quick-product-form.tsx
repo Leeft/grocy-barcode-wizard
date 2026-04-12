@@ -211,7 +211,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
         <div className="flex flex-row gap-5">
           <div className="mb-4 flex-auto">
-            <div className="flex flex-col">
+            <div className="flex flex-col leading-7">
               <FormField>
                 <FormCheckbox
                   id={fields.shouldNotBeFrozen.name}
@@ -221,7 +221,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                     setShouldNotBeFrozen(e.target.checked)
                   }
                 />
-                <label htmlFor={fields.shouldNotBeFrozen.name}>
+                <label htmlFor={fields.shouldNotBeFrozen.name} className="leading-6">
                   This product should not be frozen
                   <TooltipWrapper id="not-frozen-tooltip">
                     Checking this checkbox will hide some options from you,
