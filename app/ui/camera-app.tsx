@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Dispatch, RefObject, SetStateAction, useRef, useState } from "react";
 import { WebCamera, WebCameraHandler } from "@shivantra/react-web-camera";
 import { fileToBase64 } from "file64";
 import { RotateCw, Trash, SwitchCamera, Camera, VideoOff } from "lucide-react";
@@ -16,10 +16,7 @@ type CapturedImage = {
 export function CameraApp() {
   const [images, setImages] = useState<CapturedImage[]>([]);
   const [cameraEnabled, setCameraEnabled] = useState<boolean>(false);
-
-  if (!navigator.mediaDevices?.enumerateDevices) {
-    return <h1>Camera not available; needs https connection</h1>;
-  }
+  const shutterHandler = useRef<OneOffSoundHandler>(null);
 
   const buttonClassCommon = clsx(
     "flex-row",
@@ -34,13 +31,15 @@ export function CameraApp() {
   );
 
   return (
-    <div className="relative">
+    <div className="relative py-4">
+      <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
       {cameraEnabled ? (
         images.length == 0 ? (
           <CameraUI
             setCameraEnabled={setCameraEnabled}
             setImages={setImages}
             buttonClassCommon={buttonClassCommon}
+            shutterHandler={shutterHandler}
           />
         ) : (
           <Images
@@ -70,13 +69,14 @@ function CameraUI({
   buttonClassCommon,
   setImages,
   setCameraEnabled,
+  shutterHandler,
 }: {
   buttonClassCommon: string;
   setImages: Dispatch<SetStateAction<CapturedImage[]>>;
   setCameraEnabled: Dispatch<SetStateAction<boolean>>;
+  shutterHandler: RefObject<OneOffSoundHandler | null>;
 }) {
   const cameraHandler = useRef<WebCameraHandler>(null);
-  const shutterHandler = useRef<OneOffSoundHandler>(null);
 
   async function handleCapture() {
     shutterHandler.current?.play();
@@ -98,7 +98,6 @@ function CameraUI({
 
   return (
     <>
-      <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
       <div className="absolute top-5 left-5 flex gap-3">
         <button
           className={clsx(buttonClassCommon, "bg-slate-600")}
