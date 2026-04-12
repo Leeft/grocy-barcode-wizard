@@ -6,6 +6,36 @@ import { OptionType } from "@/interfaces/options";
 
 type ModeType = "weight" | "volume" | "abstract";
 
+export function ModeToQuantityTitle(mode: string | undefined) {
+  let value: string = "Amount";
+  switch (mode) {
+    case "weight":
+      value = "Weight";
+    case "volume":
+      value = "Volume";
+    case "abstract":
+      value = "Unit Amount";
+    default:
+      value = "Amount";
+  }
+  return <>{value} *</>;
+}
+
+export function ModeToUnitTitle(mode: string | undefined) {
+  let value: string = "Unit";
+  switch (mode) {
+    case "weight":
+      value = "Weight unit";
+    case "volume":
+      value = "Volume unit";
+    case "abstract":
+      value = "Abstract/discrete unit";
+    default:
+      value = "Unit";
+  }
+  return <>{value} *</>;
+}
+
 export function UnitModeDropdown({
   name,
   className,
@@ -39,10 +69,10 @@ export function UnitModeDropdown({
       isSearchable={false}
       placeholder="Pick..."
       onChange={(inputValue: SingleValue<OptionType> /* action */) => {
-          if (inputValue?.value !== undefined) {
-            const value = inputValue?.value as ModeType;
-            setSelectedMode(value);
-          }
+        if (inputValue?.value !== undefined) {
+          const value = inputValue?.value as ModeType;
+          setSelectedMode(value);
+        }
       }}
     />
   );

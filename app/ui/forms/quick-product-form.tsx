@@ -19,8 +19,6 @@ import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 import { Button } from "../button";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "../product/location-dropdown";
-import { InformationCircleIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "react-tooltip";
 import { addYears, dateToISODate } from "@/lib/date";
 import { ModeType, Option } from "@/interfaces";
 import CustomSelect, { CustomSelectHandle } from "../custom-select";
@@ -28,12 +26,17 @@ import { FormLabel } from "./inputs/form-label";
 import { FormField } from "./inputs/form-field";
 import { FormErrors } from "./inputs/form-errors";
 import { FormCheckbox } from "./inputs/form-checkbox";
-import { UnitModeDropdown } from "../product/unit-mode-dropdown";
+import {
+  ModeToQuantityTitle,
+  ModeToUnitTitle,
+  UnitModeDropdown,
+} from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
 import clsx from "clsx";
 import Barcode from "@/lib/barcode";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
+import TooltipWrapper from "../tooltip-wrapper";
 
 export function QuickProductForm({ barcode }: { barcode: Barcode }) {
   const [lastResult, action, submitPending] = useActionState(
@@ -132,7 +135,6 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
   // Clear unit selection dropdown and amount input when the unit type is changed
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedWeightUnitId(null);
     setQuantity(selectedUnitMode === "abstract" ? "1.0" : "");
     quSelectRef.current?.clear();
@@ -140,7 +142,6 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
   // Set the due days when a packing date and due/expiry dates are set
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     calculateDueDays();
   }, [expiryDate, packagingDate, calculateDueDays]);
 
@@ -160,22 +161,12 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             <h1 className="mb-3 inline-block text-lg font-bold text-slate-400 uppercase">
               Quick product capture
             </h1>
-            <a
-              className="inline-block w-10 cursor-help pl-2"
-              data-tooltip-id="form-purpose-tooltip"
-            >
-              &nbsp;
-              <InformationCircleIcon className="inline size-5 text-slate-300" />
-            </a>
-            <Tooltip id="form-purpose-tooltip" className="info-tooltip">
-              This form captures the essentials for a product quickly
-              <br />
-              while you have the product at hand, only queueing it to be
-              <br />
-              completed and added to Grocy when your products are
-              <br />
-              safely back under refrigeration or freezing conditions.
-            </Tooltip>
+            <TooltipWrapper id="form-purpose-tooltip">
+              This form captures the essentials for a product quickly while you
+              have the product at hand, only queueing it to be completed and
+              added to Grocy when your products are safely back under
+              refrigeration or freezing conditions.
+            </TooltipWrapper>
           </div>
         </div>
 
@@ -208,33 +199,20 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 <FormCheckbox
                   id={fields.shouldNotBeFrozen.name}
                   ariaDescribedBy="should-not-be-frozen-error"
+                  checked={fields.shouldNotBeFrozen.initialValue ? true : false}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setShouldNotBeFrozen(e.target.checked)
                   }
-                  checked={fields.shouldNotBeFrozen.initialValue ? true : false}
                 />
                 <label htmlFor={fields.shouldNotBeFrozen.name}>
                   This product should not be frozen
-                  <a
-                    className="relative top-[-3] inline-block w-10 cursor-help pl-3"
-                    data-tooltip-id="not-frozen-tooltip"
-                  >
-                    &nbsp;
-                    <InformationCircleIcon className="inline size-5 text-slate-300" />
-                  </a>
-                  <Tooltip id="not-frozen-tooltip" className="info-tooltip">
+                  <TooltipWrapper id="not-frozen-tooltip">
                     Checking this checkbox will hide some options from you,
-                    <br />
-                    making it a bit easier to fill out this form.
-                    <br />
-                    <br />
-                    Note that the dropdowns may have entries that are disabled
-                    <br />
-                    by activating this so if you don&apos;t fill out the form in
-                    order you
-                    <br />
-                    may need to correct the choices after.
-                  </Tooltip>
+                    making it a bit easier to fill out this form. Note that the
+                    dropdowns may have entries that are disabled by activating
+                    this so if you don&apos;t fill out the form in order you may
+                    need to correct the choices after.
+                  </TooltipWrapper>
                 </label>
               </FormField>
               <FormErrors
@@ -252,27 +230,14 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
               title="Unit system *"
               className="inline"
             >
-              <a
-                className="relative top-[-5] inline-block w-10 cursor-help"
-                data-tooltip-id="weight-mode-tooltip"
-              >
-                &nbsp;
-                <InformationCircleIcon className="inline size-5 text-slate-300" />
-              </a>
-              <Tooltip id="weight-mode-tooltip" className="info-tooltip">
+              <TooltipWrapper id="weight-mode-tooltip">
                 For the units specify the discrete weight, volume or more
-                <br />
-                abstract unit you buy this product at. E.g. if you buy it in
-                <br />
-                a 450g package, specify just that. Or your bell peppers might
-                <br />
-                come in a bag of 3 without listing the weight, so you specify
-                <br />
-                &quot;1 bag&quot; as the abstract unit here. We will refine the
-                details
-                <br />
-                when submitting the data to Grocy.
-              </Tooltip>
+                abstract unit you buy this product at. E.g. if you buy it in a
+                450g package, specify just that. Or your bell peppers might come
+                in a bag of 3 without listing the weight, so you specify
+                &ldquo;1 bag&rdquo; as the abstract unit here. We will refine
+                the details when submitting the data to Grocy.
+              </TooltipWrapper>
             </FormLabel>
             <FormField>
               <UnitModeDropdown
@@ -290,18 +255,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
           <div className="mb-4 flex-none">
             <FormLabel
               htmlFor={fields.mainQuantity.name}
-              title={(() => {
-                switch (selectedUnitMode) {
-                  case "weight":
-                    return "Weight *";
-                  case "volume":
-                    return "Volume *";
-                  case "abstract":
-                    return "Unit Amount *";
-                  default:
-                    return "Amount *";
-                }
-              })()}
+              title={ModeToQuantityTitle(selectedUnitMode)}
             ></FormLabel>
             <FormField>
               <input
@@ -339,18 +293,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
           <div className="mb-4 grow">
             <FormLabel
               htmlFor={fields.mainQuantityUnitId.name}
-              title={(() => {
-                switch (selectedUnitMode) {
-                  case "weight":
-                    return "Weight unit *";
-                  case "volume":
-                    return "Volume unit *";
-                  case "abstract":
-                    return "Abstract/discrete unit *";
-                  default:
-                    return "Unit *";
-                }
-              })()}
+              title={ModeToUnitTitle(selectedUnitMode)}
             ></FormLabel>
             <FormField>
               <QuantityUnitsDropdown
@@ -402,7 +345,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
           <div className="mb-4 flex-none">
             <FormLabel
               htmlFor={fields.dueDateType.name}
-              title="Due date type"
+              title="Due date type *"
             ></FormLabel>
             <FormField>
               <CustomSelect
@@ -413,7 +356,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                   { value: "no-expiry", label: "Does not expire" },
                 ]}
                 className="w-40 flex-none"
-                aria-describedby="default-shop-location-error"
+                aria-describedby="due-date-type-error"
                 placeholder="Expiry..."
                 defaultValue={expiryMode}
                 required={true}
@@ -478,26 +421,16 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                   title="Packaging date"
                   className="inline"
                 >
-                  <a
-                    className="w-10 cursor-help pl-2"
-                    data-tooltip-id="packaging-date-tooltip"
-                  >
-                    <InformationCircleIcon className="inline size-5 text-slate-300" />
-                  </a>
-                  <Tooltip id="packaging-date-tooltip" className="info-tooltip">
-                    When you set or change both due and
-                    <br />
-                    packaging date, default due days will
-                    <br />
-                    be set to the difference between these
-                    <br />
-                    two dates.
+                  <TooltipWrapper id="packaging-date-tooltip">
+                    When you set or change <em>both</em> the due- and packaging
+                    dates the &ldquo;default due days&rdquo; will be set to the
+                    difference between these two dates.
                     <br />
                     <br />
-                    The packaging date input has no function
-                    <br />
-                    other than to calculate this for you.
-                  </Tooltip>
+                    Besides this utility the packaging date input currently has
+                    no function other than to calculate this date difference for
+                    you.
+                  </TooltipWrapper>
                 </FormLabel>
                 <FormField>
                   <input
