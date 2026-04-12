@@ -40,7 +40,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
     quickProductFormSubmit,
     undefined,
   );
-  
+
   const [form, fields] = useForm({
     // Sync the result of last submission
     lastResult,
@@ -268,7 +268,8 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 <br />
                 come in a bag of 3 without listing the weight, so you specify
                 <br />
-                "1 bag" as the abstract unit here. We will refine the details
+                &quot;1 bag&quot; as the abstract unit here. We will refine the
+                details
                 <br />
                 when submitting the data to Grocy.
               </Tooltip>
