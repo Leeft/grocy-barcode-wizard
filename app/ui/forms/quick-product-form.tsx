@@ -3,7 +3,6 @@
 import {
   ChangeEvent,
   use,
-  useActionState,
   useCallback,
   useContext,
   useEffect,
@@ -14,10 +13,8 @@ import {
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import { ProductLocation, QuantityUnit } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
-import {
-  quickProductFormSubmit,
-  QueueProductState,
-} from "@/forms/quick-product-form-submit";
+import { quickProductFormSubmit } from "@/forms/quick-product-form-submit";
+import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 import { Button } from "../button";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "../product/location-dropdown";
@@ -34,17 +31,30 @@ import { UnitModeDropdown } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
 import clsx from "clsx";
 import Barcode from "@/lib/barcode";
-
-const initialState: QueueProductState = {
-  form: {
-    name: "",
-    dueOrExpiryDate: "",
-    packagingDate: "",
-  },
-  message: "",
-};
+import { useFormState } from "react-dom";
+import { useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod/v4";
 
 export function QuickProductForm({ barcode }: { barcode: Barcode }) {
+  const [lastResult, action, submitPending] = useFormState(
+    quickProductFormSubmit,
+    undefined,
+  );
+  
+  const [form, fields] = useForm({
+    // Sync the result of last submission
+    lastResult,
+
+    // Reuse the validation logic on the client
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: QuickProductFormSchema });
+    },
+
+    // Validate the form on blur event triggered
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+  });
+
   const [quantity, setQuantity] = useState<string>("");
   const [shouldNotBeFrozen, setShouldNotBeFrozen] = useState<boolean>(false);
   const [expiryMode, setExpiryMode] = useState<Option | null>(null);
@@ -67,11 +77,6 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
   const [selectedUnitMode, setSelectedUnitMode] = useState<
     ModeType | undefined
   >(undefined);
-
-  const [state, formAction, submitPending] = useActionState(
-    quickProductFormSubmit,
-    initialState,
-  );
 
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
   const locations = use(
@@ -141,9 +146,11 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
   return (
     <form
-      action={formAction}
-      onKeyDown={handleKeyDown}
+      id={form.id}
+      onSubmit={form.onSubmit}
+      action={action}
       noValidate
+      onKeyDown={handleKeyDown}
       className="pb-25"
     >
       <input name="barcode" type="hidden" value={barcode.barcode} />
@@ -174,13 +181,14 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
 
         <div className="flex flex-row gap-5">
           <div className="mb-4 flex-auto">
-            <FormLabel htmlFor="name" title="Product name *" />
+            <FormLabel htmlFor={fields.name.name} title="Product name *" />
             <FormField>
               <input
-                id="name"
-                name="name"
+                id={fields.name.name}
                 type="text"
-                defaultValue={state.form?.name}
+                key={fields.name.key}
+                name={fields.name.name}
+                defaultValue={fields.name.initialValue}
                 minLength={2}
                 maxLength={64}
                 placeholder="Name of the product to create, 2 to 64 characters long"
@@ -189,7 +197,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 required
               />
             </FormField>
-            <FormErrors id="name-error" errors={state.errors?.name} />
+            <FormErrors id="name-error" errors={fields.name.errors} />
           </div>
         </div>
 
@@ -198,14 +206,14 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             <div className="flex flex-col">
               <FormField>
                 <FormCheckbox
-                  id="shouldNotBeFrozen"
+                  id={fields.shouldNotBeFrozen.name}
                   ariaDescribedBy="should-not-be-frozen-error"
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setShouldNotBeFrozen(e.target.checked)
                   }
-                  checked={state.form?.shouldNotBeFrozen ? true : false}
+                  checked={fields.shouldNotBeFrozen.initialValue ? true : false}
                 />
-                <label htmlFor="shouldNotBeFrozen">
+                <label htmlFor={fields.shouldNotBeFrozen.name}>
                   This product should not be frozen
                   <a
                     className="relative top-[-3] inline-block w-10 cursor-help pl-3"
@@ -231,7 +239,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
               </FormField>
               <FormErrors
                 id="should-not-be-frozen-error"
-                errors={state.errors?.shouldNotBeFrozen}
+                errors={fields.shouldNotBeFrozen.errors}
               />
             </div>
           </div>
@@ -275,12 +283,12 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="unit-system-error"
-              errors={state.errors?.unitSystem}
+              errors={fields.unitSystem.errors}
             />
           </div>
           <div className="mb-4 flex-none">
             <FormLabel
-              htmlFor="mainQuantity"
+              htmlFor={fields.mainQuantity.name}
               title={(() => {
                 switch (selectedUnitMode) {
                   case "weight":
@@ -296,8 +304,8 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             ></FormLabel>
             <FormField>
               <input
-                id="mainQuantity"
-                name="mainQuantity"
+                id={fields.mainQuantity.name}
+                name={fields.mainQuantity.name}
                 type="number"
                 min={0.001}
                 max={10000}
@@ -324,12 +332,12 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="main-quantity-error"
-              errors={state.errors?.mainQuantity}
+              errors={fields.mainQuantity.errors}
             />
           </div>
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor="mainQuantityUnitId"
+              htmlFor={fields.mainQuantityUnitId.name}
               title={(() => {
                 switch (selectedUnitMode) {
                   case "weight":
@@ -346,7 +354,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             <FormField>
               <QuantityUnitsDropdown
                 ref={quSelectRef}
-                name="mainQuantityUnitId"
+                name={fields.mainQuantityUnitId.name}
                 units={units}
                 selectedId={selectedWeightUnitId}
                 className="w-46"
@@ -359,7 +367,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="main-quantity-id-error"
-              errors={state.errors?.mainQuantityUnitId}
+              errors={fields.mainQuantityUnitId.errors}
             />
           </div>
         </div>
@@ -367,12 +375,13 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
         <div className="flex flex-row gap-5">
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor="defaultProductLocationId"
+              htmlFor={fields.defaultProductLocationId.name}
               title="Initial product location *"
             ></FormLabel>
             <FormField>
               <LocationDropdown
-                name="defaultProductLocationId"
+                key={fields.defaultProductLocationId.key}
+                name={fields.defaultProductLocationId.name}
                 units={locations}
                 className="w-auto flex-2"
                 aria-describedby="default-product-location-error"
@@ -383,17 +392,20 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="default-product-location-error"
-              errors={state.errors?.defaultProductLocationId}
+              errors={fields.defaultProductLocationId.errors}
             />
           </div>
         </div>
 
         <div className="flex flex-row flex-wrap gap-x-5">
           <div className="mb-4 flex-none">
-            <FormLabel htmlFor="dueDateType" title="Due date type"></FormLabel>
+            <FormLabel
+              htmlFor={fields.dueDateType.name}
+              title="Due date type"
+            ></FormLabel>
             <FormField>
               <CustomSelect
-                name="dueDateType"
+                name={fields.dueDateType.name}
                 options={[
                   { value: "best-before", label: "Best before" },
                   { value: "expiry-date", label: "Expires at" },
@@ -418,7 +430,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="due-date-type-error"
-              errors={state.errors?.dueDateType}
+              errors={fields.dueDateType.errors}
             />
           </div>
 
@@ -426,7 +438,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             <>
               <div className="mb-4 flex-none">
                 <FormLabel
-                  htmlFor="dueOrExpiryDate"
+                  htmlFor={fields.dueOrExpiryDate.name}
                   title={
                     expiryMode.value === "best-before"
                       ? "Best before *"
@@ -436,9 +448,9 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 <FormField>
                   <input
                     type="date"
-                    id="dueOrExpiryDate"
-                    name="dueOrExpiryDate"
-                    defaultValue={state.form?.dueOrExpiryDate}
+                    id={fields.dueOrExpiryDate.name}
+                    name={fields.dueOrExpiryDate.name}
+                    defaultValue={fields.dueOrExpiryDate.initialValue}
                     min={dateToISODate(addYears(new Date(), -1))}
                     max={dateToISODate(addYears(new Date(), 10))}
                     required
@@ -448,7 +460,6 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                       "relative",
                       "top-[-1]",
                     )}
-                    //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
                     aria-describedby="due-or-expiry-date-error"
                     onChange={(e) => {
                       setExpiryDate(new Date(e.target.valueAsNumber));
@@ -457,12 +468,12 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 </FormField>
                 <FormErrors
                   id="due-or-expiry-date-error"
-                  errors={state.errors?.dueOrExpiryDate}
+                  errors={fields.dueOrExpiryDate.errors}
                 />
               </div>
               <div className="mb-4 flex-none">
                 <FormLabel
-                  htmlFor="packagingDate"
+                  htmlFor={fields.packagingDate.name}
                   title="Packaging date"
                   className="inline"
                 >
@@ -490,9 +501,9 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 <FormField>
                   <input
                     type="date"
-                    id="packagingDate"
-                    name="packagingDate"
-                    defaultValue={state.form?.packagingDate}
+                    id={fields.packagingDate.name}
+                    name={fields.packagingDate.name}
+                    defaultValue={fields.packagingDate.initialValue}
                     min={dateToISODate(addYears(new Date(), -1))}
                     max={
                       expiryDate !== null
@@ -514,7 +525,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                 </FormField>
                 <FormErrors
                   id="packaging-date-error"
-                  errors={state.errors?.packagingDate}
+                  errors={fields.packagingDate.errors}
                 />
               </div>
             </>
@@ -525,14 +536,14 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
           <div className="mb-5 flex flex-row flex-wrap gap-5">
             <div className="flex-1">
               <FormLabel
-                htmlFor="defaultDueDays"
+                htmlFor={fields.defaultDueDays.name}
                 className="w-46 text-xs text-wrap"
                 title="Default due days *"
               ></FormLabel>
               <FormField>
                 <input
-                  id="defaultDueDays"
-                  name="defaultDueDays"
+                  id={fields.defaultDueDays.name}
+                  name={fields.defaultDueDays.name}
                   type="number"
                   min={0}
                   max={10000}
@@ -559,19 +570,19 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
               </FormField>
               <FormErrors
                 id="default-due-days-error"
-                errors={state.errors?.defaultDueDays}
+                errors={fields.defaultDueDays.errors}
               />
             </div>
             <div className="flex-1">
               <FormLabel
-                htmlFor="defaultDueDaysAfterOpen"
+                htmlFor={fields.defaultDueDaysAfterOpen.name}
                 className="w-46 text-xs text-wrap"
                 title="Default due days after open "
               ></FormLabel>
               <FormField>
                 <input
-                  id="defaultDueDaysAfterOpen"
-                  name="defaultDueDaysAfterOpen"
+                  id={fields.defaultDueDaysAfterOpen.name}
+                  name={fields.defaultDueDaysAfterOpen.name}
                   type="number"
                   min={0}
                   max={10000}
@@ -592,13 +603,12 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                     "mb-[-3]",
                   )}
                   aria-describedby="default-due-days-after-open-error"
-                  // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
                   required
                 />
               </FormField>
               <FormErrors
                 id="default-due-days-after-open-error"
-                errors={state.errors?.defaultDueDaysAfterOpen}
+                errors={fields.defaultDueDaysAfterOpen.errors}
               />
             </div>
 
@@ -606,14 +616,14 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
               <>
                 <div className="flex-1">
                   <FormLabel
-                    htmlFor="defaultDueDaysAfterFreezing"
+                    htmlFor={fields.defaultDueDaysAfterFreezing.name}
                     className="w-46 text-xs text-wrap"
                     title="Default due days after freezing *"
                   ></FormLabel>
                   <FormField>
                     <input
-                      id="defaultDueDaysAfterFreezing"
-                      name="defaultDueDaysAfterFreezing"
+                      id={fields.defaultDueDaysAfterFreezing.name}
+                      name={fields.defaultDueDaysAfterFreezing.name}
                       type="number"
                       min={0}
                       max={10000}
@@ -636,25 +646,24 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                         "mb-[-3]",
                       )}
                       aria-describedby="default-due-days-after-freezing-error"
-                      // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
                       required
                     />
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-freezing-error"
-                    errors={state.errors?.defaultDueDaysAfterFreezing}
+                    errors={fields.defaultDueDaysAfterFreezing.errors}
                   />
                 </div>
                 <div className="flex-1">
                   <FormLabel
-                    htmlFor="defaultDueDaysAfterThawing"
+                    htmlFor={fields.defaultDueDaysAfterThawing.name}
                     className="w-46 text-xs text-wrap"
                     title="Default due days after thawing *"
                   ></FormLabel>
                   <FormField>
                     <input
-                      id="defaultDueDaysAfterThawing"
-                      name="defaultDueDaysAfterThawing"
+                      id={fields.defaultDueDaysAfterThawing.name}
+                      name={fields.defaultDueDaysAfterThawing.name}
                       type="number"
                       min={0}
                       max={10000}
@@ -683,7 +692,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                   </FormField>
                   <FormErrors
                     id="default-due-days-after-thawing-error"
-                    errors={state.errors?.defaultDueDaysAfterThawing}
+                    errors={fields.defaultDueDaysAfterThawing.errors}
                   />
                 </div>
               </>

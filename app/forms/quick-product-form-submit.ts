@@ -5,146 +5,12 @@ import {
   ProductCreateInput,
   ProductPhotoUncheckedCreateInput,
 } from "@/generated/prisma/models";
-import { dateToISODate } from "@/lib/date";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { parseWithZod } from "@conform-to/zod/v4";
 import prisma from "@/lib/prisma";
-
-const FormSchema = z
-  .object({
-    barcode: z.string().trim(),
-
-    name: z
-      .string()
-      .trim()
-      .min(2, "Expecting at least 2 characters")
-      .max(64, "Keep the product name under 64 characters"), // Grocy can handle longer though
-
-    // productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
-
-    unitSystem: z.enum(["weight", "volume", "abstract"], {
-      message: "The unit system to use must be chosen",
-    }),
-
-    mainQuantityUnitId: z.coerce
-      .number()
-      .gt(0, { message: "Select a unit from the list" }),
-
-    mainQuantity: z.coerce.number().gt(0, { message: `Must be above 0` }),
-
-    // parentProductId: z.coerce
-    //   .number()
-    //   .gt(-1, { message: "Parent product must be unset or greater than zero" }),
-
-    defaultProductLocationId: z.coerce
-      .number()
-      .gt(0, { message: "Default product location must be set" }),
-
-    // defaultConsumeLocationId: z.coerce.number().gt(-1, {
-    //   message: "Consumption location must be unset or greater than zero",
-    // }),
-
-    // defaultShopLocationId: z.coerce.number().gt(-1, {
-    //   message: "Default shop location must be unset or greater than zero",
-    // }),
-
-    dueDateType: z.enum(["best-before", "expiry-date", "no-expiry"], {
-      message: "Due- or expiry-date type must be chosen",
-    }),
-
-    dueOrExpiryDate: z.iso.date({ error: "Not a valid date" }).optional(),
-
-    packagingDate: z.iso.date({ error: "Not a valid date" }).optional(),
-
-    shouldNotBeFrozen: z.coerce.boolean(),
-
-    // noStockCheck: z.coerce.boolean(),
-
-    // canNotOpen: z.coerce.boolean(),
-
-    // moveOnOpen: z.coerce.boolean(),
-
-    // hideFromStock: z.coerce.boolean(),
-
-    defaultDueDays: z.coerce
-      .number()
-      .gt(-1, { message: `Must be 0 or greater` })
-      .optional(),
-
-    defaultDueDaysAfterOpen: z.coerce
-      .number()
-      .gt(-1, { message: `Must be 0 or greater` })
-      .optional(),
-
-    defaultDueDaysAfterFreezing: z.coerce
-      .number()
-      .gt(-1, { message: `Must be 0 or greater` })
-      .optional(),
-
-    defaultDueDaysAfterThawing: z.coerce
-      .number()
-      .gt(-1, { message: `Must be 0 or greater` })
-      .optional(),
-
-    image: z.string().optional(),
-  })
-  .refine(
-    ({ dueDateType, dueOrExpiryDate, packagingDate }) => {
-      // No need to check anything for no-expiry
-      if (dueDateType === "no-expiry") return true;
-      if (!dueOrExpiryDate) return false;
-      if (!packagingDate) return true;
-      return packagingDate < dueOrExpiryDate;
-    },
-    {
-      message: "Due date must be after packaging date",
-      path: ["dueOrExpiryDate"],
-    },
-  )
-  .refine(
-    ({ dueDateType, packagingDate }) => {
-      // No need to check anything for no-expiry
-      if (dueDateType === "no-expiry") return true;
-      if (!packagingDate) return true;
-      const today = dateToISODate(new Date());
-      return packagingDate <= today;
-    },
-    {
-      message: "Packaging date must be in the past",
-      path: ["packagingDate"],
-    },
-  );
-export type AddProductFormData = z.infer<typeof FormSchema>;
-
-export type QueueProductState = {
-  message: string;
-  form: {
-    name: string;
-    dueOrExpiryDate: string;
-    packagingDate: string;
-    [k: string]: FormDataEntryValue;
-  };
-  errors?: {
-    barcode?: string[];
-    name?: string[];
-    mainQuantityUnitId?: string[];
-    mainQuantity?: string[];
-    parentProductId?: string[];
-    defaultProductLocationId?: string[];
-    defaultConsumeLocationId?: string[];
-    defaultShopLocationId?: string[];
-    dueOrExpiryDate?: string[];
-    dueDateType?: string[];
-    unitSystem?: string[];
-    packagingDate?: string[];
-    shouldNotBeFrozen?: string[];
-    defaultDueDays?: string[];
-    defaultDueDaysAfterOpen?: string[];
-    defaultDueDaysAfterFreezing?: string[];
-    defaultDueDaysAfterThawing?: string[];
-  };
-};
+import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 
 function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(",");
@@ -158,32 +24,36 @@ function dataURLtoFile(dataurl: string, filename: string): File {
   return new File([u8arr], filename, { type: mime });
 }
 
-export async function quickProductFormSubmit(
-  _prev: QueueProductState,
-  formData: FormData,
-): Promise<QueueProductState> {
-  const rawFormData = Object.fromEntries(formData.entries());
-  const validation = FormSchema.safeParse(rawFormData);
+export async function quickProductFormSubmit( prevstate: unknown, formData: FormData ) {
+  const submission = parseWithZod(formData, { schema: QuickProductFormSchema });
 
-  if (!validation.success) {
-    console.error(
-      "Form validation errors",
-      validation.error.flatten().fieldErrors,
-    );
-    //console.log("form data state", rawFormData);
-    return {
-      message: "",
-      form: {
-        name: "",
-        dueOrExpiryDate: "",
-        packagingDate: "",
-        ...rawFormData,
-      },
-      errors: validation.error.flatten().fieldErrors,
-    };
-  } else {
-    //console.log("validated", validation.data);
+  // Send the submission back to the client if the status is not successful
+  if (submission.status !== 'success') {
+    return submission.reply();
   }
+
+  //const rawFormData = Object.fromEntries(formData.entries());
+  //const validation = FormSchema.safeParse(rawFormData);
+
+  // if (!validation.success) {
+  //   console.error(
+  //     "Form validation errors",
+  //     validation.error.flatten().fieldErrors,
+  //   );
+  //   //console.log("form data state", rawFormData);
+  //   return {
+  //     message: "",
+  //     form: {
+  //       name: "",
+  //       dueOrExpiryDate: "",
+  //       packagingDate: "",
+  //       ...rawFormData,
+  //     },
+  //     errors: validation.error.flatten().fieldErrors,
+  //   };
+  // } else {
+  //   //console.log("validated", validation.data);
+  // }
 
   // validated {
   //   name: 'This is a product name',
@@ -199,56 +69,56 @@ export async function quickProductFormSubmit(
   //   defaultDueDaysAfterOpen: 0
   // }
 
-  let dueDateType = "BEST_BEFORE";
-  if (validation.data.dueDateType === "expiry-date")
-    dueDateType = "EXPIRY_DATE";
-  else if (validation.data.dueDateType === "no-expiry")
-    dueDateType = "NO_EXPIRY";
+  // let dueDateType = "BEST_BEFORE";
+  // if (validation.data.dueDateType === "expiry-date")
+  //   dueDateType = "EXPIRY_DATE";
+  // else if (validation.data.dueDateType === "no-expiry")
+  //   dueDateType = "NO_EXPIRY";
 
-  const canExpire = dueDateType !== DueDateType.NO_EXPIRY;
-  const data = validation.data;
+  // const canExpire = dueDateType !== DueDateType.NO_EXPIRY;
+  // const data = validation.data;
 
-  const queuedProduct = await prisma.product.create({
-    data: {
-      name: data.name,
-      pending: true,
-      canBeFrozen: !data.shouldNotBeFrozen,
-      unitSystem: data.unitSystem.toUpperCase() as UnitSystem,
-      unitAmount: data.mainQuantity,
-      unitChosen: data.mainQuantityUnitId,
-      dueDateType: dueDateType as DueDateType,
-      expiresAt: canExpire ? data.dueOrExpiryDate! : null,
-      packagingDate: canExpire ? data.packagingDate! : null,
-      defaultDueDays: canExpire ? data.defaultDueDays : null,
-      defaultDueDaysAfterOpen: canExpire ? data.defaultDueDaysAfterOpen : null,
-      defaultDueDaysAfterFreezing: canExpire
-        ? data.defaultDueDaysAfterFreezing
-        : null,
-      defaultDueDaysAfterThawing: canExpire
-        ? data.defaultDueDaysAfterThawing
-        : null,
-    } as ProductCreateInput,
-  });
+  // const queuedProduct = await prisma.product.create({
+  //   data: {
+  //     name: data.name,
+  //     pending: true,
+  //     canBeFrozen: !data.shouldNotBeFrozen,
+  //     unitSystem: data.unitSystem.toUpperCase() as UnitSystem,
+  //     unitAmount: data.mainQuantity,
+  //     unitChosen: data.mainQuantityUnitId,
+  //     dueDateType: dueDateType as DueDateType,
+  //     expiresAt: canExpire ? data.dueOrExpiryDate! : null,
+  //     packagingDate: canExpire ? data.packagingDate! : null,
+  //     defaultDueDays: canExpire ? data.defaultDueDays : null,
+  //     defaultDueDaysAfterOpen: canExpire ? data.defaultDueDaysAfterOpen : null,
+  //     defaultDueDaysAfterFreezing: canExpire
+  //       ? data.defaultDueDaysAfterFreezing
+  //       : null,
+  //     defaultDueDaysAfterThawing: canExpire
+  //       ? data.defaultDueDaysAfterThawing
+  //       : null,
+  //   } as ProductCreateInput,
+  // });
 
-  console.log("queued product is", queuedProduct);
+  // console.log("queued product is", queuedProduct);
 
-  if (data.image) {
-    const file = dataURLtoFile(data.image, "filename-not-used-yet");
-    const arr = new Uint8Array(await file.arrayBuffer());
-    await prisma.productPhoto.create({
-      data: {
-        filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
-        data: arr,
-        productId: queuedProduct.id,
-        grocyFileGroup: "productpictures",
-      } as ProductPhotoUncheckedCreateInput,
-    });
-  }
+  // if (data.image) {
+  //   const file = dataURLtoFile(data.image, "filename-not-used-yet");
+  //   const arr = new Uint8Array(await file.arrayBuffer());
+  //   await prisma.productPhoto.create({
+  //     data: {
+  //       filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+  //       data: arr,
+  //       productId: queuedProduct.id,
+  //       grocyFileGroup: "productpictures",
+  //     } as ProductPhotoUncheckedCreateInput,
+  //   });
+  // }
 
-  await prisma.barcode.update({
-    where: { barcode: data.barcode },
-    data: { productId: queuedProduct.id },
-  });
+  // await prisma.barcode.update({
+  //   where: { barcode: data.barcode },
+  //   data: { productId: queuedProduct.id },
+  // });
 
   // Revalidate the cache for the invoices page and redirect the user.
   revalidatePath("/scan");

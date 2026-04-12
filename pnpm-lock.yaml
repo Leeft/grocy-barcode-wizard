@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@conform-to/react':
+        specifier: ^1.18.0
+        version: 1.18.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@conform-to/zod':
+        specifier: ^1.18.0
+        version: 1.18.0(zod@4.3.6)
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.3)
@@ -182,6 +188,20 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@conform-to/dom@1.18.0':
+    resolution: {integrity: sha512-luccJjJJgvePp8mmU1plwEcofP0Gk/7a54ukSX1ta7K6J0Ep37nm18WK7gowrVCIHzCnR7iAdyjd+vGTpuI4zw==}
+
+  '@conform-to/react@1.18.0':
+    resolution: {integrity: sha512-k5CnPa/a6YOv1+cavx5DiW4yh9RxC148Xxir5p3dqJ6r20WD9MvhVDOSJ/qmIegkYoLKQhxnOw3RJoNFfEDKPw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
+  '@conform-to/zod@1.18.0':
+    resolution: {integrity: sha512-ombphsARN/7QpjOOsk7QPHDvCK1dLr4PlTz6styUQoh9vt8FxTOuH64XdY0XGtwUCTSJ5/9lvBa75cyhDbYm1Q==}
+    peerDependencies:
+      zod: ^3.21.0 || ^4.0.0
 
   '@electric-sql/pglite-socket@0.1.1':
     resolution: {integrity: sha512-p2hoXw3Z3LQHwTeikdZNsFBOvXGqKY2hk51BBw+8NKND8eoH+8LFOtW9Z8CQKmTJ2qqGYu82ipqiyFZOTTXNfw==}
@@ -3132,6 +3152,19 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@conform-to/dom@1.18.0': {}
+
+  '@conform-to/react@1.18.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@conform-to/dom': 1.18.0
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
+  '@conform-to/zod@1.18.0(zod@4.3.6)':
+    dependencies:
+      '@conform-to/dom': 1.18.0
+      zod: 4.3.6
 
   '@electric-sql/pglite-socket@0.1.1(@electric-sql/pglite@0.4.1)':
     dependencies:
