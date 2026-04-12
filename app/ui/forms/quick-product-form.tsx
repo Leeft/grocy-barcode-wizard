@@ -113,6 +113,23 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
     "min-h-[38px]",
   );
 
+  const dueDaysInputCommonStyles: string = clsx(
+    "peer",
+    "w-45",
+    inputCommonStyles,
+    "rounded-md!",
+    "relative",
+    "top-[-1]",
+    "mb-[-3]",
+  );
+
+  const dateInputCommonStyles: string = clsx(
+    "w-38",
+    inputCommonStyles,
+    "relative",
+    "top-[-1]",
+  );
+
   const calculateDueDays = useCallback(() => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
@@ -398,12 +415,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                     min={dateToISODate(addYears(new Date(), -1))}
                     max={dateToISODate(addYears(new Date(), 10))}
                     required
-                    className={clsx(
-                      "w-38",
-                      inputCommonStyles,
-                      "relative",
-                      "top-[-1]",
-                    )}
+                    className={dateInputCommonStyles}
                     aria-describedby="due-or-expiry-date-error"
                     onChange={(e) => {
                       setExpiryDate(new Date(e.target.valueAsNumber));
@@ -444,13 +456,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                         ? dateToISODate(expiryDate)
                         : dateToISODate(addYears(new Date(), 10))
                     }
-                    className={clsx(
-                      "w-38",
-                      inputCommonStyles,
-                      "relative",
-                      "top-[-1]",
-                    )}
-                    //className={"w-full peer block w-30 rounded-md py-[6] my-[9.5] px-3 text-base font-bold text-left outline-3 outline-[#bbb] focus:outline-blue-400 placeholder:text-gray-500 border-0! border-transparent"
+                    className={dateInputCommonStyles}
                     aria-describedby="packaging-date-error"
                     onChange={(e) => {
                       setPackagingDate(new Date(e.target.valueAsNumber));
@@ -487,18 +493,8 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                   onChange={(e) =>
                     setDefaultDueDays(Number.parseInt(e.target.value))
                   }
-                  className={clsx(
-                    "peer",
-                    "w-45",
-                    inputCommonStyles,
-                    "rounded-md!",
-                    "relative",
-                    "top-[-1]",
-                    //"focus:invalid:border-[#e75f5f]!",
-                    "mb-[-3]",
-                  )}
+                  className={dueDaysInputCommonStyles}
                   aria-describedby="default-due-days-error"
-                  // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
                   required
                 />
               </FormField>
@@ -526,16 +522,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                   onChange={(e) =>
                     setDefaultDueAfterOpen(Number.parseInt(e.target.value))
                   }
-                  className={clsx(
-                    "peer",
-                    "w-45",
-                    inputCommonStyles,
-                    "rounded-md!",
-                    "relative",
-                    "top-[-1]",
-                    //"focus:invalid:border-[#e75f5f]!",
-                    "mb-[-3]",
-                  )}
+                  className={dueDaysInputCommonStyles}
                   aria-describedby="default-due-days-after-open-error"
                   required
                 />
@@ -569,16 +556,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                           Number.parseInt(e.target.value),
                         )
                       }
-                      className={clsx(
-                        "peer",
-                        "w-45",
-                        inputCommonStyles,
-                        "rounded-md!",
-                        "relative",
-                        "top-[-1]",
-                        //"focus:invalid:border-[#e75f5f]!",
-                        "mb-[-3]",
-                      )}
+                      className={dueDaysInputCommonStyles}
                       aria-describedby="default-due-days-after-freezing-error"
                       required
                     />
@@ -609,16 +587,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                           Number.parseInt(e.target.value),
                         )
                       }
-                      className={clsx(
-                        "peer",
-                        "w-45",
-                        inputCommonStyles,
-                        "rounded-md!",
-                        "relative",
-                        "top-[-1]",
-                        //"focus:invalid:border-[#e75f5f]!",
-                        "mb-[-3]",
-                      )}
+                      className={dueDaysInputCommonStyles}
                       aria-describedby="default-due-days-after-thawing-error"
                       // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
                       required
