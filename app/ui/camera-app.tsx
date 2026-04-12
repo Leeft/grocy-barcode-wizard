@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { WebCamera, WebCameraHandler } from "@shivantra/react-web-camera";
 import { fileToBase64 } from "file64";
-import { RotateCw, Trash, SwitchCamera, Camera } from "lucide-react";
+import { RotateCw, Trash, SwitchCamera, Camera, VideoOff } from "lucide-react";
 import clsx from "clsx";
 import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
 
@@ -14,9 +14,69 @@ type CapturedImage = {
 };
 
 export function CameraApp() {
+  const [images, setImages] = useState<CapturedImage[]>([]);
+  const [cameraEnabled, setCameraEnabled] = useState<boolean>(false);
+
+  if (!navigator.mediaDevices?.enumerateDevices) {
+    return <h1>Camera not available; needs https connection</h1>;
+  }
+
+  const buttonClassCommon = clsx(
+    "flex-row",
+    "relative",
+    "flex",
+    "h-12",
+    "w-12",
+    "cursor-pointer",
+    "justify-center",
+    "rounded-4xl",
+    "align-middle",
+  );
+
+  return (
+    <div className="relative">
+      {cameraEnabled ? (
+        images.length == 0 ? (
+          <CameraUI
+            setCameraEnabled={setCameraEnabled}
+            setImages={setImages}
+            buttonClassCommon={buttonClassCommon}
+          />
+        ) : (
+          <Images
+            images={images}
+            setImages={setImages}
+            buttonClassCommon={buttonClassCommon}
+          />
+        )
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={() => setCameraEnabled(true)}
+            title="Click to enable camera"
+            className="rounded-1xl h-auto w-full cursor-pointer border border-slate-500 text-slate-500"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/empty-frame.png" alt="" />
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function CameraUI({
+  buttonClassCommon,
+  setImages,
+  setCameraEnabled,
+}: {
+  buttonClassCommon: string;
+  setImages: Dispatch<SetStateAction<CapturedImage[]>>;
+  setCameraEnabled: Dispatch<SetStateAction<boolean>>;
+}) {
   const cameraHandler = useRef<WebCameraHandler>(null);
   const shutterHandler = useRef<OneOffSoundHandler>(null);
-  const [images, setImages] = useState<CapturedImage[]>([]);
 
   async function handleCapture() {
     shutterHandler.current?.play();
@@ -32,6 +92,64 @@ export function CameraApp() {
     }
   }
 
+  function handleSwitch() {
+    cameraHandler.current?.switch();
+  }
+
+  return (
+    <>
+      <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
+      <div className="absolute top-5 left-5 flex gap-3">
+        <button
+          className={clsx(buttonClassCommon, "bg-slate-600")}
+          onClick={handleCapture}
+          title="Take snapshot"
+          type="button"
+        >
+          <Camera size="28" className="relative top-2.5" />
+        </button>
+        <button
+          className={clsx(buttonClassCommon, "bg-blue-600")}
+          onClick={handleSwitch}
+          title="Switch camera"
+          type="button"
+        >
+          <SwitchCamera size="28" className="relative top-2.5" />
+        </button>
+        <button
+          className={clsx(buttonClassCommon, "bg-amber-800")}
+          onClick={() => setCameraEnabled(false)}
+          title="Disable camera"
+          type="button"
+        >
+          <VideoOff size="28" className="relative top-2.5" />
+        </button>
+      </div>
+      <div>
+        <WebCamera
+          ref={cameraHandler}
+          videoStyle={{ borderRadius: 0 }}
+          className="camera-container"
+          videoClassName="camera-video"
+          captureMode="back"
+          captureType="png"
+          getFileName={() => `next-photo-${Date.now()}.jpeg`}
+          onError={(err) => console.error(err)}
+        />
+      </div>
+    </>
+  );
+}
+
+function Images({
+  images,
+  buttonClassCommon,
+  setImages,
+}: {
+  images: CapturedImage[];
+  buttonClassCommon: string;
+  setImages: Dispatch<SetStateAction<CapturedImage[]>>;
+}) {
   async function handleRotateRight(index: number) {
     images.map((imageInfo, blobIndex) => {
       if (blobIndex === index) {
@@ -59,100 +177,43 @@ export function CameraApp() {
     });
   }
 
-  function handleSwitch() {
-    cameraHandler.current?.switch();
-  }
-
   function handleDelete(index: number) {
     const img = [...images];
     img.splice(index, 1);
     setImages(img);
   }
 
-  if (!navigator.mediaDevices?.enumerateDevices) {
-    return <h1>Camera not available; needs https connection</h1>;
-  }
-
-  const buttonClassCommon = clsx(
-    "flex-row",
-    "relative",
-    "flex",
-    "h-12",
-    "w-12",
-    "cursor-pointer",
-    "justify-center",
-    "rounded-4xl",
-    "align-middle",
-  );
-
   return (
-    <div className="relative">
-      {images.length == 0 && (
-        <>
-          <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
+    <div className="flex flex-wrap gap-5">
+      {images.map((image, ind) => (
+        <div key={`captured-image-${ind}-container`} className="relative">
           <div className="absolute top-5 left-5 flex gap-3">
             <button
-              className={clsx(buttonClassCommon, "bg-slate-600")}
-              onClick={handleCapture}
-              title="Take snapshot"
+              className={clsx(buttonClassCommon, "bg-red-600")}
+              onClick={() => handleDelete(ind)}
+              title="Discard this image"
               type="button"
             >
-              <Camera size="28" className="relative top-2.5" />
+              <Trash size="28" className="relative top-2.5" />
             </button>
             <button
+              onClick={() => handleRotateRight(ind)}
               className={clsx(buttonClassCommon, "bg-amber-600")}
-              onClick={handleSwitch}
-              title="Switch camera"
+              title="Rotate 90 degrees clockwise"
               type="button"
             >
-              <SwitchCamera size="28" className="relative top-2.5" />
+              <RotateCw size="28" className="relative top-2.5" />
             </button>
           </div>
-          <div>
-            <WebCamera
-              ref={cameraHandler}
-              videoStyle={{ borderRadius: 0 }}
-              className="camera-container"
-              videoClassName="camera-video"
-              captureMode="back"
-              captureType="png"
-              getFileName={() => `next-photo-${Date.now()}.jpeg`}
-              onError={(err) => console.error(err)}
-            />
-          </div>
-        </>
-      )}
-      <div className="flex flex-wrap gap-5">
-        {images.map((image, ind) => (
-          <div key={`captured-image-${ind}-container`} className="relative">
-            <div className="absolute top-5 left-5 flex gap-3">
-              <button
-                className={clsx(buttonClassCommon, "bg-red-600")}
-                onClick={() => handleDelete(ind)}
-                title="Discard this image"
-                type="button"
-              >
-                <Trash size="28" className="relative top-2.5" />
-              </button>
-              <button
-                onClick={() => handleRotateRight(ind)}
-                className={clsx(buttonClassCommon, "bg-amber-600")}
-                title="Rotate 90 degrees clockwise"
-                type="button"
-              >
-                <RotateCw size="28" className="relative top-2.5" />
-              </button>
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={`captured-image-${ind}`}
-              src={image.dataUrl}
-              alt="Captured image from camera"
-            />
-            <input type="hidden" name="image" value={image.dataUrl} />
-          </div>
-        ))}
-      </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={`captured-image-${ind}`}
+            src={image.dataUrl}
+            alt="Captured image from camera"
+          />
+          <input type="hidden" name="image" value={image.dataUrl} />
+        </div>
+      ))}
     </div>
   );
 }
