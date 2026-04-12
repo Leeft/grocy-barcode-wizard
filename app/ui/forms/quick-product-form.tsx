@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   KeyboardEvent,
+  useActionState,
 } from "react";
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import { ProductLocation, QuantityUnit } from "@/interfaces/grocy";
@@ -31,12 +32,11 @@ import { UnitModeDropdown } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
 import clsx from "clsx";
 import Barcode from "@/lib/barcode";
-import { useFormState } from "react-dom";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 
 export function QuickProductForm({ barcode }: { barcode: Barcode }) {
-  const [lastResult, action, submitPending] = useFormState(
+  const [lastResult, action, submitPending] = useActionState(
     quickProductFormSubmit,
     undefined,
   );
