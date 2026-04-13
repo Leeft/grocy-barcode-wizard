@@ -4,6 +4,9 @@ import { QuickProductForm } from "@/ui/forms/quick-product-form";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import BarcodeActions from "@/ui/product/actions";
 import QueuedProduct from "@/ui/product/queued-product";
+import { ensureBarcodeExists } from "@/lib/barcode-db";
+import { findProductInGrocy } from "@/lib/grocy";
+import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 
 export default async function BarcodePage({
   params,
@@ -50,10 +53,62 @@ export default async function BarcodePage({
     }
   }
 
+  let grocyBarcode: Barcode | null = null;
+  try {
+    grocyBarcode = await processReceivedBarcode(barcode);
+  } catch (err) {
+    console.log("Couldn't get product by barcode:", err);
+  }
+
+  if (grocyBarcode !== null) {
+    return (
+      <>
+        <BarcodeScannerApp slug={grocyBarcode.code} />
+        <ExistingProductForm barcode={grocyBarcode} />
+        <BarcodeActions
+          barcode={grocyBarcode}
+          className="w-auto"
+          editing={false}
+        />
+      </>
+    );
+  }
+
+  const notFoundBarcode = new Barcode({
+    barcode: barcode,
+  });
+
   return (
     <>
       <BarcodeScannerApp slug={barcode} />
-      <QuickProductForm code={barcode} />;
+      <QuickProductForm code={barcode} />
     </>
   );
+}
+
+async function processReceivedBarcode(code: string): Promise<Barcode> {
+  let barcode: Barcode;
+
+  try {
+    barcode = new Barcode({ barcode: code });
+  } catch (err) {
+    throw new Error("Not a valid barcode");
+  }
+
+  if (barcode.isSpecialBarcode()) {
+    throw new Error("Can not handle special barcodes here");
+  }
+
+  // Make sure the barcode is known in the database, so state can
+  // be stored for it.
+  try {
+    const model = await ensureBarcodeExists(code);
+    if (model.productId !== undefined && model.productId !== null) {
+      barcode.queuedProductId = model.productId;
+    }
+  } catch (e) {
+    console.error("Could not store/update barcode in database:", e);
+  }
+
+  return findProductInGrocy(barcode);
 }

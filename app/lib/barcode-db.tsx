@@ -4,7 +4,9 @@ import prisma from "@/lib/prisma";
 import { BarcodeModel } from "@/generated/prisma/models";
 import { NotFoundError } from "@/lib/errors";
 
-export async function writeBarcode(barcode: string): Promise<BarcodeModel> {
+export async function ensureBarcodeExists(
+  barcode: string,
+): Promise<BarcodeModel> {
   "use server";
 
   const existingBarcode = await prisma.barcode.findUnique({
@@ -35,16 +37,20 @@ export async function getBarcode(barcode: string): Promise<BarcodeModel> {
   return model;
 }
 
-export async function queueBarcode(barcode: string): Promise<BarcodeModel> {
+export async function queueBarcode(
+  barcode: string,
+  queuedProductId?: number,
+): Promise<BarcodeModel> {
   "use server";
 
   return await prisma.barcode.upsert({
     where: { barcode: barcode },
-    update: { queued: true },
+    update: { queued: true, queuedProductId: queuedProductId },
     create: {
       barcode: barcode,
       scannedAt: new Date().toISOString(),
       queued: true,
+      queuedProductId: queuedProductId,
     },
   });
 }

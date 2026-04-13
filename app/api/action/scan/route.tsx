@@ -5,8 +5,8 @@ import Barcode from "@/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
 import { ReceivedBarcode } from "@/interfaces/json-objects";
 import { findProductInOpenFoodFacts } from "@/lib/open-food-facts";
-import { getBarcode, writeBarcode } from "@/lib/barcode-db";
 import { NotFoundError } from "@/lib/errors";
+import { ensureBarcodeExists } from "@/lib/barcode-db";
 
 // TODO FIXME: Access control
 
@@ -87,19 +87,9 @@ async function processReceivedBarcode(code: string) {
     );
   }
 
-  // Make sure the barcode is known in the database, so state can
-  // be stored for it.
-  try {
-    writeBarcode(barcode.code);
-  } catch (e) {
-    console.error("Could not store/update barcode in database:", e);
-  }
-
-  // TODO: Combine the calls above and below for efficiency
-
   // It might already exist in the database as a queued product, find that.
   try {
-    const model = await getBarcode(barcode.barcode);
+    const model = await ensureBarcodeExists(barcode.code);
     if (model.productId !== undefined && model.productId !== null) {
       barcode.queuedProductId = model.productId;
     }

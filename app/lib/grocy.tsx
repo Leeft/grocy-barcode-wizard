@@ -185,29 +185,29 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
 
   // There is no productnumber, but there may be a barcode for it
 
-  const {
-    data, // only present if 2XX response
-    error, // only present if 4XX or 5XX response
-  } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
-    params: { path: { barcode: barcode.barcode } },
-  });
+  const { data, error } = await grocyClient.GET(
+    "/stock/products/by-barcode/{barcode}",
+    {
+      params: { path: { barcode: barcode.code } },
+    },
+  );
 
   if (error) {
     console.error("Could not retrieve by barcode from grocy:", error);
   }
 
-  if (data !== undefined) {
-    return Promise.resolve(
-      new Barcode({
-        barcode: barcode.barcode,
-        name: data.product?.name,
-        product: data.product,
-        queuedProductId: barcode.queuedProductId,
-        // @ts-expect-error : not in OpenAPI spec, no typescript here
-        quantity: data.stock_amount_aggregated,
-      }),
-    );
-  } else {
+  if (data === undefined || !data.product) {
     return Promise.reject(barcode);
   }
+
+  return Promise.resolve(
+    new Barcode({
+      barcode: barcode.code,
+      name: data.product.name,
+      product: data.product,
+      queuedProductId: barcode.queuedProductId,
+      // @ts-expect-error : not in OpenAPI spec, no typescript here
+      quantity: data.stock_amount_aggregated,
+    }),
+  );
 }
