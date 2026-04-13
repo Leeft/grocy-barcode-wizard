@@ -19,20 +19,13 @@ export default function ScanLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const quantityUnitPromise = fetchQuantityUnits();
-  const quantityUnitConversionsPromise = fetchQuantityUnitConversions();
-  const locationsPromise = fetchLocations();
-  const productGroupsPromise = fetchProductGroups();
-  const productPromise = fetchProducts();
-  const shoppingLocationsPromise = fetchShoppingLocations();
-
   return (
-    <QuantityUnitProvider promise={quantityUnitPromise}>
-      <QuantityUnitConversionProvider promise={quantityUnitConversionsPromise}>
-        <ProductGroupProvider promise={productGroupsPromise}>
-          <ProductProvider promise={productPromise}>
-            <ShoppingLocationProvider promise={shoppingLocationsPromise}>
-              <LocationProvider promise={locationsPromise}>
+    <QuantityUnitProvider promise={fetchQuantityUnits()}>
+      <QuantityUnitConversionProvider promise={fetchQuantityUnitConversions()}>
+        <ProductGroupProvider promise={fetchProductGroups()}>
+          <ProductProvider promise={fetchProducts()}>
+            <ShoppingLocationProvider promise={fetchShoppingLocations()}>
+              <LocationProvider promise={fetchLocations()}>
                 <BarcodeScannerApp />
                 {children}
               </LocationProvider>
