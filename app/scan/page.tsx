@@ -1,3 +1,4 @@
+import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import React from "react";
 
 export default async function Page({
@@ -5,5 +6,10 @@ export default async function Page({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BarcodeScannerApp slug={undefined} />
+      {children}
+    </>
+  );
 }

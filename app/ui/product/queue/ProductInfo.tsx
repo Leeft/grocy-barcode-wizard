@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import DueDate from "../../due-date";
 import PackagingDate from "../../packaging-date";
+import Link from "next/link";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function ProductInfo({ product }: { product: any }) {
@@ -51,8 +52,9 @@ export async function ProductInfo({ product }: { product: any }) {
   }
 
   return (
-    <button
-      className="my-3 w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600"
+    <Link
+      href={`/queue/${product.barcodes[0].barcode}`}
+      className="my-3 w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600 block"
       title={`Process queued product “${product.name}”`}
     >
       <div className="flex w-full flex-col">
@@ -142,6 +144,6 @@ export async function ProductInfo({ product }: { product: any }) {
           )}
         </div>
       </div>
-    </button>
+    </Link>
   );
 }

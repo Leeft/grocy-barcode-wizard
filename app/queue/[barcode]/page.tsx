@@ -1,11 +1,8 @@
 import Barcode from "@/lib/barcode";
 import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
-import { QuickProductForm } from "@/ui/forms/quick-product-form";
-import BarcodeScannerApp from "@/ui/barcode/scanner-app";
-import BarcodeActions from "@/ui/product/actions";
 import QueuedProduct from "@/ui/product/queued-product";
 
-export default async function BarcodePage({
+export default async function QueuedEntryPage({
   params,
 }: {
   params: Promise<{ barcode: string }>;
@@ -25,17 +22,7 @@ export default async function BarcodePage({
     // Does it also exist in grocy? If so, can jump straight to things
     // that can be done with the barcode.
     if (products[0].grocyProductId) {
-      return (
-        <>
-          <BarcodeScannerApp slug={barcode} />
-          {/* <ExistingProductForm barcode={barcodeObject} /> */}
-          <BarcodeActions
-            barcode={barcodeObject}
-            className="w-auto"
-            editing={false}
-          />
-        </>
-      );
+      return <>Should redirect here</>;
     }
 
     // It does exist in the database but not in grocy. The user will
@@ -43,17 +30,12 @@ export default async function BarcodePage({
     if (barcodeObject.queuedProductId) {
       return (
         <>
-          <BarcodeScannerApp slug={barcode} />
+          <h1 className="uppercase text-3x1">Placeholder product queue entry page</h1>
           <QueuedProduct barcode={barcodeObject} />
         </>
       );
     }
   }
 
-  return (
-    <>
-      <BarcodeScannerApp slug={barcode} />
-      <QuickProductForm code={barcode} />;
-    </>
-  );
+  return <>Oops</>;
 }

@@ -3,19 +3,27 @@
 import Barcode from "@/lib/barcode";
 import BarcodeScanStatus from "@/ui/barcode/scan-status";
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export type ConnectionStatus = "connecting" | "connected" | "error";
 
-export default function BarcodeScannerApp() {
+export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   const [barcode, setBarcode] = useState<Barcode | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [retryCount, setRetryCount] = useState(0);
   const [redirect, setRedirect] = useState(false);
   const router = useRouter();
-  const params = useParams();
 
-  const debug = false;
+  const debug = true;
+
+  useEffect(() => {
+    if (slug !== undefined && (!barcode || barcode.barcode != slug)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBarcode(new Barcode({ barcode: slug }));
+    } else if (slug === null || slug === undefined) {
+      setBarcode(null);
+    }
+  }, [slug, barcode]);
 
   useEffect(() => {
     const es = new EventSource("/api/product-barcode-stream");
@@ -51,7 +59,7 @@ export default function BarcodeScannerApp() {
         }, 600);
 
         window.scrollTo(0, 0);
-        window.history.replaceState(null, "", `/scan/${barcode.barcode}`);
+
         setRedirect(true);
       } catch (err) {
         console.error("JSON Parse Error:", err, "from data", event.data);
@@ -70,27 +78,21 @@ export default function BarcodeScannerApp() {
       console.log("Closing product barcode stream connection");
       es.close();
     };
-  }, [debug, retryCount]);
+  }, [debug, retryCount, router]);
 
   useEffect(() => {
     if (redirect && barcode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRedirect( false );
       router.push(`/scan/${barcode.barcode}`);
     }
-  }, [redirect, barcode]);
-
-  useEffect(() => {
-    if (
-      params.barcode &&
-      typeof params.barcode === "string" &&
-      (!barcode || barcode.barcode != params.barcode)
-    ) {
-      setBarcode(new Barcode({ barcode: params.barcode }));
-    } else if (params.barcode === null || params.barcode === undefined) {
-      setBarcode(null);
-    }
-  }, [params]);
+  }, [redirect, barcode, router]);
 
   return (
-    <BarcodeScanStatus barcode={barcode} connectionStatus={status} retries={retryCount} />
+    <BarcodeScanStatus
+      barcode={barcode}
+      connectionStatus={status}
+      retries={retryCount}
+    />
   );
 }

@@ -3,7 +3,6 @@
 import QRCode from "@/components/qrcode";
 import Barcode from "@/lib/barcode";
 import { ConnectionStatus } from "@/ui/barcode/scanner-app";
-import { useEffect, useState } from "react";
 
 export default function BarcodeScanStatus({
   connectionStatus,
