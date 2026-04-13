@@ -10,18 +10,7 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import prisma from "@/lib/prisma";
 import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
-
-function dataURLtoFile(dataurl: string, filename: string): File {
-  const arr = dataurl.split(",");
-  const mime = arr[0]!.match(/:(.*?);/)![1];
-  const bstr = atob(arr[arr.length - 1]!);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], filename, { type: mime });
-}
+import { dataURLtoFile } from "@/lib/utils";
 
 export async function quickProductFormSubmit(
   prevstate: unknown,
@@ -33,20 +22,6 @@ export async function quickProductFormSubmit(
   if (submission.status !== "success") {
     return submission.reply();
   }
-
-  // validated {
-  //   name: 'This is a product name',
-  //   unitSystem: 'abstract',
-  //   mainQuantityUnitId: 16,
-  //   mainQuantity: 1,
-  //   defaultLocationId: 14,
-  //   dueDateType: 'expiry-date',
-  //   dueOrExpiryDate: '2026-04-30',
-  //   packagingDate: '2026-04-08',
-  //   shouldNotBeFrozen: true,
-  //   defaultDueDays: 22,
-  //   defaultDueDaysAfterOpen: 0
-  // }
 
   let dueDateType = "BEST_BEFORE";
   if (submission.value.dueDateType === "expiry-date")
