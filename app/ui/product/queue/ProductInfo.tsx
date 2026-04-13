@@ -58,7 +58,7 @@ export async function ProductInfo({ product }: { product: any }) {
       <div className="flex w-full flex-col">
         <div className="flex flex-col md:flex-row">
           <div className="w-full flex-3 flex-row">
-            <div className="flex-1 text-slate-50">
+            <div className="flex-1 text-slate-50 pl-5 -indent-5">
               <code className="text-green-500">
                 {product.barcodes[0]?.barcode}
               </code>{" "}

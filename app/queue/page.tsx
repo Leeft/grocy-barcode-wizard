@@ -9,8 +9,9 @@ export default async function Page() {
       </h1>
       <p>
         These are your queued product captures. Each entry listed here is only
-        stored in this database, and have not been completed nor sent to Grocy
-        yet. You need to open each of these and complete and upload them.
+        stored in this database, and has not been filled out completed nor sent
+        to Grocy yet. You need to open each of these and complete and upload
+        them to Grocy.
       </p>
       <Suspense fallback={<QueueLoading />}>
         <QueuedProducts />
