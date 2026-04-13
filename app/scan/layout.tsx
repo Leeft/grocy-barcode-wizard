@@ -12,6 +12,7 @@ import LocationProvider from "@/providers/location-context";
 import ProductGroupProvider from "@/providers/product-group-context";
 import ProductProvider from "@/providers/product-context";
 import ShoppingLocationProvider from "@/providers/shopping-location-context";
+import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 
 export default function ScanLayout({
   children,
@@ -32,6 +33,7 @@ export default function ScanLayout({
           <ProductProvider promise={productPromise}>
             <ShoppingLocationProvider promise={shoppingLocationsPromise}>
               <LocationProvider promise={locationsPromise}>
+                <BarcodeScannerApp />
                 {children}
               </LocationProvider>
             </ShoppingLocationProvider>
