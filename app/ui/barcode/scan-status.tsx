@@ -2,67 +2,82 @@
 
 import QRCode from "@/components/qrcode";
 import Barcode from "@/lib/barcode";
+import { ConnectionStatus } from "@/ui/barcode/scanner-app";
+import { useEffect, useState } from "react";
 
 export default function BarcodeScanStatus({
   connectionStatus,
+  retries,
   barcode,
 }: {
-  connectionStatus: string;
+  connectionStatus: ConnectionStatus;
+  retries: number;
   barcode: Barcode | null;
 }) {
   return (
     <div className="mt-1 pb-6 transition-colors duration-250 sm:mt-0">
-
       <div className="text-center">
         <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6">
           <div>
-            {barcode ? (
-              <div key={barcode.id} className="animate-in zoom-in duration-300">
-                {/* Container for Barcode and Laser */}
-                <div className="relative inline-block">
-                  {/* The Visual Barcode */}
-                  {barcode.type === "product" ? (
-                    <div className="font-barcode md:text-6x1 text-3xl leading-none tracking-normal text-slate-200">
-                      {`*${barcode.barcode}*`}
-                    </div>
-                  ) : (
-                    <QRCode
-                      id={barcode.barcode}
-                      style={{ width: 70, height: 70 }}
-                      value={barcode.barcode}
-                      quietZone={5}
-                      ecLevel={"L"}
-                    />
-                  )}
-
-                  {/* The Red Laser Line */}
-                  <div className="animate-laser pointer-events-none absolute top-1/2 left-0 h-0.5 w-full bg-red-600" />
-                </div>
-
-                {/* The Human Readable ID */}
-                <div className="mt-1 font-mono text-xl text-slate-500">
-                  {barcode.barcode}
-                </div>
-
-                {barcode.scannedAt && (
-                  <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
-                    <>SCAN_SUCCESS // {barcode.scannedAt?.toLocaleString()}</>
-                  </p>
-                )}
-              </div>
+            {!barcode || ( connectionStatus !== "connected" && retries > 0 ) ? (
+              <ScannerStreamStatus status={connectionStatus} />
             ) : (
-              <div
-                className={
-                  "md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-2xl text-gray-100 italic decoration-solid " +
-                  statusColour(connectionStatus)
-                }
-              >
-                {statusInfo(connectionStatus)}
-              </div>
+              <VisualBarcode barcode={barcode} />
             )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function VisualBarcode({ barcode }: { barcode: Barcode }) {
+  return (
+    <div key={barcode.id} className="animate-in zoom-in duration-300">
+      {/* Container for Barcode and Laser */}
+      <div className="relative inline-block">
+        {/* The Visual Barcode */}
+        {barcode.type === "product" ? (
+          <div className="font-barcode md:text-6x1 text-3xl leading-none tracking-normal text-slate-200">
+            {`*${barcode.barcode}*`}
+          </div>
+        ) : (
+          <QRCode
+            id={barcode.barcode}
+            style={{ width: 70, height: 70 }}
+            value={barcode.barcode}
+            quietZone={5}
+            ecLevel={"L"}
+          />
+        )}
+
+        {/* The red scan line */}
+        <div className="animate-laser pointer-events-none absolute top-1/2 left-0 h-0.5 w-full bg-red-600" />
+      </div>
+
+      {/* The human readable barcode */}
+      <div className="mt-1 font-mono text-xl text-slate-500">
+        {barcode.barcode}
+      </div>
+
+      {barcode.scannedAt !== null && barcode.scannedAt !== undefined && (
+        <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
+          <>SCAN SUCCESS » {barcode.scannedAt.toLocaleString()}</>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ScannerStreamStatus({ status }: { status: ConnectionStatus }) {
+  return (
+    <div
+      className={
+        "md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-2xl text-gray-100 italic decoration-solid " +
+        statusColour(status)
+      }
+    >
+      {statusInfo(status)}
     </div>
   );
 }
