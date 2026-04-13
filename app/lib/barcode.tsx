@@ -10,13 +10,6 @@ import {
 
 let nextId: number = 1;
 
-// An object with methods can't be serialised between next.js server and client
-// so this little one serves that purpose.
-export type BasicBarcode = {
-  barcode: string;
-  queuedProductId?: number;
-};
-
 export default class Barcode {
   #id: number; // immutable; uniqueness not at all guaranteed atm
   #barcode: string; // immutable
@@ -79,11 +72,8 @@ export default class Barcode {
     };
   }
 
-  toBasic(): BasicBarcode {
-    return {
-      barcode: this.barcode,
-      queuedProductId: this.queuedProductId,
-    };
+  toString(): string {
+    return this.#barcode;
   }
 
   get id(): number {
@@ -91,6 +81,10 @@ export default class Barcode {
   }
 
   get barcode(): string {
+    return this.#barcode;
+  }
+
+  get code(): string {
     return this.#barcode;
   }
 

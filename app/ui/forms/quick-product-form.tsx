@@ -33,12 +33,11 @@ import {
 } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
 import clsx from "clsx";
-import Barcode from "@/lib/barcode";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import TooltipWrapper from "../tooltip-wrapper";
 
-export function QuickProductForm({ barcode }: { barcode: Barcode }) {
+export function QuickProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(
     quickProductFormSubmit,
     undefined,
@@ -171,7 +170,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
       onKeyDown={handleKeyDown}
       className="pb-25"
     >
-      <input name="barcode" type="hidden" value={barcode.barcode} />
+      <input name="barcode" type="hidden" value={code} />
       <div className="flex flex-col">
         <div className="flex flex-row gap-5">
           <div className="flex-auto">
@@ -221,7 +220,10 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
                     setShouldNotBeFrozen(e.target.checked)
                   }
                 />
-                <label htmlFor={fields.shouldNotBeFrozen.name} className="leading-6">
+                <label
+                  htmlFor={fields.shouldNotBeFrozen.name}
+                  className="leading-6"
+                >
                   This product should not be frozen
                   <TooltipWrapper id="not-frozen-tooltip">
                     Checking this checkbox will hide some options from you,

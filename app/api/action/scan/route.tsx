@@ -83,14 +83,14 @@ async function processReceivedBarcode(code: string) {
 
     globalEvents.emit("special-barcode-stream", barcode);
     return bbuddySuccessResponse(
-      `Special barcode processed. Barcode: ${barcode.barcode}`,
+      `Special barcode processed. Barcode: ${barcode.code}`,
     );
   }
 
   // Make sure the barcode is known in the database, so state can
   // be stored for it.
   try {
-    writeBarcode(barcode.toBasic());
+    writeBarcode(barcode.code);
   } catch (e) {
     console.error("Could not store/update barcode in database:", e);
   }
@@ -99,7 +99,7 @@ async function processReceivedBarcode(code: string) {
 
   // It might already exist in the database as a queued product, find that.
   try {
-    const model = await getBarcode(barcode.toBasic());
+    const model = await getBarcode(barcode.barcode);
     if (model.productId !== undefined && model.productId !== null) {
       barcode.queuedProductId = model.productId;
     }

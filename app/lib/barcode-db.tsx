@@ -1,23 +1,20 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { BasicBarcode } from "@/lib/barcode";
 import { BarcodeModel } from "@/generated/prisma/models";
 import { NotFoundError } from "@/lib/errors";
 
-export async function writeBarcode(
-  barcode: BasicBarcode,
-): Promise<BarcodeModel> {
+export async function writeBarcode(barcode: string): Promise<BarcodeModel> {
   "use server";
 
   const existingBarcode = await prisma.barcode.findUnique({
-    where: { barcode: barcode.barcode },
+    where: { barcode: barcode },
   });
 
   if (existingBarcode === null) {
     return await prisma.barcode.create({
       data: {
-        barcode: barcode.barcode,
+        barcode: barcode,
         scannedAt: new Date().toISOString(),
       },
     });
@@ -26,11 +23,11 @@ export async function writeBarcode(
   return existingBarcode;
 }
 
-export async function getBarcode(barcode: BasicBarcode): Promise<BarcodeModel> {
+export async function getBarcode(barcode: string): Promise<BarcodeModel> {
   "use server";
 
   const model = await prisma.barcode.findUnique({
-    where: { barcode: barcode.barcode },
+    where: { barcode: barcode },
   });
 
   if (model === null) throw new NotFoundError("Barcode not found");
@@ -38,16 +35,14 @@ export async function getBarcode(barcode: BasicBarcode): Promise<BarcodeModel> {
   return model;
 }
 
-export async function queueBarcode(
-  barcode: BasicBarcode,
-): Promise<BarcodeModel> {
+export async function queueBarcode(barcode: string): Promise<BarcodeModel> {
   "use server";
 
   return await prisma.barcode.upsert({
-    where: { barcode: barcode.barcode },
+    where: { barcode: barcode },
     update: { queued: true },
     create: {
-      barcode: barcode.barcode,
+      barcode: barcode,
       scannedAt: new Date().toISOString(),
       queued: true,
     },
