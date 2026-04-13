@@ -26,12 +26,14 @@ export default class Barcode {
     quantity,
     product,
     queuedProductId,
+    scannedAt,
   }: {
     barcode: string;
     name?: string;
     quantity?: number;
     product?: GrocyProduct;
     queuedProductId?: number;
+    scannedAt?: Date;
   }) {
     this.#id = nextId += 1;
     this.#barcode = barcode.trim();
@@ -39,6 +41,7 @@ export default class Barcode {
     if (name !== undefined) this.name = name.trim();
     if (product !== undefined) this.product = product;
     if (queuedProductId !== undefined) this.queuedProductId = queuedProductId;
+    if (scannedAt !== undefined) this.scannedAt = scannedAt;
 
     this.quantity = quantity !== undefined && quantity >= 0 ? quantity : 1;
     this.#type = barcodeToType(barcode);
@@ -52,7 +55,7 @@ export default class Barcode {
       product: json.product,
     });
 
-    barcode.scannedAt = new Date(Date.now());
+    barcode.scannedAt = new Date();
 
     if (json.queuedProductId !== undefined && json.queuedProductId !== null) {
       barcode.queuedProductId = json.queuedProductId;

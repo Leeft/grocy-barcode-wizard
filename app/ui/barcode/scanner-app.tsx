@@ -19,7 +19,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   useEffect(() => {
     if (slug !== undefined && (!barcode || barcode.barcode != slug)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBarcode(new Barcode({ barcode: slug }));
+      setBarcode(new Barcode({ barcode: slug, scannedAt: new Date() }));
     } else if (slug === null || slug === undefined) {
       setBarcode(null);
     }
@@ -83,7 +83,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   useEffect(() => {
     if (redirect && barcode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRedirect( false );
+      setRedirect(false);
       router.push(`/scan/${barcode.barcode}`);
     }
   }, [redirect, barcode, router]);

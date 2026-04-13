@@ -23,6 +23,7 @@ export default async function BarcodePage({
       barcode: barcode,
       name: products[0].name,
       queuedProductId: products[0].id,
+      scannedAt: new Date(),
     });
 
     // Does it also exist in grocy? If so, can jump straight to things
@@ -76,6 +77,7 @@ export default async function BarcodePage({
 
   const notFoundBarcode = new Barcode({
     barcode: barcode,
+    scannedAt: new Date(),
   });
 
   return (
@@ -90,7 +92,7 @@ async function processReceivedBarcode(code: string): Promise<Barcode> {
   let barcode: Barcode;
 
   try {
-    barcode = new Barcode({ barcode: code });
+    barcode = new Barcode({ barcode: code, scannedAt: new Date() });
   } catch (err) {
     throw new Error("Not a valid barcode");
   }

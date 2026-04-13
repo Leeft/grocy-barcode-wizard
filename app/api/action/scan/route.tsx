@@ -65,7 +65,7 @@ async function processReceivedBarcode(code: string) {
   let barcode: Barcode;
 
   try {
-    barcode = new Barcode({ barcode: code });
+    barcode = new Barcode({ barcode: code, scannedAt: new Date() });
   } catch (err) {
     return bbuddyErrorResponse(400, `No valid barcode supplied: ${err}`);
   }
@@ -117,6 +117,7 @@ async function processReceivedBarcode(code: string) {
             barcode: notFoundBarcode.barcode,
             name: `Unkown product with barcode ${notFoundBarcode.barcode}`,
             queuedProductId: notFoundBarcode.queuedProductId,
+            scannedAt: new Date(),
           }),
         );
         // See if it can be identified after the fact (async)
