@@ -3,9 +3,8 @@ import { OpenFoodFactsResult } from "@/interfaces/json-objects";
 
 export default class ProductLookup {
   //
-  lookupOpenFoodFacts(barcode: Barcode): Promise<OpenFoodFactsResult> {
-    //
-    return fetch(
+  async lookupOpenFoodFacts(barcode: Barcode): Promise<OpenFoodFactsResult> {
+    const response = await fetch(
       `${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${encodeURIComponent(barcode.barcode)}?product_type=all`,
       {
         method: "GET",
@@ -14,11 +13,8 @@ export default class ProductLookup {
           "User-Agent": "GrocyBarcodeWizard/0.1 (liannaee@gmail.com)",
         },
       },
-    )
-      .then((response) => response.json())
-      .catch((err: Error) => {
-        console.error("Couldn't look up at openfoodfacts API:", err);
-      });
+    );
+    return await response.json();
   }
   //
 }
