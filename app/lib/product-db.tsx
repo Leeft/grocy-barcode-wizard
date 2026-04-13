@@ -55,7 +55,7 @@ export async function getProductsByBarcode(
 ) {
   "use server";
 
-  if (barcode === undefined) throw new Error("No barcode given");
+  if (barcode === undefined || barcode.trim() === '') throw new Error("No barcode given");
 
   return await prisma.product.findMany({
     select: {
