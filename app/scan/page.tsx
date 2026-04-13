@@ -1,5 +1,5 @@
 import Barcode from "@/lib/barcode";
-import { getProductByBarcode } from "@/lib/product-db";
+import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 
 export default async function Page({
@@ -13,7 +13,7 @@ export default async function Page({
 
   if (code !== "") {
     try {
-      const products = await getProductByBarcode(code);
+      const products: ProductsByBarcode = await getProductsByBarcode(code);
       if (products[0]) {
         initialBarcode = new Barcode({
           barcode: code,

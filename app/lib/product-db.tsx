@@ -10,6 +10,10 @@ export async function getProduct(id: number): Promise<ProductModel> {
 
   const model = await prisma.product.findUnique({
     where: { id: id },
+    include: {
+      barcodes: true,
+      productPhoto: true,
+    },
   });
 
   if (model === null) throw new Error("Product not found");
@@ -17,14 +21,47 @@ export async function getProduct(id: number): Promise<ProductModel> {
   return model;
 }
 
-export async function getProductByBarcode(
+export type GetProduct = Awaited<ReturnType<typeof getProduct>>;
+
+
+export async function getPendingProducts() {
+  "use server";
+
+  return await prisma.product.findMany({
+    include: {
+      barcodes: true,
+      productPhoto: true,
+    },
+    where: {
+      grocyProductId: {
+        equals: null,
+      },
+      barcodes: {
+        some: {
+          queued: {
+            equals: true,
+          },
+        },
+      },
+    },
+  });
+}
+
+export type PendingProducts = Awaited<ReturnType<typeof getPendingProducts>>;
+
+
+export async function getProductsByBarcode(
   barcode: string,
-): Promise<ProductModel[]> {
+) {
   "use server";
 
   if (barcode === undefined) throw new Error("No barcode given");
 
   return await prisma.product.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
     where: {
       barcodes: {
         some: {
@@ -36,3 +73,5 @@ export async function getProductByBarcode(
     },
   });
 }
+
+export type ProductsByBarcode = Awaited<ReturnType<typeof getProductsByBarcode>>;

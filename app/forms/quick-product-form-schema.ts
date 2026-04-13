@@ -31,7 +31,7 @@ export const QuickProductFormSchema = z
     //   .number()
     //   .gt(-1, { message: "Parent product must be unset or greater than zero" }),
 
-    defaultProductLocationId: z.coerce
+    defaultLocationId: z.coerce
       .number({
         message: "Default product location must be chosen",
       })

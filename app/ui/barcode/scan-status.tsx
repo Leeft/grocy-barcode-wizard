@@ -6,21 +6,15 @@ import Barcode from "@/lib/barcode";
 export default function BarcodeScanStatus({
   connectionStatus,
   barcode,
-  isFlashing,
 }: {
   connectionStatus: string;
   barcode: Barcode | null;
-  isFlashing: boolean;
 }) {
   return (
     <div className="mt-1 pb-6 transition-colors duration-250 sm:mt-0">
+
       <div className="text-center">
         <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6">
-          {/* Subtle inner flash indicator */}
-          {isFlashing && (
-            <div className="pointer-events-none absolute inset-0 bg-emerald-500/10" />
-          )}
-
           <div>
             {barcode ? (
               <div key={barcode.id} className="animate-in zoom-in duration-300">

@@ -1,8 +1,8 @@
-export default function Page() {
+export default function Settings() {
   return (
-    <div>
+    <div className="">
       <h1 className="mb-3 text-lg font-bold uppercase">
-        Grocy Barcode Wizard
+        Settings
       </h1>
       <p>
         TODO

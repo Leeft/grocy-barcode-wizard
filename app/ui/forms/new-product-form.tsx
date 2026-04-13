@@ -429,12 +429,12 @@ export function NewProductForm() {
           {/* default location dropdown */}
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor="defaultProductLocationId"
+              htmlFor="defaultLocationId"
               title="Default product location *"
             ></FormLabel>
             <FormField>
               <LocationDropdown
-                name="defaultProductLocationId"
+                name="defaultLocationId"
                 units={locations}
                 className="w-auto flex-2"
                 aria-describedby="default-product-location-error"
@@ -445,7 +445,7 @@ export function NewProductForm() {
             </FormField>
             <FormErrors
               id="default-product-location-error"
-              errors={state.fieldErrors?.defaultProductLocationId}
+              errors={state.fieldErrors?.defaultLocationId}
             />
           </div>
         </div>

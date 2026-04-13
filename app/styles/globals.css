@@ -1,10 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap');
 @import "tailwindcss";
 
-/* @import "tailwindcss/preflight"
-@tailwind components;
-@tailwind utilities; */
-
 @layer theme, base, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
@@ -40,10 +36,32 @@ body {
   margin: 0 auto;
 }
 
+@keyframes changeColor {
+    from {
+        background-color: #1d293d;
+    }
+    to {
+        background-color: #395077;
+    }
+}
+
+main.flash {
+    animation: changeColor 0.3s infinite alternate running;
+}
+
+
 @keyframes flash-green {
   0% { background-color: rgba(16, 132, 93, 0.566); } /* emerald-500 with opacity */
   100% { background-color: transparent; }
 }
+
+
+/* p {
+  animation-duration: 3s;
+  animation-name: slide-in;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+} */
 
 .animate-flash {
   animation: flash-green 1.2s ease-out;

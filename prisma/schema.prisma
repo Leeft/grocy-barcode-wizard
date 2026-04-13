@@ -34,6 +34,7 @@ model Product {
   unitSystem                  UnitSystem    @default(WEIGHT)
   unitAmount                  Decimal
   unitChosen                  Int
+  defaultLocation             Int
   dueDateType                 DueDateType   @default(BEST_BEFORE)
   expiresAt                   String?
   packagingDate               String?

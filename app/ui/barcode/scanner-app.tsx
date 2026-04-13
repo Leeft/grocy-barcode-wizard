@@ -20,7 +20,6 @@ export default function BarcodeScannerApp({
   const [editing /*setEditing*/] = useState(false);
   const [barcode, setBarcode] = useState<Barcode | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
-  const [isFlashing, setIsFlashing] = useState(false);
   const [retryCount /*setRetryCount*/] = useState(3);
   const searchParams = useSearchParams();
 
@@ -45,6 +44,8 @@ export default function BarcodeScannerApp({
       console.log(`Connected to product barcode stream ${es.url}`);
     };
 
+    const main = document.getElementById('main');
+
     es.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -57,10 +58,14 @@ export default function BarcodeScannerApp({
             barcode,
           );
         setBarcode(barcode);
-        setIsFlashing(true);
+        //setIsFlashing(true);
+        if (main) main.classList.add("flash");
 
         window.scrollTo(0, 0);
-        setTimeout(() => setIsFlashing(false), 1500);
+        //setTimeout(() => setIsFlashing(false), 1500);
+        setTimeout(() => {
+          if (main) main.classList.remove("flash");
+        }, 600);
 
         const params = new URLSearchParams(searchParams.toString());
         const codeParam = params.get("code");
@@ -93,11 +98,7 @@ export default function BarcodeScannerApp({
 
   return (
     <div className={`w-auto`}>
-      <BarcodeScanStatus
-        barcode={barcode}
-        isFlashing={isFlashing}
-        connectionStatus={status}
-      />
+      <BarcodeScanStatus barcode={barcode} connectionStatus={status} />
       {barcode &&
         (barcode !== null && barcode?.product !== undefined ? (
           <>

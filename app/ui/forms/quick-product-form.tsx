@@ -336,13 +336,13 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
         <div className="flex flex-row gap-5">
           <div className="mb-4 grow">
             <FormLabel
-              htmlFor={fields.defaultProductLocationId.name}
+              htmlFor={fields.defaultLocationId.name}
               title="Initial product location *"
             ></FormLabel>
             <FormField>
               <LocationDropdown
-                key={fields.defaultProductLocationId.key}
-                name={fields.defaultProductLocationId.name}
+                key={fields.defaultLocationId.key}
+                name={fields.defaultLocationId.name}
                 units={locations}
                 className="w-auto flex-2"
                 aria-describedby="default-product-location-error"
@@ -353,7 +353,7 @@ export function QuickProductForm({ barcode }: { barcode: Barcode }) {
             </FormField>
             <FormErrors
               id="default-product-location-error"
-              errors={fields.defaultProductLocationId.errors}
+              errors={fields.defaultLocationId.errors}
             />
           </div>
         </div>

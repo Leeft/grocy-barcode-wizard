@@ -21,7 +21,7 @@ const FormSchema = z.object({
     .number()
     .gt(-1, { message: "Parent product must be unset or greater than zero" }),
 
-  defaultProductLocationId: z.coerce
+  defaultLocationId: z.coerce
     .number()
     .gt(0, { message: "Default product location must be set" }),
 
@@ -80,7 +80,7 @@ export type State = {
     mainQuantityUnitId?: string[];
     mainQuantity?: string[];
     parentProductId?: string[];
-    defaultProductLocationId?: string[];
+    defaultLocationId?: string[];
     defaultConsumeLocationId?: string[];
     defaultShopLocationId?: string[];
     dueOrExpiryDate?: string[];
