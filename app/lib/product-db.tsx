@@ -61,6 +61,7 @@ export async function getProductsByBarcode(
     select: {
       id: true,
       name: true,
+      grocyProductId: true,
     },
     where: {
       barcodes: {
