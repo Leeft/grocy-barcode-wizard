@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Barcode, Rows3, Settings } from "lucide-react";
+import { House, Barcode, Rows3, Settings, Regex } from "lucide-react";
 
 export default function Navbar() {
   const iconClassName = "relative top-[-2] inline";
   const pathname = usePathname();
-  const [/*clientPathname */, setClientPathname] = useState("");
+  const [, /*clientPathname */ setClientPathname] = useState("");
 
   useEffect(() => {
     setClientPathname(pathname);
@@ -43,12 +43,16 @@ function NavigationElement({
   children: React.ReactNode;
   pathName: string;
 }) {
+  const scanPath = new RegExp("^/scan");
   return (
     <Link
       href={href}
       className={
         `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 ` +
-        (href.toString() === pathName ? "text-amber-200" : "")
+        (href.toString() === pathName ||
+        (href.toString() === "/scan" && scanPath.test(pathName))
+          ? "text-amber-200"
+          : "")
       }
     >
       {children}
