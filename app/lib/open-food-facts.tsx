@@ -1,4 +1,8 @@
-import { OpenFoodFactsProduct, OpenFoodFactsResult } from "@/interfaces/json-objects";
+import {
+  OpenFoodFactsNotFoundResult,
+  OpenFoodFactsProduct,
+  OpenFoodFactsResult,
+} from "@/interfaces/json-objects";
 import Barcode from "./barcode";
 import * as JsonDecoder from "ts.data.json";
 import ProductLookup from "@/lib/lookup";
@@ -13,32 +17,53 @@ const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
 
 const openFoodFactsDecoder = JsonDecoder.object<OpenFoodFactsResult>(
   {
+    code: JsonDecoder.string(),
     status: JsonDecoder.number(),
+    status_verbose: JsonDecoder.string(),
     product: openFoodFactsProductDecoder,
   },
   "OpenFoodFactsResult",
 );
 
-export function findProductInOpenFoodFacts(barcode: Barcode): void {
-  openFoodFactsDecoder
-    .decodePromise(new ProductLookup().lookupOpenFoodFacts(barcode))
-    .then((openFoodFactsResult: OpenFoodFactsResult) => {
-      if (openFoodFactsResult.status) {
-        const foundBarcode: Barcode = new Barcode({
-          barcode: barcode.barcode,
-          name: openFoodFactsResult.product.product_name_en,
-          queuedProductId: barcode.queuedProductId,
-        });
-        console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
-        globalEvents.emit("product-barcode-stream", foundBarcode);
-      } else {
-        console.log(
-          `Barcode ${barcode.barcode} was not found at openfoodfacts API`,
-        );
-      }
-    })
-    .catch((error) => {
-      console.error("Could not decode openfoodfacts response:", error);
-    });
-}
+const openFoodFactsNotFoundDecoder =
+  JsonDecoder.object<OpenFoodFactsNotFoundResult>(
+    {
+      code: JsonDecoder.string(),
+      status: JsonDecoder.number(),
+      status_verbose: JsonDecoder.string(),
+    },
+    "OpenFoodFactsNotFoundResult",
+  );
 
+export async function findProductInOpenFoodFacts(barcode: Barcode) {
+  const i_promise = await (
+    await new ProductLookup().lookupOpenFoodFacts(barcode)
+  ).json();
+
+  openFoodFactsNotFoundDecoder.decodePromise(i_promise).then((result) => {
+    if (result.status !== 0) {
+      openFoodFactsDecoder
+        .decodePromise(result)
+        .then((openFoodFactsResult: OpenFoodFactsResult) => {
+          if (openFoodFactsResult.status) {
+            const foundBarcode: Barcode = new Barcode({
+              barcode: barcode.barcode,
+              name: openFoodFactsResult.product?.product_name_en,
+              queuedProductId: barcode.queuedProductId,
+            });
+            console.log(`Found openfoodfacts product as ${foundBarcode.name}`);
+            globalEvents.emit("product-barcode-stream", foundBarcode);
+          } else {
+            console.log(
+              `Barcode ${barcode.barcode} was not found at openfoodfacts API`,
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Could not decode openfoodfacts response:", error);
+        });
+    } else {
+      console.log(`OpenFoodFacts has no product for barcode ${barcode}`);
+    }
+  });
+}

@@ -3,8 +3,16 @@ export type OpenFoodFactsProduct = {
 };
 
 export type OpenFoodFactsResult = {
+  code: string;
   status: number;
-  product: OpenFoodFactsProduct;
+  status_verbose: string;
+  product?: OpenFoodFactsProduct;
+};
+
+export type OpenFoodFactsNotFoundResult = {
+  code: string;
+  status: number;
+  status_verbose: string;
 };
 
 export type ReceivedBarcode = {

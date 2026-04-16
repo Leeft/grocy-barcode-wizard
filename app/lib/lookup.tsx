@@ -1,11 +1,10 @@
 import Barcode from "@/lib/barcode";
-import { OpenFoodFactsResult } from "@/interfaces/json-objects";
 
 export default class ProductLookup {
-  //
-  async lookupOpenFoodFacts(barcode: Barcode): Promise<OpenFoodFactsResult> {
-    const response = await fetch(
-      `${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${encodeURIComponent(barcode.barcode)}?product_type=all`,
+  async lookupOpenFoodFacts(barcode: Barcode) {
+    const uriBarcode = encodeURIComponent(barcode.barcode);
+    return fetch(
+      `${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${uriBarcode}?product_type=all`,
       {
         method: "GET",
         headers: {
@@ -14,7 +13,5 @@ export default class ProductLookup {
         },
       },
     );
-    return await response.json();
   }
-  //
 }
