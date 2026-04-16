@@ -11,7 +11,7 @@ import {
 import { cache } from "react";
 import Barcode from "@/lib/barcode";
 
-let baseUrl = process.env.GROCY_API_URL;
+export let baseUrl = process.env.GROCY_API_URL;
 if (baseUrl === undefined) {
   baseUrl = process.env.NEXT_PUBLIC_GROCY_API_URL;
 }
