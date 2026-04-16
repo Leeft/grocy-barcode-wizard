@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { dateToISODate } from "@/lib/date";
+import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 
 export const QuickProductFormSchema = z
   .object({
@@ -13,7 +14,7 @@ export const QuickProductFormSchema = z
 
     // productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
 
-    unitSystem: z.enum(["weight", "volume", "abstract"], {
+    unitSystem: z.enum([UnitSystem.WEIGHT, UnitSystem.VOLUME, UnitSystem.ABSTRACT], {
       message: "The unit system must be chosen",
     }),
 
@@ -45,7 +46,7 @@ export const QuickProductFormSchema = z
     //   message: "Default shop location must be unset or greater than zero",
     // }),
 
-    dueDateType: z.enum(["best-before", "expiry-date", "no-expiry"], {
+    dueDateType: z.enum([DueDateType.BEST_BEFORE, DueDateType.EXPIRY_DATE, DueDateType.NO_EXPIRY], {
       message: "Due- or expiry-date type must be chosen",
     }),
 
@@ -87,8 +88,8 @@ export const QuickProductFormSchema = z
   })
   .refine(
     ({ dueDateType, dueOrExpiryDate, packagingDate }) => {
-      // No need to check anything for no-expiry
-      if (dueDateType === "no-expiry") return true;
+      // No need to check anything for NO_EXPIRY
+      if (dueDateType === DueDateType.NO_EXPIRY) return true;
       if (!dueOrExpiryDate) return false;
       if (!packagingDate) return true;
       return packagingDate < dueOrExpiryDate;
@@ -100,8 +101,8 @@ export const QuickProductFormSchema = z
   )
   .refine(
     ({ dueDateType, packagingDate }) => {
-      // No need to check anything for no-expiry
-      if (dueDateType === "no-expiry") return true;
+      // No need to check anything for NO_EXPIRY
+      if (dueDateType === DueDateType.NO_EXPIRY) return true;
       if (!packagingDate) return true;
       const today = dateToISODate(new Date());
       return packagingDate <= today;

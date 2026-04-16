@@ -23,14 +23,12 @@ export async function quickProductFormSubmit(
     return submission.reply();
   }
 
-  let dueDateType = "BEST_BEFORE";
-  if (submission.value.dueDateType === "expiry-date")
-    dueDateType = "EXPIRY_DATE";
-  else if (submission.value.dueDateType === "no-expiry")
-    dueDateType = "NO_EXPIRY";
-
-  const canExpire = dueDateType !== DueDateType.NO_EXPIRY;
+  const canExpire = submission.value.dueDateType !== DueDateType.NO_EXPIRY;
   const data = submission.value;
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath("/scan");
+  redirect("/scan");
+}
 
   const queuedProduct = await prisma.product.create({
     data: {
