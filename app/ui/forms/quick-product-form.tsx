@@ -6,36 +6,51 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
   KeyboardEvent,
   useActionState,
 } from "react";
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
-import { ProductLocation, QuantityUnit } from "@/interfaces/grocy";
+import {
+  ProductLocation as PrLocation,
+  QuantityUnit,
+} from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { quickProductFormSubmit } from "@/forms/quick-product-form-submit";
 import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 import { Button } from "../button";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "../product/location-dropdown";
-import { addYears, dateToISODate } from "@/lib/date";
-import { ModeType, Option } from "@/interfaces";
-import CustomSelect, { CustomSelectHandle } from "../custom-select";
 import { FormLabel } from "./inputs/form-label";
 import { FormField } from "./inputs/form-field";
 import { FormErrors } from "./inputs/form-errors";
-import { FormCheckbox } from "./inputs/form-checkbox";
 import {
   ModeToQuantityTitle,
   ModeToUnitTitle,
-  UnitModeDropdown,
 } from "../product/unit-mode-dropdown";
 import { CameraApp } from "../camera-app";
 import clsx from "clsx";
-import { useForm } from "@conform-to/react";
+import { getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import TooltipWrapper from "../tooltip-wrapper";
+import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
+import {
+  dateInputCommonStyles,
+  dueDateTypeOptions,
+  dueDaysInputCommonStyles,
+  inputCommonStyles,
+  unitSystemOptions,
+} from "@/lib/product-form-shared";
+import CustomisableSelect from "../customisable-select";
+import {
+  DueDaysColumn,
+  FormColumn,
+  FormRow,
+  FormCheckbox,
+  ShouldNotBeFrozenTooltip,
+  WeightModeTooltip,
+  PackagingDateTooltip,
+} from "@/ui/forms/form-utils";
 
 export function QuickProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(
@@ -47,6 +62,14 @@ export function QuickProductForm({ code }: { code: string }) {
     // Sync the result of last submission
     lastResult,
 
+    defaultValue: {
+      unitAmount: "1.0",
+      defaultDueDays: "0",
+      defaultDueDaysAfterOpen: "0",
+      defaultDueDaysAfterFreezing: "0",
+      defaultDueDaysAfterThawing: "0",
+    },
+
     // Reuse the validation logic on the client
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: QuickProductFormSchema });
@@ -57,90 +80,36 @@ export function QuickProductForm({ code }: { code: string }) {
     shouldRevalidate: "onInput",
   });
 
-  const [quantity, setQuantity] = useState<string>("");
   const [shouldNotBeFrozen, setShouldNotBeFrozen] = useState<boolean>(false);
-  const [expiryMode, setExpiryMode] = useState<Option | null>(null);
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(UnitSystem.WEIGHT);
+  const [dueDateType, setDueDateType] = useState<DueDateType>(
+    DueDateType.BEST_BEFORE,
+  );
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [packagingDate, setPackagingDate] = useState<Date | null>(null);
-  const [defaultDueDays, setDefaultDueDays] = useState<number>(0);
-  const [defaultDueAfterOpen, setDefaultDueAfterOpen] = useState<number>(0);
-  const quSelectRef = useRef<CustomSelectHandle>(null);
-
-  const [defaultDueAfterFreezing, setDefaultDueAfterFreezing] =
-    useState<number>(0);
-
-  const [defaultDueAfterThawing, setDefaultDueAfterThawing] =
-    useState<number>(0);
-
-  const [selectedWeightUnitId, setSelectedWeightUnitId] = useState<
-    number | null
-  >(null);
-
-  const [selectedUnitMode, setSelectedUnitMode] = useState<
-    ModeType | undefined
-  >(undefined);
 
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
-  const locations = use(
-    useContext(LocationContext) as Promise<ProductLocation[]>,
-  );
-
-  const inputCommonStyles: string = clsx(
-    "block",
-    "rounded-md",
-    "my-[9.5]",
-    "py-[6]",
-    "px-2",
-    "border-1!",
-    "border-[#a0a7c3]!",
-    "hover:border-[#ebf2ff]!",
-    "focus:border-[#c7c92c]!",
-    "hover:focus:border-[#c7c92c]!",
-    "focus:border-2!",
-    "text-base",
-    "text-left",
-    "bg-[#30384f]",
-    "placeholder:font-normal",
-    "placeholder:text-grey-600",
-    "focus:placeholder:text-red-400",
-    "invalid:border-red-[#fb2c36]",
-    "focus:invalid:text-yellow-300",
-    "focus:invalid:placeholder:text-white-600",
-    "focus:invalid:bg-[#68352c]",
-    "focus:invalid:border-[#e75f5f]",
-    "outline-0!",
-    "min-h-[38px]",
-  );
-
-  const dueDaysInputCommonStyles: string = clsx(
-    "peer",
-    "w-45",
-    inputCommonStyles,
-    "rounded-md!",
-    "relative",
-    "top-[-1]",
-    "mb-[-3]",
-  );
-
-  const dateInputCommonStyles: string = clsx(
-    "w-38",
-    inputCommonStyles,
-    "relative",
-    "top-[-1]",
-  );
+  const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
 
   const calculateDueDays = useCallback(() => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
-    setDefaultDueDays(
-      Math.abs(
-        Math.round(
-          (packagingDate.getTime() - expiryDate.getTime()) /
-            (1000 * 60 * 60 * 24),
+    form.update({
+      value: {
+        defaultDueDays: Math.abs(
+          Math.round(
+            (packagingDate.getTime() - expiryDate.getTime()) /
+              (1000 * 60 * 60 * 24),
+          ),
         ),
-      ),
-    );
+      },
+    });
   }, [expiryDate, packagingDate]);
+
+  // Set the due days when a packing date and due/expiry dates are set
+  useEffect(() => {
+    calculateDueDays();
+  }, [expiryDate, packagingDate, calculateDueDays]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
@@ -148,18 +117,6 @@ export function QuickProductForm({ code }: { code: string }) {
       e.preventDefault();
     }
   };
-
-  // Clear unit selection dropdown and amount input when the unit type is changed
-  useEffect(() => {
-    setSelectedWeightUnitId(null);
-    setQuantity(selectedUnitMode === "abstract" ? "1.0" : "");
-    quSelectRef.current?.clear();
-  }, [selectedUnitMode]);
-
-  // Set the due days when a packing date and due/expiry dates are set
-  useEffect(() => {
-    calculateDueDays();
-  }, [expiryDate, packagingDate, calculateDueDays]);
 
   return (
     <form
@@ -169,120 +126,105 @@ export function QuickProductForm({ code }: { code: string }) {
       noValidate
       onKeyDown={handleKeyDown}
       className="pb-25"
+      aria-describedby={form.errors ? form.errorId : undefined}
     >
-      <input name="barcode" type="hidden" value={code} />
+      <input
+        {...getInputProps(fields.barcode, { type: "hidden" })}
+        value={code}
+      />
+      <div id={form.errorId}>{form.errors}</div>
       <div className="flex flex-col">
-        <div className="flex flex-row gap-5">
+        <FormRow>
           <div className="flex-auto">
             <h1 className="mb-3 inline-block text-lg font-bold text-slate-400 uppercase">
-              Quick product capture
+              Initial product capture
             </h1>
             <TooltipWrapper id="form-purpose-tooltip">
               This form captures the essentials for a product quickly while you
               have the product at hand, only queueing it to be completed and
-              added to Grocy when your products are safely back under
+              added to Grocy later while your products are safely back under
               refrigeration or freezing conditions.
             </TooltipWrapper>
           </div>
-        </div>
+        </FormRow>
 
-        <div className="flex flex-row gap-5">
-          <div className="mb-4 flex-auto">
+        <FormRow>
+          <FormColumn className="flex-auto mb-2">
             <FormLabel htmlFor={fields.name.name} title="Product name *" />
             <FormField>
               <input
-                id={fields.name.name}
-                type="text"
-                key={fields.name.key}
-                name={fields.name.name}
-                defaultValue={fields.name.initialValue}
-                minLength={2}
-                maxLength={64}
-                placeholder="Name of the product to create, 2 to 64 characters long"
-                className={clsx("w-full", "pr-3", inputCommonStyles)}
-                aria-describedby="name-error"
-                required
+                {...getInputProps(fields.name, { type: "text" })}
+                placeholder="Name of the product to create, 2 to 128 characters long"
+                className={clsx("w-full", "pr-3", inputCommonStyles, "mb-0")}
               />
             </FormField>
-            <FormErrors id="name-error" errors={fields.name.errors} />
-          </div>
-        </div>
+            <FormErrors id={fields.name.errorId} errors={fields.name.errors} />
+          </FormColumn>
+        </FormRow>
 
-        <div className="flex flex-row gap-5">
-          <div className="mb-4 flex-auto">
+        <FormRow>
+          <FormColumn>
             <div className="flex flex-col leading-7">
               <FormField>
                 <FormCheckbox
-                  id={fields.shouldNotBeFrozen.name}
-                  ariaDescribedBy="should-not-be-frozen-error"
-                  checked={fields.shouldNotBeFrozen.initialValue ? true : false}
+                  fieldInfo={fields.shouldNotBeFrozen}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setShouldNotBeFrozen(e.target.checked)
                   }
-                />
-                <label
-                  htmlFor={fields.shouldNotBeFrozen.name}
-                  className="leading-6"
                 >
                   This product should not be frozen
-                  <TooltipWrapper id="not-frozen-tooltip">
-                    Checking this checkbox will hide some options from you,
-                    making it a bit easier to fill out this form. Note that the
-                    dropdowns may have entries that are disabled by activating
-                    this so if you don&apos;t fill out the form in order you may
-                    need to correct the choices after.
-                  </TooltipWrapper>
-                </label>
+                  <ShouldNotBeFrozenTooltip />
+                </FormCheckbox>
               </FormField>
               <FormErrors
-                id="should-not-be-frozen-error"
+                id={fields.shouldNotBeFrozen.errorId}
                 errors={fields.shouldNotBeFrozen.errors}
               />
             </div>
-          </div>
-        </div>
+          </FormColumn>
+        </FormRow>
 
-        <div className="flex flex-row flex-wrap gap-x-5">
-          <div className="mb-3 flex-none">
+        <FormRow>
+          <FormColumn className="flex-none">
             <FormLabel
               htmlFor="unitSystem"
               title="Unit system *"
               className="inline"
             >
-              <TooltipWrapper id="weight-mode-tooltip">
-                For the units specify the discrete weight, volume or more
-                abstract unit you buy this product at. E.g. if you buy it in a
-                450g package, specify just that. Or your bell peppers might come
-                in a bag of 3 without listing the weight, so you specify
-                &ldquo;1 bag&rdquo; as the abstract unit here. We will refine
-                the details when submitting the data to Grocy.
-              </TooltipWrapper>
+              <WeightModeTooltip />
             </FormLabel>
             <FormField>
-              <UnitModeDropdown
-                name="unitSystem"
-                className="w-45 flex-2"
-                aria-describedby="unit-system-error"
-                setSelectedMode={setSelectedUnitMode}
+              <CustomisableSelect
+                {...getInputProps(fields.unitSystem, { type: "number" })}
+                options={unitSystemOptions}
+                onChange={(e) => {
+                  setUnitSystem(e.currentTarget.value as UnitSystem);
+                  form.update({
+                    value: {
+                      unitSystem: e.currentTarget.value as UnitSystem,
+                      unitAmount:
+                        e.currentTarget.value === UnitSystem.ABSTRACT
+                          ? "1.0"
+                          : "",
+                    },
+                  });
+                }}
+                required
               />
             </FormField>
             <FormErrors
-              id="unit-system-error"
+              id={fields.unitSystem.errorId}
               errors={fields.unitSystem.errors}
             />
-          </div>
-          <div className="mb-4 flex-none">
+          </FormColumn>
+          <FormColumn className="flex-none">
             <FormLabel
-              htmlFor={fields.mainQuantity.name}
-              title={ModeToQuantityTitle(selectedUnitMode)}
+              htmlFor={fields.unitAmount.name}
+              title={ModeToQuantityTitle(fields.unitSystem?.value)}
             ></FormLabel>
             <FormField>
               <input
-                id={fields.mainQuantity.name}
-                name={fields.mainQuantity.name}
-                type="number"
-                min={0.001}
-                max={10000}
+                {...getInputProps(fields.unitAmount, { type: "number" })}
                 step={0.001}
                 placeholder="Number"
                 className={clsx(
@@ -291,329 +233,173 @@ export function QuickProductForm({ code }: { code: string }) {
                   "w-30",
                   inputCommonStyles,
                   "rounded-md!",
-                  "relative",
-                  "top-[-1]",
-                  //"focus:invalid:border-[#e75f5f]!",
-                  "mb-[-3]",
                 )}
-                aria-describedby="main-quantity-error"
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(Number.parseFloat(e.target.value).toString())
-                }
-                required
               />
             </FormField>
             <FormErrors
-              id="main-quantity-error"
-              errors={fields.mainQuantity.errors}
+              id={fields.unitAmount.errorId}
+              errors={fields.unitAmount.errors}
             />
-          </div>
-          <div className="mb-4 grow">
+          </FormColumn>
+          <FormColumn className="grow">
             <FormLabel
-              htmlFor={fields.mainQuantityUnitId.name}
-              title={ModeToUnitTitle(selectedUnitMode)}
+              htmlFor={fields.unitId.name}
+              title={ModeToUnitTitle(fields.unitSystem?.value)}
             ></FormLabel>
             <FormField>
               <QuantityUnitsDropdown
-                ref={quSelectRef}
-                name={fields.mainQuantityUnitId.name}
+                {...getInputProps(fields.unitId, {
+                  type: "number",
+                })}
                 units={units}
-                selectedId={selectedWeightUnitId}
+                unitSystem={unitSystem}
                 className="w-46"
-                mode={selectedUnitMode}
-                isSearchable={false}
-                aria-describedby="main-quantity-id-error"
-                maxMenuHeight={1000}
                 required
               />
             </FormField>
             <FormErrors
-              id="main-quantity-id-error"
-              errors={fields.mainQuantityUnitId.errors}
+              id={fields.unitId.errorId}
+              errors={fields.unitId.errors}
             />
-          </div>
-        </div>
+          </FormColumn>
+        </FormRow>
 
-        <div className="flex flex-row gap-5">
-          <div className="mb-4 grow">
+        <FormRow>
+          <FormColumn className="grow">
             <FormLabel
               htmlFor={fields.defaultLocationId.name}
               title="Initial product location *"
             ></FormLabel>
             <FormField>
               <LocationDropdown
-                key={fields.defaultLocationId.key}
-                name={fields.defaultLocationId.name}
+                {...getInputProps(fields.defaultLocationId, { type: "number" })}
                 units={locations}
                 className="w-auto flex-2"
-                aria-describedby="default-product-location-error"
-                optional={false}
                 noFreezers={shouldNotBeFrozen}
                 required
               />
             </FormField>
             <FormErrors
-              id="default-product-location-error"
+              id={fields.defaultLocationId.errorId}
               errors={fields.defaultLocationId.errors}
             />
-          </div>
-        </div>
+          </FormColumn>
+        </FormRow>
 
-        <div className="flex flex-row flex-wrap gap-x-5">
-          <div className="mb-4 flex-none">
+        <FormRow>
+          <FormColumn className="flex-none">
             <FormLabel
               htmlFor={fields.dueDateType.name}
               title="Due date type *"
             ></FormLabel>
             <FormField>
-              <CustomSelect
-                name={fields.dueDateType.name}
-                options={[
-                  { value: "best-before", label: "Best before" },
-                  { value: "expiry-date", label: "Expires at" },
-                  { value: "no-expiry", label: "Does not expire" },
-                ]}
-                className="w-40 flex-none"
-                aria-describedby="due-date-type-error"
-                placeholder="Expiry..."
-                defaultValue={expiryMode}
-                required={true}
-                isSearchable={false}
-                onChange={(selected) => {
-                  if (
-                    selected !== undefined &&
-                    selected !== null &&
-                    selected.value !== undefined
-                  ) {
-                    setExpiryMode(selected);
-                  }
-                }}
+              <CustomisableSelect
+                {...getInputProps(fields.dueDateType, { type: "number" })}
+                options={dueDateTypeOptions}
+                onChange={(e) =>
+                  setDueDateType(e.currentTarget.value as DueDateType)
+                }
               />
             </FormField>
             <FormErrors
               id="due-date-type-error"
               errors={fields.dueDateType.errors}
             />
-          </div>
+          </FormColumn>
 
-          {expiryMode !== null && expiryMode.value !== "no-expiry" && (
-            <>
-              <div className="mb-4 flex-none">
-                <FormLabel
-                  htmlFor={fields.dueOrExpiryDate.name}
-                  title={
-                    expiryMode.value === "best-before"
-                      ? "Best before *"
-                      : "Expires at *"
-                  }
-                ></FormLabel>
-                <FormField>
-                  <input
-                    type="date"
-                    id={fields.dueOrExpiryDate.name}
-                    name={fields.dueOrExpiryDate.name}
-                    defaultValue={fields.dueOrExpiryDate.initialValue}
-                    min={dateToISODate(addYears(new Date(), -1))}
-                    max={dateToISODate(addYears(new Date(), 10))}
-                    required
-                    className={dateInputCommonStyles}
-                    aria-describedby="due-or-expiry-date-error"
-                    onChange={(e) => {
-                      setExpiryDate(new Date(e.target.valueAsNumber));
-                    }}
-                  />
-                </FormField>
-                <FormErrors
-                  id="due-or-expiry-date-error"
-                  errors={fields.dueOrExpiryDate.errors}
-                />
-              </div>
-              <div className="mb-4 flex-none">
-                <FormLabel
-                  htmlFor={fields.packagingDate.name}
-                  title="Packaging date"
-                  className="inline"
-                >
-                  <TooltipWrapper id="packaging-date-tooltip">
-                    When you set or change <em>both</em> the due- and packaging
-                    dates the &ldquo;default due days&rdquo; will be set to the
-                    difference between these two dates.
-                    <br />
-                    <br />
-                    Besides this utility the packaging date input currently has
-                    no function other than to calculate this date difference for
-                    you.
-                  </TooltipWrapper>
-                </FormLabel>
-                <FormField>
-                  <input
-                    type="date"
-                    id={fields.packagingDate.name}
-                    name={fields.packagingDate.name}
-                    defaultValue={fields.packagingDate.initialValue}
-                    min={dateToISODate(addYears(new Date(), -1))}
-                    max={
-                      expiryDate !== null
-                        ? dateToISODate(expiryDate)
-                        : dateToISODate(addYears(new Date(), 10))
-                    }
-                    className={dateInputCommonStyles}
-                    aria-describedby="packaging-date-error"
-                    onChange={(e) => {
-                      setPackagingDate(new Date(e.target.valueAsNumber));
-                    }}
-                  />
-                </FormField>
-                <FormErrors
-                  id="packaging-date-error"
-                  errors={fields.packagingDate.errors}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {expiryMode !== null && expiryMode.value !== "no-expiry" && (
-          <div className="mb-5 flex flex-row flex-wrap gap-5">
-            <div className="flex-1">
-              <FormLabel
-                htmlFor={fields.defaultDueDays.name}
-                className="w-46 text-xs text-wrap"
-                title="Default due days *"
-              ></FormLabel>
-              <FormField>
-                <input
-                  id={fields.defaultDueDays.name}
-                  name={fields.defaultDueDays.name}
-                  type="number"
-                  min={0}
-                  max={10000}
-                  step={1}
-                  placeholder="due days"
-                  value={defaultDueDays}
-                  onChange={(e) =>
-                    setDefaultDueDays(Number.parseInt(e.target.value))
-                  }
-                  className={dueDaysInputCommonStyles}
-                  aria-describedby="default-due-days-error"
-                  required
-                />
-              </FormField>
-              <FormErrors
-                id="default-due-days-error"
-                errors={fields.defaultDueDays.errors}
-              />
-            </div>
-            <div className="flex-1">
-              <FormLabel
-                htmlFor={fields.defaultDueDaysAfterOpen.name}
-                className="w-46 text-xs text-wrap"
-                title="Default due days after open "
-              ></FormLabel>
-              <FormField>
-                <input
-                  id={fields.defaultDueDaysAfterOpen.name}
-                  name={fields.defaultDueDaysAfterOpen.name}
-                  type="number"
-                  min={0}
-                  max={10000}
-                  step={1}
-                  placeholder="days after open"
-                  value={defaultDueAfterOpen}
-                  onChange={(e) =>
-                    setDefaultDueAfterOpen(Number.parseInt(e.target.value))
-                  }
-                  className={dueDaysInputCommonStyles}
-                  aria-describedby="default-due-days-after-open-error"
-                  required
-                />
-              </FormField>
-              <FormErrors
-                id="default-due-days-after-open-error"
-                errors={fields.defaultDueDaysAfterOpen.errors}
-              />
-            </div>
-
-            {!shouldNotBeFrozen && (
+          {fields.dueDateType.value !== null &&
+            fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
               <>
-                <div className="flex-1">
+                <FormColumn className="flex-none">
                   <FormLabel
-                    htmlFor={fields.defaultDueDaysAfterFreezing.name}
-                    className="w-46 text-xs text-wrap"
-                    title="Default due days after freezing *"
+                    htmlFor={fields.dueOrExpiryDate.name}
+                    title={
+                      fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE
+                        ? "Best before *"
+                        : "Expires at *"
+                    }
                   ></FormLabel>
                   <FormField>
                     <input
-                      id={fields.defaultDueDaysAfterFreezing.name}
-                      name={fields.defaultDueDaysAfterFreezing.name}
-                      type="number"
-                      min={0}
-                      max={10000}
-                      step={1}
-                      placeholder="days after freezing"
-                      value={defaultDueAfterFreezing}
-                      onChange={(e) =>
-                        setDefaultDueAfterFreezing(
-                          Number.parseInt(e.target.value),
-                        )
-                      }
-                      className={dueDaysInputCommonStyles}
-                      aria-describedby="default-due-days-after-freezing-error"
+                      {...getInputProps(fields.dueOrExpiryDate, {
+                        type: "date",
+                      })}
                       required
+                      className={dateInputCommonStyles}
+                      onChange={(e) =>
+                        setExpiryDate(new Date(e.currentTarget.value))
+                      }
                     />
                   </FormField>
                   <FormErrors
-                    id="default-due-days-after-freezing-error"
-                    errors={fields.defaultDueDaysAfterFreezing.errors}
+                    id={fields.dueOrExpiryDate.errorId}
+                    errors={fields.dueOrExpiryDate.errors}
                   />
-                </div>
-                <div className="flex-1">
+                </FormColumn>
+                <FormColumn className="flex-none">
                   <FormLabel
-                    htmlFor={fields.defaultDueDaysAfterThawing.name}
-                    className="w-46 text-xs text-wrap"
-                    title="Default due days after thawing *"
-                  ></FormLabel>
+                    htmlFor={fields.packagingDate.name}
+                    title="Packaging date"
+                    className="inline"
+                  >
+                    <PackagingDateTooltip />
+                  </FormLabel>
                   <FormField>
                     <input
-                      id={fields.defaultDueDaysAfterThawing.name}
-                      name={fields.defaultDueDaysAfterThawing.name}
-                      type="number"
-                      min={0}
-                      max={10000}
-                      step={1}
-                      placeholder="days after thawing"
-                      value={defaultDueAfterThawing}
+                      {...getInputProps(fields.packagingDate, { type: "date" })}
+                      className={dateInputCommonStyles}
                       onChange={(e) =>
-                        setDefaultDueAfterThawing(
-                          Number.parseInt(e.target.value),
-                        )
+                        setPackagingDate(new Date(e.currentTarget.value))
                       }
-                      className={dueDaysInputCommonStyles}
-                      aria-describedby="default-due-days-after-thawing-error"
-                      // onChange={(e) => setQuantity(Number.parseFloat(e.target.value).toString())}
-                      required
                     />
                   </FormField>
                   <FormErrors
-                    id="default-due-days-after-thawing-error"
-                    errors={fields.defaultDueDaysAfterThawing.errors}
+                    id="packaging-date-error"
+                    errors={fields.packagingDate.errors}
                   />
-                </div>
+                </FormColumn>
               </>
             )}
-          </div>
+        </FormRow>
+
+        {dueDateType !== DueDateType.NO_EXPIRY && (
+          <FormRow className="flex-col">
+            <DueDaysColumn
+              fieldInfo={fields.defaultDueDays}
+              title="Default due days *"
+              placeholder="default due days"
+            />
+            <DueDaysColumn
+              fieldInfo={fields.defaultDueDaysAfterOpen}
+              title="Default due days after open *"
+              placeholder="days after open"
+            />
+            {!shouldNotBeFrozen && (
+              <>
+                <DueDaysColumn
+                  fieldInfo={fields.defaultDueDaysAfterFreezing}
+                  title="Default due days after freezing *"
+                  placeholder="days after freezing"
+                />
+                <DueDaysColumn
+                  fieldInfo={fields.defaultDueDaysAfterThawing}
+                  title="Default due days after thawing *"
+                  placeholder="days after thawing"
+                />
+              </>
+            )}
+          </FormRow>
         )}
 
         <CameraApp />
 
-        <div className="flex flex-row gap-5">
-          <div className="mt-6 flex-none">
+        <FormRow>
+          <FormColumn className="mt-6 flex-none">
             <Button type="submit" disabled={submitPending}>
-              Create product
+              Add to queue
             </Button>
-          </div>
-        </div>
+          </FormColumn>
+        </FormRow>
       </div>
     </form>
   );

@@ -1,79 +1,70 @@
 "use client";
 
-import CustomSelect from "../custom-select";
-import { SingleValue } from "react-select";
-import { OptionType } from "@/interfaces/options";
+import { UnitSystem } from "@/generated/prisma/enums";
+import { QuantityUnit } from "@/interfaces/grocy";
+import { unitSystemOptions } from "@/lib/product-form-shared";
+import CustomisableSelect, { CustomisableSelectProps } from "@/ui/customisable-select";
 
-type ModeType = "weight" | "volume" | "abstract";
-
-export function ModeToQuantityTitle(mode: string | undefined) {
+export function ModeToQuantityTitle(mode: UnitSystem | string | undefined) {
   let value: string = "Amount";
   switch (mode) {
-    case "weight":
-      value = "Weight";
-    case "volume":
-      value = "Volume";
-    case "abstract":
-      value = "Unit Amount";
+    case UnitSystem.WEIGHT:
+      value = "Weight amount";
+      break;
+    case UnitSystem.VOLUME:
+      value = "Volume amount";
+      break;
+    case UnitSystem.ABSTRACT:
+      value = "Unit amount";
+      break;
     default:
       value = "Amount";
+      break;
   }
   return <>{value} *</>;
 }
 
-export function ModeToUnitTitle(mode: string | undefined) {
+export function ModeToUnitTitle(mode: UnitSystem | string | undefined) {
   let value: string = "Unit";
   switch (mode) {
-    case "weight":
+    case UnitSystem.WEIGHT:
       value = "Weight unit";
-    case "volume":
+      break;
+    case UnitSystem.VOLUME:
       value = "Volume unit";
-    case "abstract":
+      break;
+    case UnitSystem.ABSTRACT:
       value = "Abstract/discrete unit";
+      break;
     default:
       value = "Unit";
+      break;
   }
   return <>{value} *</>;
 }
 
-export function UnitModeDropdown({
-  name,
-  className,
-  setSelectedMode,
-}: {
-  name: string;
-  className?: string;
-  setSelectedMode: React.Dispatch<React.SetStateAction<ModeType | undefined>>;
-}) {
+interface UnitModeDropdownProps extends Omit<CustomisableSelectProps, 'options'> {
+  //units: QuantityUnit[];
+  //mode: UnitSystem;
+  options?: CustomisableSelectProps['options'];
+  //setSelectedMode: React.Dispatch<React.SetStateAction<UnitSystem | undefined>>;
+}
+
+export const UnitModeDropdown: React.FC<UnitModeDropdownProps> = ({
+  //units,
+  //mode,
+  //setSelectedMode,
+  ...rest
+}) => {
   return (
-    <CustomSelect
-      id={name}
-      className={className}
-      maxMenuHeight={320}
-      name={name}
-      options={[
-        {
-          value: "weight",
-          label: "By weight",
-        },
-        {
-          value: "volume",
-          label: "By volume",
-        },
-        {
-          value: "abstract",
-          label: "Abstract/discrete",
-        },
-      ]}
-      required={true}
-      isSearchable={false}
-      placeholder="Pick..."
-      onChange={(inputValue: SingleValue<OptionType> /* action */) => {
-        if (inputValue?.value !== undefined) {
-          const value = inputValue?.value as ModeType;
-          setSelectedMode(value);
-        }
-      }}
+    <CustomisableSelect {...rest}
+      options={unitSystemOptions}
+      // onChange={(inputValue: SingleValue<OptionType> /* action */) => {
+      //   if (inputValue?.value !== undefined) {
+      //     const value = inputValue?.value as UnitSystem;
+      //     setSelectedMode(value);
+      //   }
+      // }}
     />
   );
 }

@@ -1,13 +1,12 @@
 "use client";
 
 import { QuantityUnit } from "@/interfaces/grocy";
-import CustomSelect, { CustomSelectHandle } from "../custom-select";
-import {
-  OptionOrGroupArray,
-  OptionType,
-} from "@/interfaces/options";
-import { ModeType } from "@/interfaces";
-import { useState } from "react";
+import React, { useState } from "react";
+import { UnitSystem } from "@/generated/prisma/enums";
+import CustomisableSelect, {
+  CustomisableSelectProps,
+  CustomisableSelectOptionArray,
+} from "../customisable-select";
 
 const quantityTypes = [
   "weight-metric",
@@ -27,39 +26,26 @@ const quantityGroupLabels: Record<QuantityType, string> = {
   "volume-us-dry": "Volume (US; dry)",
 };
 
-export function QuantityUnitsDropdown({
-  name,
-  units,
-  className,
-  mode,
-  selectedId,
-  //setSelectedId,
-  required = false,
-  isSearchable = true,
-  maxMenuHeight = 320,
-  ref,
-}: {
-  name: string;
+interface QuantityUnitsDropdownProps extends Omit<CustomisableSelectProps, 'options'> {
   units: QuantityUnit[];
-  className?: string;
-  mode: ModeType | undefined;
-  selectedId: number | null;
-  //setSelectedId: React.Dispatch<React.SetStateAction<number>>;
-  required?: boolean | undefined;
-  isSearchable?: boolean;
-  maxMenuHeight?: number;
-  ref?: React.RefObject<CustomSelectHandle | null>;
-}) {
+  unitSystem: UnitSystem;
+  options?: CustomisableSelectProps['options'];
+}
+
+export const QuantityUnitsDropdown: React.FC<QuantityUnitsDropdownProps> = ({
+  units,
+  unitSystem,
+  ...rest
+}) => {
   const options = quantityUnitsToOptions({
-    entityObjects: units,
-    mode: mode,
+    units: units,
+    unitSystem: unitSystem,
   });
 
-  const pickMe: OptionOrGroupArray = [
+  const pickMe: CustomisableSelectOptionArray = [
     {
-      value: "0",
+      value: "",
       label: "Pick ...",
-      isDisabled: true,
     },
   ];
 
@@ -69,7 +55,7 @@ export function QuantityUnitsDropdown({
 
   options.map((value) => {
     if ("value" in value) {
-      if (Number(value.value) === selectedId) {
+      if (Number(value.value) === rest.defaultValue) {
         setSelectedOption(value);
       }
     }
@@ -88,54 +74,40 @@ export function QuantityUnitsDropdown({
 
   return (
     <>
-      <CustomSelect
-        ref={ref}
-        id={name}
-        className={className}
-        maxMenuHeight={maxMenuHeight}
-        name={name}
+      <CustomisableSelect {...rest}
         options={combinedOptions}
-        required={required}
-        isSearchable={isSearchable}
-        value={selectedOption}
-        //onChange={handleChange}
-        placeholder="Pick..."
-        noOptionsMessage={({ inputValue }) =>
-          inputValue
-            ? `No quantity units found for "${inputValue}"`
-            : "Start typing to pick..."
-        }
       />
     </>
   );
-}
+};
 
 function quantityUnitsToOptions({
-  entityObjects,
-  mode,
+  units,
+  unitSystem,
 }: {
-  entityObjects: QuantityUnit[];
-  mode: ModeType | undefined;
+  units: QuantityUnit[];
+  unitSystem: UnitSystem;
 }) {
-  if (entityObjects === undefined) return [];
+  if (units === undefined) return [];
 
-  const options: OptionOrGroupArray = [];
+  const options: CustomisableSelectOptionArray = [];
 
-  if (mode !== "abstract") {
+  if (unitSystem !== UnitSystem.ABSTRACT) {
     quantityTypes.forEach((type: QuantityType) => {
-      const groupOptions: OptionType[] = [];
-      entityObjects.forEach((entity: QuantityUnit) => {
+      const groupOptions: CustomisableSelectOptionArray = [];
+      units.forEach((entity: QuantityUnit) => {
         if (
           entity !== undefined &&
+          entity.id &&
           entity.userfields !== undefined &&
           entity.userfields.type !== undefined &&
           entity.userfields.type !== null &&
-          RegExp(`${mode}`).test(type)
+          RegExp(`${unitSystem}`, "i").test(type)
         ) {
           if (entity.userfields.type == type) {
             groupOptions.push({
-              value: entity.id?.toString(),
-              label: entity.name,
+              value: entity.id.toString(),
+              label: entity.name!,
               type: entity.userfields.type,
             });
           }
@@ -156,17 +128,18 @@ function quantityUnitsToOptions({
       }
     }
 
-    entityObjects.sort(compareWords).forEach((entity: QuantityUnit) => {
+    units.sort(compareWords).forEach((entity: QuantityUnit) => {
       if (
         entity !== undefined &&
+        entity.id &&
         entity.userfields !== undefined &&
         (entity.userfields.type == undefined ||
           entity.userfields.type === null ||
-          !RegExp(/(volume|weight)/).test(entity.userfields.type))
+          !RegExp(/(VOLUME|WEIGHT)/i).test(entity.userfields.type))
       ) {
         options.push({
           value: entity.id?.toString(),
-          label: entity.name,
+          label: entity.name!,
           type: entity.userfields.type,
         });
       }

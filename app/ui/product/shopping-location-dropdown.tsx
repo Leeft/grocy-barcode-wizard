@@ -1,70 +1,59 @@
 "use client";
 
-import { SingleValue } from "react-select";
-import CustomSelect from "../custom-select";
 import { ShoppingLocation as Location } from "@/interfaces/grocy";
-import { OptionType } from "@/interfaces/options";
+import CustomisableSelect, {
+  CustomisableSelectOptionArray,
+  CustomisableSelectProps,
+} from "@/ui/customisable-select";
 
-export function ShoppingLocationDropdown({
-  name,
-  units,
-  className,
-  setSelectedId,
-  optional = false,
-  insert,
-  placeholder = "Pick a location...",
-}: {
-  name: string;
+interface ShoppingLocationDropdownProps extends Omit<
+  CustomisableSelectProps,
+  "options"
+> {
   units: Location[];
-  className?: string;
-  setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
-  optional?: boolean;
-  insert?: OptionType;
-  placeholder?: string;
-}) {
-  const options: OptionType[] = locationsToOptions({
+  //setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
+  options?: CustomisableSelectProps["options"];
+}
+
+export const ShoppingLocationDropdown: React.FC<
+  ShoppingLocationDropdownProps
+> = ({
+  units,
+  //setSelectedId,
+  ...rest
+}) => {
+  const options: CustomisableSelectOptionArray = locationsToOptions({
     entityObjects: units,
   });
 
-  let defaultValue = undefined;
-
-  if (optional && insert !== undefined) {
-    options.unshift(insert);
-    defaultValue = options[0];
-  }
+  // let defaultValue = undefined;
+  // if (!rest.required && insert !== undefined) {
+  //   options.unshift(insert);
+  //   defaultValue = options[0];
+  // }
 
   return (
-    <CustomSelect
-      className={className}
-      maxMenuHeight={500}
-      name={name}
+    <CustomisableSelect
+      {...rest}
       options={options}
-      onChange={(
-        inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */,
-      ) => {
-        if (setSelectedId && inputValue?.value !== undefined)
-          setSelectedId(Number.parseInt(inputValue?.value));
-      }}
-      defaultValue={defaultValue}
-      isSearchable
-      placeholder={placeholder}
-      noOptionsMessage={({ inputValue }) =>
-        inputValue
-          ? `No locations found for "${inputValue}"`
-          : "Start typing to pick..."
-      }
+      // onChange={(
+      //   inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */,
+      // ) => {
+      //   if (setSelectedId && inputValue?.value !== undefined)
+      //     setSelectedId(Number.parseInt(inputValue?.value));
+      // }}
     />
   );
-}
+};
 
 function locationsToOptions({
   entityObjects,
 }: {
   entityObjects: Location[];
-}): OptionType[] {
+}): CustomisableSelectOptionArray {
   if (entityObjects === undefined) return [];
 
-  const options: OptionType[] = [];
+  const options: CustomisableSelectOptionArray = [];
 
   function compareWords(a: Location, b: Location) {
     if (a.name!.toLowerCase() < b.name!.toLowerCase()) {
@@ -75,10 +64,12 @@ function locationsToOptions({
   }
 
   entityObjects.sort(compareWords).forEach((entity: Location) => {
-    options.push({
-      value: entity.id?.toString(),
-      label: entity.name,
-    });
+    if (entity.id && entity.name) {
+      options.push({
+        value: entity.id?.toString(),
+        label: entity.name,
+      });
+    }
   });
 
   return options;

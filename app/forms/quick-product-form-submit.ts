@@ -1,16 +1,14 @@
 "use server";
 
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
-import {
-  ProductCreateInput,
-  ProductPhotoUncheckedCreateInput,
-} from "@/generated/prisma/models";
+import { ProductPhotoUncheckedCreateInput } from "@/generated/prisma/models";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import prisma from "@/lib/prisma";
 import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 import { dataURLtoFile } from "@/lib/utils";
+import { dateToISODate } from "@/lib/date";
 
 export async function quickProductFormSubmit(
   prevstate: unknown,
@@ -25,10 +23,6 @@ export async function quickProductFormSubmit(
 
   const canExpire = submission.value.dueDateType !== DueDateType.NO_EXPIRY;
   const data = submission.value;
-  // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath("/scan");
-  redirect("/scan");
-}
 
   const queuedProduct = await prisma.product.create({
     data: {
@@ -36,12 +30,12 @@ export async function quickProductFormSubmit(
       pending: true,
       canBeFrozen: !data.shouldNotBeFrozen,
       unitSystem: data.unitSystem.toUpperCase() as UnitSystem,
-      unitAmount: data.mainQuantity,
-      unitChosen: data.mainQuantityUnitId,
+      unitAmount: data.unitAmount.toString(),
+      unitChosen: data.unitId,
       defaultLocation: data.defaultLocationId,
-      dueDateType: dueDateType as DueDateType,
-      expiresAt: canExpire ? data.dueOrExpiryDate! : null,
-      packagingDate: canExpire ? data.packagingDate! : null,
+      dueDateType: data.dueDateType,
+      expiresAt: canExpire ? dateToISODate(data.dueOrExpiryDate!) : null,
+      packagingDate: canExpire ? dateToISODate(data.packagingDate!) : null,
       defaultDueDays: canExpire ? data.defaultDueDays : null,
       defaultDueDaysAfterOpen: canExpire ? data.defaultDueDaysAfterOpen : null,
       defaultDueDaysAfterFreezing: canExpire
@@ -50,7 +44,7 @@ export async function quickProductFormSubmit(
       defaultDueDaysAfterThawing: canExpire
         ? data.defaultDueDaysAfterThawing
         : null,
-    } as ProductCreateInput,
+    },
   });
 
   console.log("queued product is", queuedProduct);
