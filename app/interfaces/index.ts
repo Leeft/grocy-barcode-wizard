@@ -42,8 +42,6 @@ export const specialBarcodeTypes = [
 
 export const productOnlyBarcodeTypes = ["product", "grocy-product"] as const;
 
-export type ModeType = "weight" | "volume" | "abstract";
-
 export type BarcodeAnyType = (typeof allBarcodeTypes)[number];
 export type BarcodeSpecialType = (typeof specialBarcodeTypes)[number];
 export type BarcodeProductType = (typeof productOnlyBarcodeTypes)[number];
