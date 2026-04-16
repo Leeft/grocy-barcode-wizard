@@ -32,7 +32,7 @@ model Product {
   pending                     Boolean
   canBeFrozen                 Boolean
   unitSystem                  UnitSystem    @default(WEIGHT)
-  unitAmount                  Decimal
+  unitAmount                  String
   unitChosen                  Int
   defaultLocation             Int
   dueDateType                 DueDateType   @default(BEST_BEFORE)
