@@ -32,7 +32,7 @@ export default async function BarcodePage({
       return (
         <>
           <BarcodeScannerApp slug={barcode} />
-          {/* <ExistingProductForm barcode={barcodeObject} /> */}
+          <ExistingProductForm barcode={barcodeObject} />
           <BarcodeActions
             barcode={barcodeObject}
             className="w-auto"
@@ -56,9 +56,10 @@ export default async function BarcodePage({
 
   let grocyBarcode: Barcode | null = null;
   try {
-    grocyBarcode = await processReceivedBarcode(barcode);
-  } catch (err) {
-    console.log("Couldn't get product by barcode:", err);
+    if (barcode !== "installHook.js.map")
+      grocyBarcode = await processReceivedBarcode(barcode);
+  } catch {
+    console.log(`Couldn't get product by barcode: ${barcode}`);
   }
 
   if (grocyBarcode !== null) {

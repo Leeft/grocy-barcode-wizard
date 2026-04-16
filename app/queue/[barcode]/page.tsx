@@ -1,6 +1,12 @@
 import Barcode from "@/lib/barcode";
-import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
-import QueuedProduct from "@/ui/product/queued-product";
+import {
+  getProduct,
+  getProductsByBarcode,
+  ProductsByBarcode,
+} from "@/lib/product-db";
+import { EditProductForm } from "@/ui/forms/edit-product-form";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function QueuedEntryPage({
   params,
@@ -19,22 +25,28 @@ export default async function QueuedEntryPage({
       queuedProductId: products[0].id,
     });
 
+    if (
+      barcodeObject.queuedProductId === undefined ||
+      isNaN(barcodeObject.queuedProductId)
+    ) {
+      redirect("/queue");
+    }
+
     // Does it also exist in grocy? If so, can jump straight to things
     // that can be done with the barcode.
     if (products[0].grocyProductId) {
-      return <>Should redirect here</>;
+      // FIXME: Redirect to a better place
+      redirect("/queue");
     }
 
     // It does exist in the database but not in grocy. The user will
     // have to capture the essentials for this product.
-    if (barcodeObject.queuedProductId) {
-      return (
-        <>
-          <h1 className="uppercase text-3x1">Placeholder product queue entry page</h1>
-          <QueuedProduct barcode={barcodeObject} />
-        </>
-      );
-    }
+    const product = getProduct(barcodeObject.queuedProductId);
+    return (
+      <Suspense>
+        <EditProductForm code={barcode} product={product} />
+      </Suspense>
+    );
   }
 
   return <>Oops</>;
