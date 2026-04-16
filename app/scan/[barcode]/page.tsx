@@ -75,10 +75,10 @@ export default async function BarcodePage({
     );
   }
 
-  const notFoundBarcode = new Barcode({
-    barcode: barcode,
-    scannedAt: new Date(),
-  });
+  // const notFoundBarcode = new Barcode({
+  //   barcode: barcode,
+  //   scannedAt: new Date(),
+  // });
 
   return (
     <>
@@ -93,7 +93,7 @@ async function processReceivedBarcode(code: string): Promise<Barcode> {
 
   try {
     barcode = new Barcode({ barcode: code, scannedAt: new Date() });
-  } catch (err) {
+  } catch {
     throw new Error("Not a valid barcode");
   }
 
