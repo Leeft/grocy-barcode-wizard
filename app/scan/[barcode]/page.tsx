@@ -7,6 +7,7 @@ import QueuedProduct from "@/ui/product/queued-product";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
+import prisma from "@/lib/prisma";
 
 export default async function BarcodePage({
   params,
@@ -14,6 +15,17 @@ export default async function BarcodePage({
   params: Promise<{ barcode: string }>;
 }) {
   const { barcode } = await params;
+
+  try {
+    await ensureBarcodeExists(barcode);
+    await prisma.barcode.update({
+      where: { barcode: barcode },
+      data: { queued: true },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    console.error("Couldn't update barcode status:", err);
+  }
 
   const products: ProductsByBarcode = await getProductsByBarcode(barcode);
 
