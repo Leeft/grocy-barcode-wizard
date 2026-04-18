@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export function FormLabel({
   htmlFor,
   className = "text-sm",
@@ -13,7 +15,7 @@ export function FormLabel({
     <span className="">
       <label
         htmlFor={htmlFor}
-        className={`mb-2 block text-sm font-medium text-slate-400 ${className}`}
+        className={clsx(`mb-2 block text-sm font-medium text-slate-400`,className)}
       >
         {title}
       </label>
