@@ -14,6 +14,8 @@ import {
 import DueDate from "../../due-date";
 import PackagingDate from "../../packaging-date";
 import Link from "next/link";
+import { getProductPhoto } from "@/lib/product-db";
+import { Suspense } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function ProductInfo({ product }: { product: any }) {
@@ -51,16 +53,21 @@ export async function ProductInfo({ product }: { product: any }) {
       break;
   }
 
+  let photo;
+  if (product.productPhoto) {
+    photo = await getProductPhoto(product.productPhoto.id);
+  }
+
   return (
     <Link
       href={`/queue/${product.barcodes[0].barcode}`}
-      className="my-3 w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600 block"
+      className="my-3 block w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600"
       title={`Process queued product “${product.name}”`}
     >
       <div className="flex w-full flex-col">
         <div className="flex flex-col md:flex-row">
           <div className="w-full flex-3 flex-row">
-            <div className="flex-1 text-slate-50 pl-5 -indent-5">
+            <div className="flex-1 pl-5 -indent-5 text-slate-50">
               <code className="text-green-500">
                 {product.barcodes[0]?.barcode}
               </code>{" "}
@@ -129,19 +136,21 @@ export async function ProductInfo({ product }: { product: any }) {
                 </div>
               )}
           </div>
-          {product.productPhoto && (
-            <div className="flex-1">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={
-                  `data:image/png;base64,` +
-                  product.productPhoto?.data.toBase64()
-                }
-                alt="Product photo"
-                className="float-right my-3 mr-2 block rounded-sm md:my-3 md:mt-2 md:ml-5 md:max-h-80 md:max-w-80"
-              />
-            </div>
-          )}
+          <Suspense>
+            {photo && (
+              <div className="flex-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    `data:image/png;base64,` +
+                    photo.data.toBase64()
+                  }
+                  alt="Product photo"
+                  className="float-right my-3 mr-2 block rounded-sm md:my-3 md:mt-2 md:ml-5 md:max-h-80 md:max-w-80"
+                />
+              </div>
+            )}
+          </Suspense>
         </div>
       </div>
     </Link>
