@@ -1,4 +1,8 @@
-import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
+import {
+  DueDateType,
+  PurchasePriceType,
+  UnitSystem,
+} from "@/generated/prisma/enums";
 import clsx from "clsx";
 
 export const inputCommonStyles: string = clsx(
@@ -57,4 +61,10 @@ export const unitSystemOptions = [
   { value: UnitSystem.WEIGHT, label: "By weight" },
   { value: UnitSystem.VOLUME, label: "By volume" },
   { value: UnitSystem.ABSTRACT, label: "Abstract/discrete" },
+];
+
+export const purchasePriceOptions = [
+  { value: PurchasePriceType.UNSPECIFIED, label: "Unspecified" },
+  { value: PurchasePriceType.UNIT_PRICE, label: "Unit price" },
+  { value: PurchasePriceType.TOTAL_PRICE, label: "Total price" },
 ];

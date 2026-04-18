@@ -9,6 +9,7 @@ export function addYears(_date: Date, years: number): Date {
 }
 
 export function dateToISODate(_date: Date): string {
+  if ( _date === undefined ) return '';
   const str: string | undefined = _date.toISOString().split("T")[0];
   if (str === undefined) {
     return "";

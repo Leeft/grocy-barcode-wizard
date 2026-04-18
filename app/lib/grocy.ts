@@ -49,6 +49,16 @@ const myMiddleware: Middleware = {
 export const grocyClient = createClient<paths>({ baseUrl: baseUrl });
 grocyClient.use(myMiddleware);
 
+export const fetchConfig = cache(async () => {
+  try {
+    const res = await grocyClient.GET("/system/config", {});
+    return res.data as Record<string, never>;
+  } catch (error) {
+    console.error("Error loading grocy config:", error);
+    throw new Error("Could not fetch grocy config.");
+  }
+});
+
 export const fetchQuantityUnits = cache(async () => {
   try {
     const res = await grocyClient.GET("/objects/{entity}", {

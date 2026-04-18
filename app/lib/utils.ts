@@ -9,3 +9,8 @@ export function dataURLtoFile(dataurl: string, filename: string): File {
   }
   return new File([u8arr], filename, { type: mime });
 }
+
+export const toMap = (map: any, obj: any) => {
+  map[obj.id] = obj;
+  return map;
+};
