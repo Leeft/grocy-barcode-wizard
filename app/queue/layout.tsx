@@ -1,4 +1,5 @@
 import {
+  fetchConfig,
   fetchLocations,
   fetchProductGroups,
   fetchProducts,
@@ -12,6 +13,7 @@ import LocationProvider from "@/providers/location-context";
 import ProductGroupProvider from "@/providers/product-group-context";
 import ProductProvider from "@/providers/product-context";
 import ShoppingLocationProvider from "@/providers/shopping-location-context";
+import GrocyConfigProvider from "@/providers/grocy-config-context";
 
 export default function QueueLayout({
   children,
@@ -25,7 +27,9 @@ export default function QueueLayout({
           <ProductProvider promise={fetchProducts()}>
             <ShoppingLocationProvider promise={fetchShoppingLocations()}>
               <LocationProvider promise={fetchLocations()}>
-                {children}
+                <GrocyConfigProvider promise={fetchConfig()}>
+                  {children}
+                </GrocyConfigProvider>
               </LocationProvider>
             </ShoppingLocationProvider>
           </ProductProvider>
