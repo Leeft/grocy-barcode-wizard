@@ -1,6 +1,6 @@
 import { dueDaysInputCommonStyles } from "@/lib/product-form-shared";
 import { FieldMetadata, getInputProps } from "@conform-to/react";
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import { FormLabel } from "./inputs/form-label";
 import { FormErrors } from "./inputs/form-errors";
 import { FormField } from "./inputs/form-field";
@@ -24,7 +24,7 @@ export function FormColumn({
   children,
   className = "mb-4 flex-auto",
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return <div className={className}>{children}</div>;
@@ -49,6 +49,9 @@ const DueDaysInput: React.FC<DueDaysInputProps> = ({
       })}
       className={`${dueDaysInputCommonStyles} ${className}`}
       placeholder={placeholder}
+      min={0}
+      max={10000}
+      step={1}
       required
       {...rest}
     />
@@ -78,11 +81,15 @@ export function DueDaysColumn({
       <FormField>
         <DueDaysInput
           fieldInfo={fieldInfo}
-          className="shrink w-39! md:w-48!"
-          placeholder="days after thawing"
+          className="w-39! shrink md:w-48!"
+          placeholder={placeholder}
         />
       </FormField>
-      <FormErrors id={fieldInfo.errorId} errors={fieldInfo.errors} className="w-40 md:w-50" />
+      <FormErrors
+        id={fieldInfo.errorId}
+        errors={fieldInfo.errors}
+        className="w-40 md:w-50"
+      />
     </FormColumn>
   );
 }
@@ -96,7 +103,7 @@ interface FormCheckBoxProps extends React.SelectHTMLAttributes<HTMLInputElement>
 
 export const FormCheckbox: React.FC<FormCheckBoxProps> = ({
   fieldInfo,
-  className = "mr-3",
+  className = "mr-3 cursor-pointer",
   labelClassName = "leading-6",
   children,
   ...rest
@@ -110,7 +117,10 @@ export const FormCheckbox: React.FC<FormCheckBoxProps> = ({
         className={className}
         onChange={rest.onChange}
       />
-      <label htmlFor={fieldInfo.id} className={labelClassName}>
+      <label
+        htmlFor={fieldInfo.id}
+        className={`cursor-pointer ` + labelClassName}
+      >
         {children}
       </label>
     </>
@@ -133,7 +143,7 @@ export function WeightModeTooltip() {
       you buy this product at. E.g. if you buy it in a 450g package, specify
       just that. Or your bell peppers might come in a bag of 3 without listing
       the weight, so you specify &ldquo;1 bag&rdquo; as the abstract unit here.
-      We will refine the details when submitting the data to Grocy.
+      We will refine required conversions before submitting the data to Grocy.
     </TooltipWrapper>
   );
 }
