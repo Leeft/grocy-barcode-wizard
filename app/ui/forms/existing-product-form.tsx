@@ -8,6 +8,7 @@ import {
   fetchShoppingLocations,
   grocyClient,
 } from "@/lib/grocy";
+import { toMap } from "@/lib/utils";
 import { Suspense } from "react";
 
 export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
@@ -60,14 +61,7 @@ export function ExistingProductInfoPlaceholder() {
 }
 
 export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const toMap = (map: any, obj: any) => {
-    map[obj.id] = obj;
-    return map;
-  };
-
   const units = (await fetchQuantityUnits()).reduce(toMap, {});
-
   const shopLocations = (await fetchShoppingLocations()).reduce(toMap, {});
   const productGroups = (await fetchProductGroups()).reduce(toMap, {});
   const products = (await fetchProducts()).reduce(toMap, {});
@@ -258,11 +252,6 @@ async function FooFoo({
   data: any;
   dueType: string;
 }) {
-  const toMap = (map: any, obj: any) => {
-    map[obj.id] = obj;
-    return map;
-  };
-
   const units = (await fetchQuantityUnits()).reduce(toMap, {});
   const locations = (await fetchLocations()).reduce(toMap, {});
 
