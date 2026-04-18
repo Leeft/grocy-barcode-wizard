@@ -16,11 +16,13 @@ interface LocationDropdownProps extends Omit<
   units: Location[];
   options?: CustomisableSelectProps["options"];
   noFreezers: boolean;
+  allowEmpty?: boolean;
 }
 
 export const LocationDropdown: React.FC<LocationDropdownProps> = ({
   units,
   noFreezers,
+  allowEmpty = false,
   ...rest
 }) => {
   const freezers: Freezers = {};
@@ -34,6 +36,7 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
     entityObjects: units,
     freezers: freezers,
     noFreezers: noFreezers,
+    allowEmpty: allowEmpty,
   });
 
   return <CustomisableSelect {...rest} options={options} />;
@@ -43,17 +46,19 @@ function locationsToOptions({
   entityObjects,
   freezers,
   noFreezers,
+  allowEmpty,
 }: {
   entityObjects: Location[];
   freezers: Freezers;
   noFreezers: boolean;
+  allowEmpty: boolean;
 }) {
   if (entityObjects === undefined) return [];
 
   const options: CustomisableSelectOptionArray = [];
 
   options.push({
-    value: "",
+    value: allowEmpty ? "0" : "",
     label: "Pick ...",
   });
 
