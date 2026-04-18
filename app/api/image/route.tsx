@@ -17,20 +17,21 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
           // "content-length": stats.size + "",
         }),
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       return NextResponse.json(
         {
-          error: "Error while serving the file: " + err.message,
+          error: "Error while serving the file: " + err.message!,
         },
-        { status: 500 },
+        { status: 404 },
       );
     }
   }
 
   return NextResponse.json(
     {
-      error: "Not found",
+      error: "Bad request",
     },
-    { status: 500 },
+    { status: 400 },
   );
 };
