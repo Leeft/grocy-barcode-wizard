@@ -24,25 +24,57 @@ enum DueDateType {
   NO_EXPIRY
 }
 
+enum PurchasePriceType {
+  UNSPECIFIED // 1 in Grocy
+  UNIT_PRICE // 2 in Grocy
+  TOTAL_PRICE // 3 in Grocy
+}
+
 model Product {
-  id                          Int           @id @default(autoincrement())
-  name                        String
-  barcodes                    Barcode[]
-  grocyProductId              Int?
-  pending                     Boolean
-  canBeFrozen                 Boolean
-  unitSystem                  UnitSystem    @default(WEIGHT)
-  unitAmount                  String
-  unitChosen                  Int
-  defaultLocation             Int
-  dueDateType                 DueDateType   @default(BEST_BEFORE)
-  expiresAt                   String?
-  packagingDate               String?
-  defaultDueDays              Int?
-  defaultDueDaysAfterOpen     Int?
-  defaultDueDaysAfterFreezing Int?
-  defaultDueDaysAfterThawing  Int?
-  productPhoto                ProductPhoto?
+  id                            Int               @id @default(autoincrement())
+  userId                        Int
+  createdBy                     User              @relation(fields: [userId], references: [id])
+  createdAt                     DateTime
+  // Essential capture fields
+  name                          String
+  barcodes                      Barcode[]
+  grocyProductId                Int?
+  pending                       Boolean
+  canBeFrozen                   Boolean
+  unitSystem                    UnitSystem        @default(WEIGHT)
+  unitAmount                    String
+  unitChosen                    Int
+  defaultLocation               Int
+  dueDateType                   DueDateType       @default(BEST_BEFORE)
+  expiresAt                     String?
+  packagingDate                 String?
+  dueDays                       Int?
+  dueDaysAfterOpen              Int?
+  dueDaysAfterFreezing          Int?
+  dueDaysAfterThawing           Int?
+  productPhoto                  ProductPhoto?
+  quantity                      Int               @default(1)
+  // Additional capture fields
+  productGroup                  Int?
+  consumeLocationId             Int?
+  defaultShop                   Int?
+  moveOnOpen                    Boolean           @default(false)
+  enableTareWeight              Boolean           @default(false)
+  disableStockChecking          Boolean           @default(false)
+  openedAsOutOfStock            Boolean           @default(true)
+  accumulateSubProductsMinStock Boolean           @default(false)
+  tareWeight                    String?
+  energy                        String?
+  quickConsumeAmount            String?
+  quickOpenAmount               String?
+  purchasePriceType             PurchasePriceType @default(UNSPECIFIED)
+  cantOpen                      Boolean           @default(false)
+  dontShowOnStock               Boolean           @default(false)
+  disableOwnStock               Boolean           @default(false)
+  quantityUnitStock             Int?
+  defaultQuantityUnitPurchase   Int?
+  defaultQuantityUnitConsume    Int?
+  quantityUnitPrices            Int?
 }
 
 model Barcode {
@@ -67,11 +99,40 @@ enum GrocyFileGroup {
 }
 
 model ProductPhoto {
-  id             Int            @id @default(autoincrement())
-  productId      Int            @unique
-  product        Product        @relation(fields: [productId], references: [id])
+  id             Int             @id @default(autoincrement())
+  userId         Int
+  createdBy      User            @relation(fields: [userId], references: [id])
+  productId      Int             @unique
+  product        Product         @relation(fields: [productId], references: [id])
   filename       String
   grocyFileGroup GrocyFileGroup? @default(productpictures)
   grocyFileName  String?
   data           Bytes
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  name          String
+  email         String
+  created       DateTime
+  settings      Settings?
+  userApiKeys   UserApiKeys?
+  products      Product[]
+  productPhotos ProductPhoto[]
+}
+
+model Settings {
+  userId              Int     @id
+  user                User    @relation(fields: [userId], references: [id])
+  openCameraByDefault Boolean @default(false)
+  playSoundOnScan     Boolean @default(false)
+}
+
+model UserApiKeys {
+  id      Int      @id @default(autoincrement())
+  userId  Int      @unique
+  user    User     @relation(fields: [userId], references: [id])
+  apiKey  String
+  created DateTime
 }
