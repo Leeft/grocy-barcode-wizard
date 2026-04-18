@@ -21,36 +21,22 @@ export const QuickProductFormSchema = z
       },
     ),
 
-    unitId: z.coerce
+    unitId: z
       .number("Select a unit from the list")
       .gt(0, { message: "Select a unit from the list" }),
 
-    unitAmount: z.coerce
+    unitAmount: z
       .number(`Must be above 0`)
       .gt(0, { message: `Must be above 0` })
       .lte(10000, { message: `Number must be 10000 or less` }),
 
-    // parentProductId: z.coerce
-    //   .number()
-    //   .gt(-1, { message: "Parent product must be unset or greater than zero" }),
-
-    defaultLocationId: z.coerce
+    defaultLocationId: z
       .number("Valid default product location must be chosen")
       .gt(0, { message: "Valid default product location must be chosen" }),
 
-    // defaultConsumeLocationId: z.coerce.number().gt(-1, {
-    //   message: "Consumption location must be unset or greater than zero",
-    // }),
-
-    // defaultShopLocationId: z.coerce.number().gt(-1, {
-    //   message: "Default shop location must be unset or greater than zero",
-    // }),
-
     dueDateType: z.enum(
       [DueDateType.BEST_BEFORE, DueDateType.EXPIRY_DATE, DueDateType.NO_EXPIRY],
-      {
-        message: "Due- or expiry-date type must be chosen",
-      },
+      "Due- or expiry-date type must be chosen",
     ),
 
     dueOrExpiryDate: z
@@ -67,33 +53,25 @@ export const QuickProductFormSchema = z
 
     shouldNotBeFrozen: z.coerce.boolean(),
 
-    // noStockCheck: z.coerce.boolean(),
-
-    // canNotOpen: z.coerce.boolean(),
-
-    // moveOnOpen: z.coerce.boolean(),
-
-    // hideFromStock: z.coerce.boolean(),
-
-    defaultDueDays: z.coerce
+    dueDays: z.coerce
       .number(`Must be 0 or greater`)
       .gte(0, { message: `Must be 0 or greater` })
       .lte(10000, { message: `Must be less than 10000` })
       .optional(),
 
-    defaultDueDaysAfterOpen: z.coerce
+    dueDaysAfterOpen: z.coerce
       .number(`Must be 0 or greater`)
       .gte(0, { message: `Must be 0 or greater` })
       .lte(10000, { message: `Must be less than 10000` })
       .optional(),
 
-    defaultDueDaysAfterFreezing: z.coerce
+    dueDaysAfterFreezing: z.coerce
       .number(`Must be 0 or greater`)
       .gte(0, { message: `Must be 0 or greater` })
       .lte(10000, { message: `Must be less than 10000` })
       .optional(),
 
-    defaultDueDaysAfterThawing: z.coerce
+    dueDaysAfterThawing: z.coerce
       .number(`Must be 0 or greater`)
       .gte(0, { message: `Must be 0 or greater` })
       .lte(10000, { message: `Must be less than 10000` })
@@ -104,54 +82,54 @@ export const QuickProductFormSchema = z
   .superRefine((data, ctx) => {
     const {
       dueDateType,
-      defaultDueDays,
-      defaultDueDaysAfterOpen,
-      defaultDueDaysAfterFreezing,
-      defaultDueDaysAfterThawing,
+      dueDays,
+      dueDaysAfterOpen,
+      dueDaysAfterFreezing,
+      dueDaysAfterThawing,
       shouldNotBeFrozen,
     } = data;
 
-    if (dueDateType !== "NO_EXPIRY" && isNaN(defaultDueDays!)) {
+    if (dueDateType !== "NO_EXPIRY" && isNaN(dueDays!)) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days must be 0 or more",
-        input: defaultDueDays,
-        path: ["defaultDueDays"],
+        input: dueDays,
+        path: ["dueDays"],
       });
     }
 
-    if (dueDateType !== "NO_EXPIRY" && isNaN(defaultDueDaysAfterOpen!)) {
+    if (dueDateType !== "NO_EXPIRY" && isNaN(dueDaysAfterOpen!)) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days after open must be 0 or more",
-        input: defaultDueDaysAfterOpen,
-        path: ["defaultDueDaysAfterOpen"],
+        input: dueDaysAfterOpen,
+        path: ["dueDaysAfterOpen"],
       });
     }
 
     if (
       dueDateType !== DueDateType.NO_EXPIRY &&
       !shouldNotBeFrozen &&
-      isNaN(defaultDueDaysAfterFreezing!)
+      isNaN(dueDaysAfterFreezing!)
     ) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days after freezing must be 0 or more",
-        input: defaultDueDaysAfterFreezing,
-        path: ["defaultDueDaysAfterFreezing"],
+        input: dueDaysAfterFreezing,
+        path: ["dueDaysAfterFreezing"],
       });
     }
 
     if (
       dueDateType !== DueDateType.NO_EXPIRY &&
       !shouldNotBeFrozen &&
-      isNaN(defaultDueDaysAfterThawing!)
+      isNaN(dueDaysAfterThawing!)
     ) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days after thawing must be 0 or more",
-        input: defaultDueDaysAfterThawing,
-        path: ["defaultDueDaysAfterThawing"],
+        input: dueDaysAfterThawing,
+        path: ["dueDaysAfterThawing"],
       });
     }
   })

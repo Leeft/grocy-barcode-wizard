@@ -1,7 +1,6 @@
 "use server";
 
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
-import { ProductPhotoUncheckedCreateInput } from "@/generated/prisma/models";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
@@ -21,11 +20,16 @@ export async function quickProductFormSubmit(
     return submission.reply();
   }
 
-  const canExpire = submission.value.dueDateType !== DueDateType.NO_EXPIRY;
   const data = submission.value;
+
+  function expiresOrNull<Type>(value: Type) {
+    return data.dueDateType !== DueDateType.NO_EXPIRY ? value : null;
+  }
 
   const queuedProduct = await prisma.product.create({
     data: {
+      userId: 1, // TODO: Actual users
+      createdAt: new Date().toISOString(),
       name: data.name,
       pending: true,
       canBeFrozen: !data.shouldNotBeFrozen,
@@ -34,16 +38,12 @@ export async function quickProductFormSubmit(
       unitChosen: data.unitId,
       defaultLocation: data.defaultLocationId,
       dueDateType: data.dueDateType,
-      expiresAt: canExpire ? dateToISODate(data.dueOrExpiryDate!) : null,
-      packagingDate: canExpire ? dateToISODate(data.packagingDate!) : null,
-      defaultDueDays: canExpire ? data.defaultDueDays : null,
-      defaultDueDaysAfterOpen: canExpire ? data.defaultDueDaysAfterOpen : null,
-      defaultDueDaysAfterFreezing: canExpire
-        ? data.defaultDueDaysAfterFreezing
-        : null,
-      defaultDueDaysAfterThawing: canExpire
-        ? data.defaultDueDaysAfterThawing
-        : null,
+      expiresAt: expiresOrNull(dateToISODate(data.dueOrExpiryDate!)),
+      packagingDate: expiresOrNull(dateToISODate(data.packagingDate!)),
+      dueDays: expiresOrNull(data.dueDays),
+      dueDaysAfterOpen: expiresOrNull(data.dueDaysAfterOpen),
+      dueDaysAfterFreezing: expiresOrNull(data.dueDaysAfterFreezing),
+      dueDaysAfterThawing: expiresOrNull(data.dueDaysAfterThawing),
     },
   });
 
@@ -54,11 +54,12 @@ export async function quickProductFormSubmit(
     const arr = new Uint8Array(await file.arrayBuffer());
     await prisma.productPhoto.create({
       data: {
+        userId: 1, // TODO: Actual users
+        productId: queuedProduct.id,
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
         data: arr,
-        productId: queuedProduct.id,
         grocyFileGroup: "productpictures",
-      } as ProductPhotoUncheckedCreateInput,
+      },
     });
   }
 

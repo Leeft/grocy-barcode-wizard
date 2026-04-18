@@ -37,7 +37,6 @@ import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 import {
   dateInputCommonStyles,
   dueDateTypeOptions,
-  dueDaysInputCommonStyles,
   inputCommonStyles,
   unitSystemOptions,
 } from "@/lib/product-form-shared";
@@ -51,6 +50,7 @@ import {
   WeightModeTooltip,
   PackagingDateTooltip,
 } from "@/ui/forms/form-utils";
+import { dateToISODate } from "@/lib/date";
 
 export function QuickProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(
@@ -64,10 +64,10 @@ export function QuickProductForm({ code }: { code: string }) {
 
     defaultValue: {
       unitAmount: "1.0",
-      defaultDueDays: "0",
-      defaultDueDaysAfterOpen: "0",
-      defaultDueDaysAfterFreezing: "0",
-      defaultDueDaysAfterThawing: "0",
+      dueDays: "0",
+      dueDaysAfterOpen: "0",
+      dueDaysAfterFreezing: "0",
+      dueDaysAfterThawing: "0",
     },
 
     // Reuse the validation logic on the client
@@ -80,23 +80,15 @@ export function QuickProductForm({ code }: { code: string }) {
     shouldRevalidate: "onInput",
   });
 
-  const [shouldNotBeFrozen, setShouldNotBeFrozen] = useState<boolean>(false);
-  const [unitSystem, setUnitSystem] = useState<UnitSystem>(UnitSystem.WEIGHT);
-  const [dueDateType, setDueDateType] = useState<DueDateType>(
-    DueDateType.BEST_BEFORE,
-  );
-  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
-  const [packagingDate, setPackagingDate] = useState<Date | null>(null);
-
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
 
-  const calculateDueDays = useCallback(() => {
+  const calculateDueDays = (expiryDate: Date, packagingDate: Date) => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
     form.update({
       value: {
-        defaultDueDays: Math.abs(
+        dueDays: Math.abs(
           Math.round(
             (packagingDate.getTime() - expiryDate.getTime()) /
               (1000 * 60 * 60 * 24),
@@ -104,12 +96,8 @@ export function QuickProductForm({ code }: { code: string }) {
         ),
       },
     });
-  }, [expiryDate, packagingDate]);
-
-  // Set the due days when a packing date and due/expiry dates are set
-  useEffect(() => {
-    calculateDueDays();
-  }, [expiryDate, packagingDate, calculateDueDays]);
+    form.validate();
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
@@ -149,7 +137,7 @@ export function QuickProductForm({ code }: { code: string }) {
         </FormRow>
 
         <FormRow>
-          <FormColumn className="flex-auto mb-2">
+          <FormColumn className="mb-2 flex-auto">
             <FormLabel htmlFor={fields.name.name} title="Product name *" />
             <FormField>
               <input
@@ -166,12 +154,7 @@ export function QuickProductForm({ code }: { code: string }) {
           <FormColumn>
             <div className="flex flex-col leading-7">
               <FormField>
-                <FormCheckbox
-                  fieldInfo={fields.shouldNotBeFrozen}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setShouldNotBeFrozen(e.target.checked)
-                  }
-                >
+                <FormCheckbox fieldInfo={fields.shouldNotBeFrozen}>
                   This product should not be frozen
                   <ShouldNotBeFrozenTooltip />
                 </FormCheckbox>
@@ -198,7 +181,6 @@ export function QuickProductForm({ code }: { code: string }) {
                 {...getInputProps(fields.unitSystem, { type: "number" })}
                 options={unitSystemOptions}
                 onChange={(e) => {
-                  setUnitSystem(e.currentTarget.value as UnitSystem);
                   form.update({
                     value: {
                       unitSystem: e.currentTarget.value as UnitSystem,
@@ -252,7 +234,7 @@ export function QuickProductForm({ code }: { code: string }) {
                   type: "number",
                 })}
                 units={units}
-                unitSystem={unitSystem}
+                unitSystem={fields.unitSystem.value as UnitSystem}
                 className="w-46"
                 required
               />
@@ -275,7 +257,7 @@ export function QuickProductForm({ code }: { code: string }) {
                 {...getInputProps(fields.defaultLocationId, { type: "number" })}
                 units={locations}
                 className="w-auto flex-2"
-                noFreezers={shouldNotBeFrozen}
+                noFreezers={fields.shouldNotBeFrozen.value ? true : false}
                 required
               />
             </FormField>
@@ -294,95 +276,100 @@ export function QuickProductForm({ code }: { code: string }) {
             ></FormLabel>
             <FormField>
               <CustomisableSelect
-                {...getInputProps(fields.dueDateType, { type: "number" })}
+                {...getInputProps(fields.dueDateType, { type: "hidden" })}
                 options={dueDateTypeOptions}
-                onChange={(e) =>
-                  setDueDateType(e.currentTarget.value as DueDateType)
-                }
               />
             </FormField>
             <FormErrors
-              id="due-date-type-error"
+              id={fields.dueDateType.errorId}
               errors={fields.dueDateType.errors}
             />
           </FormColumn>
 
-          {fields.dueDateType.value !== null &&
-            fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
-              <>
-                <FormColumn className="flex-none">
-                  <FormLabel
-                    htmlFor={fields.dueOrExpiryDate.name}
-                    title={
-                      fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE
-                        ? "Best before *"
-                        : "Expires at *"
-                    }
-                  ></FormLabel>
-                  <FormField>
-                    <input
-                      {...getInputProps(fields.dueOrExpiryDate, {
-                        type: "date",
-                      })}
-                      required
-                      className={dateInputCommonStyles}
-                      onChange={(e) =>
-                        setExpiryDate(new Date(e.currentTarget.value))
-                      }
-                    />
-                  </FormField>
-                  <FormErrors
-                    id={fields.dueOrExpiryDate.errorId}
-                    errors={fields.dueOrExpiryDate.errors}
+          {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
+            <>
+              <FormColumn className="flex-none">
+                <FormLabel
+                  htmlFor={fields.dueOrExpiryDate.name}
+                  title={
+                    fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE
+                      ? "Best before *"
+                      : "Expires at *"
+                  }
+                ></FormLabel>
+                <FormField>
+                  <input
+                    {...getInputProps(fields.dueOrExpiryDate, {
+                      type: "date",
+                    })}
+                    required
+                    className={dateInputCommonStyles}
+                    onChange={(e) => {
+                      if (fields.packagingDate.value)
+                        calculateDueDays(
+                          new Date(e.currentTarget.value),
+                          new Date(fields.packagingDate.value),
+                        );
+                    }}
                   />
-                </FormColumn>
-                <FormColumn className="flex-none">
-                  <FormLabel
-                    htmlFor={fields.packagingDate.name}
-                    title="Packaging date"
-                    className="inline"
-                  >
-                    <PackagingDateTooltip />
-                  </FormLabel>
-                  <FormField>
-                    <input
-                      {...getInputProps(fields.packagingDate, { type: "date" })}
-                      className={dateInputCommonStyles}
-                      onChange={(e) =>
-                        setPackagingDate(new Date(e.currentTarget.value))
-                      }
-                    />
-                  </FormField>
-                  <FormErrors
-                    id="packaging-date-error"
-                    errors={fields.packagingDate.errors}
+                </FormField>
+                <FormErrors
+                  id={fields.dueOrExpiryDate.errorId}
+                  errors={fields.dueOrExpiryDate.errors}
+                />
+              </FormColumn>
+              <FormColumn className="flex-none">
+                <FormLabel
+                  htmlFor={fields.packagingDate.name}
+                  title="Packaging date"
+                  className="inline"
+                >
+                  <PackagingDateTooltip />
+                </FormLabel>
+                <FormField>
+                  <input
+                    {...getInputProps(fields.packagingDate, { type: "date" })}
+                    className={dateInputCommonStyles}
+                    max={dateToISODate(new Date())}
+                    onChange={(e) => {
+                      if (fields.dueOrExpiryDate.value)
+                        calculateDueDays(
+                          new Date(fields.dueOrExpiryDate.value),
+                          new Date(e.currentTarget.value),
+                        );
+                    }}
                   />
-                </FormColumn>
-              </>
-            )}
+                </FormField>
+                <FormErrors
+                  id={fields.packagingDate.errorId}
+                  errors={fields.packagingDate.errors}
+                />
+              </FormColumn>
+            </>
+          )}
         </FormRow>
 
-        {dueDateType !== DueDateType.NO_EXPIRY && (
+        {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
           <FormRow className="flex-col">
             <DueDaysColumn
-              fieldInfo={fields.defaultDueDays}
+              fieldInfo={fields.dueDays}
               title="Default due days *"
               placeholder="default due days"
             />
             <DueDaysColumn
-              fieldInfo={fields.defaultDueDaysAfterOpen}
+              fieldInfo={fields.dueDaysAfterOpen}
               title="Default due days after open *"
               placeholder="days after open"
             />
-            {!shouldNotBeFrozen && (
+            {!fields.shouldNotBeFrozen.value && (
               <>
                 <DueDaysColumn
-                  fieldInfo={fields.defaultDueDaysAfterFreezing}
+                  fieldInfo={fields.dueDaysAfterFreezing}
                   title="Default due days after freezing *"
                   placeholder="days after freezing"
                 />
                 <DueDaysColumn
-                  fieldInfo={fields.defaultDueDaysAfterThawing}
+                  fieldInfo={fields.dueDaysAfterThawing}
                   title="Default due days after thawing *"
                   placeholder="days after thawing"
                 />
