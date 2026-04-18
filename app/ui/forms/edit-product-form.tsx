@@ -248,7 +248,6 @@ export function EditProductForm({
                         e.currentTarget.value === UnitSystem.ABSTRACT
                           ? "1.0"
                           : "",
-                        unitId: fields.unitId.value, // preserve existing choice after remount
                     },
                   });
 
@@ -309,7 +308,6 @@ export function EditProductForm({
                 units={units}
                 unitSystem={fields.unitSystem.value as UnitSystem}
                 className="w-46"
-                plural={Number(fields.unitAmount.value) !== 1.0}
                 required
               />
             </FormField>
@@ -838,10 +836,7 @@ export function EditProductForm({
                     : "??"}
                 </div>
                 &nbsp;/&nbsp;
-                <UnitForAmount
-                  unit={fields.unitId.value!}
-                  className="inline"
-                />
+                <UnitForAmount unit={fields.unitId.value!} className="inline" />
               </div>
             </div>
             <FormField>

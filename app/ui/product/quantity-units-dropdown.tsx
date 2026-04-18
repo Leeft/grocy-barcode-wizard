@@ -46,7 +46,6 @@ export const QuantityUnitsDropdown: React.FC<QuantityUnitsDropdownProps> = ({
   units,
   unitSystem,
   allOptions = false,
-  plural = false,
   ref,
   ...rest
 }) => {
@@ -54,7 +53,6 @@ export const QuantityUnitsDropdown: React.FC<QuantityUnitsDropdownProps> = ({
     units: units,
     unitSystem: unitSystem,
     allOptions: allOptions,
-    plural: plural,
   });
 
   const pickMe: CustomisableSelectOptionArray = [
@@ -81,12 +79,10 @@ function quantityUnitsToOptions({
   units,
   unitSystem,
   allOptions,
-  plural,
 }: {
   units: QuantityUnit[];
   unitSystem: UnitSystem;
   allOptions: boolean;
-  plural: boolean;
 }) {
   if (units === undefined) return [];
 
@@ -107,7 +103,7 @@ function quantityUnitsToOptions({
           if (entity.userfields.type == type) {
             groupOptions.push({
               value: entity.id.toString(),
-              label: plural ? entity.name_plural! : entity.name!,
+              label: entity.name_plural!,
               type: entity.userfields.type,
             });
           }
