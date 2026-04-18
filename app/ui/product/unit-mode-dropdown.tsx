@@ -1,7 +1,6 @@
 "use client";
 
 import { UnitSystem } from "@/generated/prisma/enums";
-import { QuantityUnit } from "@/interfaces/grocy";
 import { unitSystemOptions } from "@/lib/product-form-shared";
 import CustomisableSelect, { CustomisableSelectProps } from "@/ui/customisable-select";
 
@@ -44,27 +43,15 @@ export function ModeToUnitTitle(mode: UnitSystem | string | undefined) {
 }
 
 interface UnitModeDropdownProps extends Omit<CustomisableSelectProps, 'options'> {
-  //units: QuantityUnit[];
-  //mode: UnitSystem;
   options?: CustomisableSelectProps['options'];
-  //setSelectedMode: React.Dispatch<React.SetStateAction<UnitSystem | undefined>>;
 }
 
 export const UnitModeDropdown: React.FC<UnitModeDropdownProps> = ({
-  //units,
-  //mode,
-  //setSelectedMode,
   ...rest
 }) => {
   return (
     <CustomisableSelect {...rest}
       options={unitSystemOptions}
-      // onChange={(inputValue: SingleValue<OptionType> /* action */) => {
-      //   if (inputValue?.value !== undefined) {
-      //     const value = inputValue?.value as UnitSystem;
-      //     setSelectedMode(value);
-      //   }
-      // }}
     />
   );
 }

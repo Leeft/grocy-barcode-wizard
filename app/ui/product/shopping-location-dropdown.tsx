@@ -11,7 +11,6 @@ interface ShoppingLocationDropdownProps extends Omit<
   "options"
 > {
   units: Location[];
-  //setSelectedId?: React.Dispatch<React.SetStateAction<number>>;
   options?: CustomisableSelectProps["options"];
 }
 
@@ -19,29 +18,17 @@ export const ShoppingLocationDropdown: React.FC<
   ShoppingLocationDropdownProps
 > = ({
   units,
-  //setSelectedId,
   ...rest
 }) => {
   const options: CustomisableSelectOptionArray = locationsToOptions({
     entityObjects: units,
   });
 
-  // let defaultValue = undefined;
-  // if (!rest.required && insert !== undefined) {
-  //   options.unshift(insert);
-  //   defaultValue = options[0];
-  // }
-
   return (
     <CustomisableSelect
       {...rest}
       options={options}
-      // onChange={(
-      //   inputValue: SingleValue<OptionType> /* action: ActionMeta<Option> */,
-      // ) => {
-      //   if (setSelectedId && inputValue?.value !== undefined)
-      //     setSelectedId(Number.parseInt(inputValue?.value));
-      // }}
+
     />
   );
 };

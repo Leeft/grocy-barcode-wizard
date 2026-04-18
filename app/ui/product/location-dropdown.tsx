@@ -1,13 +1,13 @@
 "use client";
 
 import { ProductLocation as Location } from "@/interfaces/grocy";
-import { OptionType } from "@/interfaces/options";
 import CustomisableSelect, {
+  CustomisableSelectOption,
   CustomisableSelectOptionArray,
   CustomisableSelectProps,
 } from "../customisable-select";
 
-type Freezers = Record<string, OptionType>;
+type Freezers = Record<string, CustomisableSelectOption>;
 
 interface LocationDropdownProps extends Omit<
   CustomisableSelectProps,
