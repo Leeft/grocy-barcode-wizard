@@ -1,6 +1,6 @@
 import { inputCommonStyles } from "@/lib/product-form-shared";
 
-import React from "react";
+import React, { RefObject } from "react";
 
 export type CustomisableSelectOption = {
   value: string;
@@ -23,17 +23,20 @@ export type CustomisableSelectOptionArray = CustomisableSelectGroupOrOption[];
 export interface CustomisableSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   className?: string;
   options: CustomisableSelectOptionArray;
+  ref?: RefObject<HTMLSelectElement>;
 }
 
 export const CustomisableSelect: React.FC<CustomisableSelectProps> = ({
   className,
   options,
+  ref,
   ...rest
 }) => {
   return (
     <div className="customisable-select-wrapper">
       <select
         {...rest}
+        ref={ref}
         className={`customisable relative top-[-1] ${inputCommonStyles} ${className}`}
       >
         {options.map((optionOrGroup) => (
