@@ -7,12 +7,13 @@ import {
   useState,
   KeyboardEvent,
   useActionState,
-  useEffect,
-  useCallback,
+  useRef,
+  RefObject,
 } from "react";
 import { QuantityUnitsDropdown } from "@/ui/product/quantity-units-dropdown";
 import {
   ProductLocation as PrLocation,
+  ProductGroup,
   QuantityUnit,
 } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
@@ -37,8 +38,8 @@ import clsx from "clsx";
 import {
   dateInputCommonStyles,
   dueDateTypeOptions,
-  dueDaysInputCommonStyles,
   inputCommonStyles,
+  purchasePriceOptions,
   unitSystemOptions,
 } from "@/lib/product-form-shared";
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
@@ -52,6 +53,13 @@ import {
   ShouldNotBeFrozenTooltip,
   WeightModeTooltip,
 } from "./form-utils";
+import { ProductGroupDropdown } from "../product/product-group-dropdown";
+import { ProductGroupContext } from "@/providers/product-group-context";
+import { dateToISODate } from "@/lib/date";
+import { GrocyConfigContext } from "@/providers/grocy-config-context";
+import { toMap } from "@/lib/utils";
+const unitClass = "text-green-200";
+const unitTaggedLabelClass = clsx("w-60 flex grow");
 
 export function EditProductForm({
   code,
@@ -64,6 +72,8 @@ export function EditProductForm({
     editProductFormSubmit,
     undefined,
   );
+
+  const weightUnitIdRef = useRef<HTMLSelectElement>(undefined);
 
   const productData = use(product);
 
@@ -87,22 +97,25 @@ export function EditProductForm({
       dueDateType: productData.dueDateType,
       dueOrExpiryDate: productData.expiresAt,
       packagingDate: productData.packagingDate,
-      defaultDueDays:
-        productData.defaultDueDays !== null
-          ? productData.defaultDueDays.toString()
+      dueDays:
+        productData.dueDays !== null ? productData.dueDays.toString() : "",
+      dueDaysAfterOpen:
+        productData.dueDaysAfterOpen !== null
+          ? productData.dueDaysAfterOpen.toString()
           : "",
-      defaultDueDaysAfterOpen:
-        productData.defaultDueDaysAfterOpen !== null
-          ? productData.defaultDueDaysAfterOpen.toString()
+      dueDaysAfterFreezing:
+        productData.dueDaysAfterFreezing !== null
+          ? productData.dueDaysAfterFreezing.toString()
           : "",
-      defaultDueDaysAfterFreezing:
-        productData.defaultDueDaysAfterFreezing !== null
-          ? productData.defaultDueDaysAfterFreezing.toString()
+      dueDaysAfterThawing:
+        productData.dueDaysAfterThawing !== null
+          ? productData.dueDaysAfterThawing.toString()
           : "",
-      defaultDueDaysAfterThawing:
-        productData.defaultDueDaysAfterThawing !== null
-          ? productData.defaultDueDaysAfterThawing.toString()
-          : "",
+
+      tareWeight: 0,
+      energy: 0,
+      quickConsumeAmount: 1.0,
+      quickOpenAmount: 1.0,
     },
 
     // Reuse the validation logic on the client
@@ -115,25 +128,25 @@ export function EditProductForm({
     shouldRevalidate: "onInput",
   });
 
-  const [shouldNotBeFrozen, setShouldNotBeFrozen] = useState<boolean>(
-    fields.shouldNotBeFrozen.value ? true : false,
-  );
-  const [unitSystem, setUnitSystem] = useState<UnitSystem>(UnitSystem.WEIGHT);
-  const [dueDateType, setDueDateType] = useState<DueDateType>(
-    DueDateType.BEST_BEFORE,
-  );
-  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
-  const [packagingDate, setPackagingDate] = useState<Date | null>(null);
-
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
+  const grocyConfig = use(
+    useContext(GrocyConfigContext) as Promise<Record<string, never>>,
+  );
 
-  const calculateDueDays = useCallback(() => {
+  const unitsMap = units.reduce(toMap, {});
+  const locationsMap = locations.reduce(toMap, {});
+
+  const productGroups = use(
+    useContext(ProductGroupContext) as Promise<ProductGroup[]>,
+  );
+
+  const calculateDueDays = (expiryDate: Date, packagingDate: Date) => {
     if (expiryDate === null) return;
     if (packagingDate === null) return;
     form.update({
       value: {
-        defaultDueDays: Math.abs(
+        dueDays: Math.abs(
           Math.round(
             (packagingDate.getTime() - expiryDate.getTime()) /
               (1000 * 60 * 60 * 24),
@@ -141,12 +154,8 @@ export function EditProductForm({
         ),
       },
     });
-  }, [expiryDate, packagingDate]);
-
-  // Set the due days when a packing date and due/expiry dates are set
-  useEffect(() => {
-    calculateDueDays();
-  }, [expiryDate, packagingDate, calculateDueDays]);
+    form.validate();
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
@@ -180,8 +189,9 @@ export function EditProductForm({
               <br />
               <br />
               In case you need to make any changes, here is the data captured
-              earlier. Plus you should enter more detailed data; so far we've
-              only grabbed the minimum required to create a basic product.
+              earlier. Plus you should enter more detailed data; so far
+              we&apos;ve only grabbed the minimum required to create a basic
+              product.
             </TooltipWrapper>
           </div>
         </div>
@@ -204,12 +214,7 @@ export function EditProductForm({
           <FormColumn>
             <div className="flex flex-col leading-7">
               <FormField>
-                <FormCheckbox
-                  fieldInfo={fields.shouldNotBeFrozen}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setShouldNotBeFrozen(e.target.checked)
-                  }
-                >
+                <FormCheckbox fieldInfo={fields.shouldNotBeFrozen}>
                   This product should not be frozen
                   <ShouldNotBeFrozenTooltip />
                 </FormCheckbox>
@@ -236,7 +241,6 @@ export function EditProductForm({
                 {...getInputProps(fields.unitSystem, { type: "number" })}
                 options={unitSystemOptions}
                 onChange={(e) => {
-                  setUnitSystem(e.currentTarget.value as UnitSystem);
                   form.update({
                     value: {
                       unitSystem: e.currentTarget.value as UnitSystem,
@@ -244,8 +248,19 @@ export function EditProductForm({
                         e.currentTarget.value === UnitSystem.ABSTRACT
                           ? "1.0"
                           : "",
+                        unitId: fields.unitId.value, // preserve existing choice after remount
                     },
                   });
+
+                  if (e.currentTarget.value !== UnitSystem.WEIGHT) {
+                    form.update({
+                      value: {
+                        enableTareWeight: false,
+                      },
+                    });
+                  }
+
+                  fields.unitSystem.valid = true;
                 }}
                 required
               />
@@ -283,15 +298,18 @@ export function EditProductForm({
             <FormLabel
               htmlFor={fields.unitId.name}
               title={ModeToUnitTitle(fields.unitSystem?.value)}
+              className={`text-sm! ${unitClass}!`}
             ></FormLabel>
             <FormField>
               <QuantityUnitsDropdown
                 {...getInputProps(fields.unitId, {
                   type: "number",
                 })}
+                ref={weightUnitIdRef as RefObject<HTMLSelectElement>}
                 units={units}
-                unitSystem={unitSystem}
+                unitSystem={fields.unitSystem.value as UnitSystem}
                 className="w-46"
+                plural={Number(fields.unitAmount.value) !== 1.0}
                 required
               />
             </FormField>
@@ -313,7 +331,7 @@ export function EditProductForm({
                 {...getInputProps(fields.defaultLocationId, { type: "number" })}
                 units={locations}
                 className="w-auto flex-2"
-                noFreezers={shouldNotBeFrozen}
+                noFreezers={fields.shouldNotBeFrozen.value ? true : false}
                 required
               />
             </FormField>
@@ -332,95 +350,100 @@ export function EditProductForm({
             ></FormLabel>
             <FormField>
               <CustomisableSelect
-                {...getInputProps(fields.dueDateType, { type: "number" })}
+                {...getInputProps(fields.dueDateType, { type: "hidden" })}
                 options={dueDateTypeOptions}
-                onChange={(e) =>
-                  setDueDateType(e.currentTarget.value as DueDateType)
-                }
               />
             </FormField>
             <FormErrors
-              id="due-date-type-error"
+              id={fields.dueDateType.errorId}
               errors={fields.dueDateType.errors}
             />
           </FormColumn>
 
-          {fields.dueDateType.value !== null &&
-            fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
-              <>
-                <FormColumn className="flex-none">
-                  <FormLabel
-                    htmlFor={fields.dueOrExpiryDate.name}
-                    title={
-                      fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE
-                        ? "Best before *"
-                        : "Expires at *"
-                    }
-                  ></FormLabel>
-                  <FormField>
-                    <input
-                      {...getInputProps(fields.dueOrExpiryDate, {
-                        type: "date",
-                      })}
-                      required
-                      className={dateInputCommonStyles}
-                      onChange={(e) =>
-                        setExpiryDate(new Date(e.currentTarget.value))
-                      }
-                    />
-                  </FormField>
-                  <FormErrors
-                    id={fields.dueOrExpiryDate.errorId}
-                    errors={fields.dueOrExpiryDate.errors}
+          {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
+            <>
+              <FormColumn className="flex-none">
+                <FormLabel
+                  htmlFor={fields.dueOrExpiryDate.name}
+                  title={
+                    fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE
+                      ? "Best before *"
+                      : "Expires at *"
+                  }
+                ></FormLabel>
+                <FormField>
+                  <input
+                    {...getInputProps(fields.dueOrExpiryDate, {
+                      type: "date",
+                    })}
+                    required
+                    className={dateInputCommonStyles}
+                    onChange={(e) => {
+                      if (fields.packagingDate.value)
+                        calculateDueDays(
+                          new Date(e.currentTarget.value),
+                          new Date(fields.packagingDate.value),
+                        );
+                    }}
                   />
-                </FormColumn>
-                <FormColumn className="flex-none">
-                  <FormLabel
-                    htmlFor={fields.packagingDate.name}
-                    title="Packaging date"
-                    className="inline"
-                  >
-                    <PackagingDateTooltip />
-                  </FormLabel>
-                  <FormField>
-                    <input
-                      {...getInputProps(fields.packagingDate, { type: "date" })}
-                      className={dateInputCommonStyles}
-                      onChange={(e) =>
-                        setPackagingDate(new Date(e.currentTarget.value))
-                      }
-                    />
-                  </FormField>
-                  <FormErrors
-                    id="packaging-date-error"
-                    errors={fields.packagingDate.errors}
+                </FormField>
+                <FormErrors
+                  id={fields.dueOrExpiryDate.errorId}
+                  errors={fields.dueOrExpiryDate.errors}
+                />
+              </FormColumn>
+              <FormColumn className="flex-none">
+                <FormLabel
+                  htmlFor={fields.packagingDate.name}
+                  title="Packaging date"
+                  className="inline"
+                >
+                  <PackagingDateTooltip />
+                </FormLabel>
+                <FormField>
+                  <input
+                    {...getInputProps(fields.packagingDate, { type: "date" })}
+                    className={dateInputCommonStyles}
+                    max={dateToISODate(new Date())}
+                    onChange={(e) => {
+                      if (fields.dueOrExpiryDate.value)
+                        calculateDueDays(
+                          new Date(fields.dueOrExpiryDate.value),
+                          new Date(e.currentTarget.value),
+                        );
+                    }}
                   />
-                </FormColumn>
-              </>
-            )}
+                </FormField>
+                <FormErrors
+                  id={fields.packagingDate.errorId}
+                  errors={fields.packagingDate.errors}
+                />
+              </FormColumn>
+            </>
+          )}
         </FormRow>
 
-        {dueDateType !== DueDateType.NO_EXPIRY && (
+        {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
           <FormRow className="flex-col">
             <DueDaysColumn
-              fieldInfo={fields.defaultDueDays}
+              fieldInfo={fields.dueDays}
               title="Default due days *"
               placeholder="default due days"
             />
             <DueDaysColumn
-              fieldInfo={fields.defaultDueDaysAfterOpen}
+              fieldInfo={fields.dueDaysAfterOpen}
               title="Default due days after open *"
               placeholder="days after open"
             />
-            {!shouldNotBeFrozen && (
+            {!fields.shouldNotBeFrozen.value && (
               <>
                 <DueDaysColumn
-                  fieldInfo={fields.defaultDueDaysAfterFreezing}
+                  fieldInfo={fields.dueDaysAfterFreezing}
                   title="Default due days after freezing *"
                   placeholder="days after freezing"
                 />
                 <DueDaysColumn
-                  fieldInfo={fields.defaultDueDaysAfterThawing}
+                  fieldInfo={fields.dueDaysAfterThawing}
                   title="Default due days after thawing *"
                   placeholder="days after thawing"
                 />
@@ -428,6 +451,473 @@ export function EditProductForm({
             )}
           </FormRow>
         )}
+
+        <hr className="mt-6 mb-6 text-slate-500" />
+
+        <FormRow>
+          <FormColumn className="grow">
+            <FormLabel
+              htmlFor={fields.productGroup.name}
+              title="Product group"
+              className="inline"
+            ></FormLabel>
+            <FormField>
+              <ProductGroupDropdown
+                {...getInputProps(fields.productGroup, { type: "number" })}
+                className="w-auto flex-2"
+                insert={{ value: "0", label: "Pick ..." }}
+                units={productGroups}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.productGroup.errorId}
+              errors={fields.productGroup.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="grow">
+            <FormLabel
+              htmlFor={fields.quantityUnitStock.name}
+              title="Quantity unit stock (not editable; uses the unit system set above)"
+            ></FormLabel>
+            <FormField>
+              <input
+                {...getInputProps(fields.quantityUnitStock, {
+                  type: "text",
+                })}
+                name={fields.quantityUnitStock.name}
+                className={clsx(
+                  "w-46",
+                  "pr-3",
+                  inputCommonStyles,
+                  "mb-0",
+                  "cursor-not-allowed",
+                  "text-slate-400",
+                  "border-slate-500",
+                  `${unitClass}!`,
+                )}
+                value={
+                  fields.unitId.value
+                    ? unitsMap[fields.unitId.value].name
+                    : "(Is set above)"
+                }
+                readOnly={true}
+              />
+            </FormField>
+            <FormErrors id={fields.quantityUnitStock.errorId} errors={[""]} />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="grow">
+            <FormLabel
+              htmlFor={fields.defaultQuantityUnitPurchase.name}
+              title="Default quantity unit purchase *"
+            ></FormLabel>
+            <FormField>
+              <QuantityUnitsDropdown
+                {...getInputProps(fields.defaultQuantityUnitPurchase, {
+                  type: "number",
+                })}
+                units={units}
+                unitSystem={fields.unitSystem.value as UnitSystem}
+                allOptions
+                className="w-46"
+                required
+              />
+            </FormField>
+            <FormErrors
+              id={fields.defaultQuantityUnitPurchase.errorId}
+              errors={fields.defaultQuantityUnitPurchase.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormLabel
+            htmlFor={fields.quickConsumeAmount.name}
+            className="w-full grow flex-col"
+            title="By default, “consume” will consume this quantity: *"
+          />
+        </FormRow>
+        <FormRow className="mt-[-7]">
+          <FormColumn className="shrink">
+            <FormField>
+              <input
+                {...getInputProps(fields.quickConsumeAmount, {
+                  type: "number",
+                })}
+                min={0}
+                step={0.001}
+                placeholder="Number"
+                className={clsx(
+                  "hide-arrows",
+                  "peer",
+                  "w-16",
+                  inputCommonStyles,
+                  "rounded-md!",
+                )}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.quickConsumeAmount.errorId}
+              errors={fields.quickConsumeAmount.errors}
+            />
+          </FormColumn>
+          <FormColumn className="shrink">
+            <FormField>
+              <QuantityUnitsDropdown
+                {...getInputProps(fields.defaultQuantityUnitConsume, {
+                  type: "number",
+                })}
+                units={units}
+                unitSystem={fields.unitSystem.value as UnitSystem}
+                allOptions
+                className="w-46"
+                required
+              />
+            </FormField>
+            <FormErrors
+              id={fields.defaultQuantityUnitConsume.errorId}
+              errors={fields.defaultQuantityUnitConsume.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="grow">
+            <FormLabel
+              htmlFor={fields.quantityUnitPrices.name}
+              title="Quantity unit for prices *"
+            ></FormLabel>
+            <FormField>
+              <QuantityUnitsDropdown
+                {...getInputProps(fields.quantityUnitPrices, {
+                  type: "number",
+                })}
+                units={units}
+                unitSystem={fields.unitSystem.value as UnitSystem}
+                allOptions
+                className="w-46"
+                required
+              />
+            </FormField>
+            <FormErrors
+              id={fields.quantityUnitPrices.errorId}
+              errors={fields.quantityUnitPrices.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn>
+            <div className="flex flex-col leading-7">
+              <FormField>
+                <FormCheckbox fieldInfo={fields.cantOpen}>
+                  Can't be opened
+                </FormCheckbox>
+              </FormField>
+              <FormErrors
+                id={fields.cantOpen.errorId}
+                errors={fields.cantOpen.errors}
+              />
+            </div>
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn>
+            <div className="flex flex-col leading-7">
+              <FormField>
+                <FormCheckbox fieldInfo={fields.dontShowOnStock}>
+                  Never show on stock overview
+                  <TooltipWrapper id="do-not-show-on-stock-tooltip">
+                    Hide from the stock overview irrespective of the stock
+                    status of this item.
+                  </TooltipWrapper>
+                </FormCheckbox>
+              </FormField>
+              <FormErrors
+                id={fields.dontShowOnStock.errorId}
+                errors={fields.dontShowOnStock.errors}
+              />
+            </div>
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn>
+            <div className="flex flex-col leading-7">
+              <FormField>
+                <FormCheckbox fieldInfo={fields.disableOwnStock}>
+                  Can't &ldquo;purchase&rdquo; these products
+                  <TooltipWrapper id="disable-own-stock-tooltip">
+                    This product can't have stock as it hides the product from
+                    the &ldquo;purchase&rdquo; process.
+                    <br />
+                    <br />
+                    You should probably only use this on a parent product which
+                    is used to group and aggregate other products.
+                  </TooltipWrapper>
+                </FormCheckbox>
+              </FormField>
+              <FormErrors
+                id={fields.disableOwnStock.errorId}
+                errors={fields.disableOwnStock.errors}
+              />
+            </div>
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn>
+            <div className="flex flex-col leading-7">
+              <FormField>
+                <FormCheckbox fieldInfo={fields.disableStockChecking}>
+                  Disable stock fulfillment checking for this ingredient
+                  <TooltipWrapper id="stock-fulfillment-tooltip">
+                    The default setting to use when adding the product as a
+                    recipe ingredient.
+                  </TooltipWrapper>
+                </FormCheckbox>
+              </FormField>
+              <FormErrors
+                id={fields.disableStockChecking.errorId}
+                errors={fields.disableStockChecking.errors}
+              />
+            </div>
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="grow">
+            <FormLabel
+              htmlFor={fields.defaultConsumeLocationId.name}
+              title={`Default “consume” location`}
+              className="inline"
+            >
+              <TooltipWrapper id="product-group-tooltip">
+                &ldquo;Quick consume&rdquo; actions will use any stock at this
+                location first.
+              </TooltipWrapper>
+            </FormLabel>
+            <FormField>
+              <LocationDropdown
+                {...getInputProps(fields.defaultConsumeLocationId, {
+                  type: "number",
+                })}
+                units={locations}
+                className="w-auto flex-2"
+                noFreezers={fields.shouldNotBeFrozen.value ? true : false}
+                allowEmpty={true}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.defaultConsumeLocationId.errorId}
+              errors={fields.defaultConsumeLocationId.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        {fields.defaultConsumeLocationId.value !== undefined &&
+          Number(fields.defaultConsumeLocationId.value) > 0 &&
+          !fields.cantOpen.value && (
+            <FormRow>
+              <FormColumn>
+                <div className="flex flex-col leading-7">
+                  <FormField>
+                    <FormCheckbox fieldInfo={fields.moveOnOpen}>
+                      Move to location{" "}
+                      <span className="text-amber-200">
+                        «
+                        {
+                          locationsMap[
+                            Number(fields.defaultConsumeLocationId.value)
+                          ]!.name
+                        }
+                        »
+                      </span>{" "}
+                      on “open”
+                      <TooltipWrapper id="move-on-open-tooltip">
+                        When marking this product as &ldquo;open&rdquo; the
+                        configured amount will be moved to the default consume
+                        location.
+                      </TooltipWrapper>
+                    </FormCheckbox>
+                  </FormField>
+                  <FormErrors
+                    id={fields.moveOnOpen.errorId}
+                    errors={fields.moveOnOpen.errors}
+                  />
+                </div>
+              </FormColumn>
+            </FormRow>
+          )}
+
+        {fields.unitSystem.value === UnitSystem.WEIGHT && (
+          <>
+            <FormRow>
+              <FormColumn>
+                <div className="flex flex-col leading-7">
+                  <FormField>
+                    <FormCheckbox fieldInfo={fields.enableTareWeight}>
+                      Enable tare weight handling
+                      <TooltipWrapper id="enable-tare-weight-tooltip">
+                        In tare weight mode you always have to measure the total
+                        quantity of your stock including the weight of the
+                        container, and you provide the weight of the container
+                        here.
+                      </TooltipWrapper>
+                    </FormCheckbox>
+                  </FormField>
+                  <FormErrors
+                    id={fields.enableTareWeight.errorId}
+                    errors={fields.enableTareWeight.errors}
+                  />
+                </div>
+              </FormColumn>
+            </FormRow>
+
+            {fields.enableTareWeight.value !== undefined &&
+              fields.enableTareWeight.value && (
+                <FormRow>
+                  <FormColumn className="grow">
+                    <div className={`${unitTaggedLabelClass} h-5`}>
+                      <FormLabel
+                        htmlFor={fields.tareWeight.name}
+                        title="Tare weight"
+                      ></FormLabel>
+                      <UnitForAmount
+                        unit={fields.unitId.value!}
+                        className="grow text-right"
+                      />
+                    </div>
+                    <FormField>
+                      <input
+                        {...getInputProps(fields.tareWeight, {
+                          type: "number",
+                        })}
+                        step={0.001}
+                        placeholder="Number"
+                        className={clsx(
+                          "hide-arrows",
+                          "peer",
+                          "w-30",
+                          inputCommonStyles,
+                          "rounded-md!",
+                        )}
+                      />
+                    </FormField>
+                    <FormErrors
+                      id={fields.tareWeight.errorId}
+                      errors={fields.tareWeight.errors}
+                    />
+                  </FormColumn>
+                </FormRow>
+              )}
+          </>
+        )}
+
+        <FormRow>
+          <FormColumn className="grow">
+            <div className={`${unitTaggedLabelClass} h-5`}>
+              <FormLabel htmlFor={fields.energy.name} title="Energy" />
+
+              <div className="grow text-right text-nowrap text-slate-400">
+                <div
+                  className={clsx(
+                    "text-nowrap",
+                    "inline",
+                    !grocyConfig && "text-amber-700",
+                  )}
+                >
+                  {grocyConfig && grocyConfig.ENERGY_UNIT
+                    ? grocyConfig.ENERGY_UNIT
+                    : "??"}
+                </div>
+                &nbsp;/&nbsp;
+                <UnitForAmount
+                  unit={fields.unitId.value!}
+                  className="inline"
+                />
+              </div>
+            </div>
+            <FormField>
+              <input
+                {...getInputProps(fields.energy, { type: "number" })}
+                min={0}
+                step={0.001}
+                placeholder={`Energy per TODO`}
+                className={clsx(
+                  "hide-arrows",
+                  "peer",
+                  "w-30",
+                  inputCommonStyles,
+                  "rounded-md!",
+                )}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.energy.errorId}
+              errors={fields.energy.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="grow">
+            <div className={`${unitTaggedLabelClass} h-5`}>
+              <FormLabel
+                htmlFor={fields.quickOpenAmount.name}
+                title="Quick open amount"
+              />
+              <UnitForAmount
+                unit={fields.unitId.value!}
+                className="h-5 grow text-right text-sm"
+              />
+            </div>
+            <FormField>
+              <input
+                {...getInputProps(fields.quickOpenAmount, { type: "number" })}
+                min={0}
+                step={0.001}
+                placeholder="Number"
+                className={clsx(
+                  "hide-arrows",
+                  "peer",
+                  "w-30",
+                  inputCommonStyles,
+                  "rounded-md!",
+                )}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.quickOpenAmount.errorId}
+              errors={fields.quickOpenAmount.errors}
+            />
+          </FormColumn>
+        </FormRow>
+
+        <FormRow>
+          <FormColumn className="flex-none">
+            <FormLabel
+              htmlFor={fields.purchasePriceType.name}
+              title="Default purchase price type"
+            ></FormLabel>
+            <FormField>
+              <CustomisableSelect
+                {...getInputProps(fields.purchasePriceType, { type: "hidden" })}
+                options={purchasePriceOptions}
+              />
+            </FormField>
+            <FormErrors
+              id={fields.purchasePriceType.errorId}
+              errors={fields.purchasePriceType.errors}
+            />
+          </FormColumn>
+        </FormRow>
 
         <CameraApp />
 
@@ -440,5 +930,38 @@ export function EditProductForm({
         </div>
       </div>
     </form>
+  );
+}
+
+function UnitForAmount({
+  unit,
+  className,
+  ref,
+}: {
+  unit: number | string;
+  className?: string;
+  ref?: RefObject<HTMLSelectElement>;
+}) {
+  "use client";
+  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
+  const unitsMap = units.reduce(toMap, {});
+  return (
+    <>
+      {Number(unit) > 0 ? (
+        <div
+          className={clsx("cursor-pointer", unitClass, className)}
+          onClick={() => ref?.current?.focus({ preventScroll: false })}
+        >
+          {unitsMap[unit].name}
+        </div>
+      ) : (
+        <div
+          className={clsx("cursor-pointer", "text-amber-700", className)}
+          onClick={() => ref?.current?.focus({ preventScroll: false })}
+        >
+          ???
+        </div>
+      )}
+    </>
   );
 }
