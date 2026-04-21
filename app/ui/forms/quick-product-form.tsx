@@ -121,10 +121,10 @@ export function QuickProductForm({ code }: { code: string }) {
         value={code}
       />
       <div id={form.errorId}>{form.errors}</div>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-y-5">
         <FormRow>
           <div className="flex-auto">
-            <h1 className="mb-3 inline-block text-lg font-bold text-slate-400 uppercase">
+            <h1 className="inline-block text-lg font-bold text-slate-400 uppercase">
               Initial product capture
             </h1>
             <TooltipWrapper id="form-purpose-tooltip">
@@ -137,13 +137,13 @@ export function QuickProductForm({ code }: { code: string }) {
         </FormRow>
 
         <FormRow>
-          <FormColumn className="mb-2 flex-auto">
+          <FormColumn className="flex-auto">
             <FormLabel htmlFor={fields.name.name} title="Product name *" />
             <FormField>
               <input
                 {...getInputProps(fields.name, { type: "text" })}
                 placeholder="Name of the product to create, 2 to 128 characters long"
-                className={clsx("w-full", "pr-3", inputCommonStyles, "mb-0")}
+                className={clsx("w-full", "pr-3", inputCommonStyles)}
               />
             </FormField>
             <FormErrors id={fields.name.errorId} errors={fields.name.errors} />
@@ -171,8 +171,8 @@ export function QuickProductForm({ code }: { code: string }) {
           <FormColumn className="flex-none">
             <FormLabel
               htmlFor="unitSystem"
-              title="Unit system *"
-              className="inline"
+              title="Stock unit system *"
+              className="inline-block"
             >
               <WeightModeTooltip />
             </FormLabel>
@@ -350,7 +350,7 @@ export function QuickProductForm({ code }: { code: string }) {
         </FormRow>
 
         {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
-          <FormRow className="flex-col">
+            <FormRow className="flex-col gap-y-5">
             <DueDaysColumn
               fieldInfo={fields.dueDays}
               title="Default due days *"

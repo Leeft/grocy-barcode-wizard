@@ -3,8 +3,8 @@ import { Suspense } from "react";
 
 export default async function Page() {
   return (
-    <div className="">
-      <h1 className="mb-3 text-lg font-bold uppercase">
+    <div>
+      <h1 className="text-lg font-bold uppercase">
         Product creation queue
       </h1>
       <p>

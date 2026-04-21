@@ -1,10 +1,7 @@
 import { dueDaysInputCommonStyles } from "@/lib/product-form-shared";
 import { FieldMetadata, getInputProps } from "@conform-to/react";
-import React from "react";
-import { FormLabel } from "./inputs/form-label";
-import { FormErrors } from "./inputs/form-errors";
-import { FormField } from "./inputs/form-field";
 import TooltipWrapper from "../tooltip-wrapper";
+import clsx from "clsx";
 
 export function FormRow({
   children,
@@ -59,8 +56,8 @@ const DueDaysInput: React.FC<DueDaysInputProps> = ({
 };
 
 export function DueDaysColumn({
-  className = "mb-0",
-  labelClassName = "w-36 md:w-48 text-xs text-wrap",
+  className = "mb-0 w-56",
+  labelClassName,
   title,
   fieldInfo,
   placeholder,
@@ -75,20 +72,23 @@ export function DueDaysColumn({
     <FormColumn className={className}>
       <FormLabel
         htmlFor={fieldInfo.name}
-        className={labelClassName}
+        className={clsx(
+          "block w-full align-bottom text-xs text-wrap",
+          labelClassName,
+        )}
         title={title}
       />
       <FormField>
         <DueDaysInput
           fieldInfo={fieldInfo}
-          className="w-39! shrink md:w-48!"
+          className="w-full"
           placeholder={placeholder}
         />
       </FormField>
       <FormErrors
         id={fieldInfo.errorId}
         errors={fieldInfo.errors}
-        className="w-40 md:w-50"
+        className="w-full"
       />
     </FormColumn>
   );
@@ -103,7 +103,7 @@ interface FormCheckBoxProps extends React.SelectHTMLAttributes<HTMLInputElement>
 
 export const FormCheckbox: React.FC<FormCheckBoxProps> = ({
   fieldInfo,
-  className = "mr-3 cursor-pointer",
+  className = "mr-2 cursor-pointer",
   labelClassName = "leading-6",
   children,
   ...rest

@@ -7,11 +7,7 @@ export default async function QueuedProducts() {
   return (
     <ul className="py-2">
       {products.map((product) => (
-        <li
-          key={`product-row-${product.id}`}
-          className=""
-          suppressHydrationWarning
-        >
+        <li key={`product-row-${product.id}`} suppressHydrationWarning>
           <ProductInfo product={product} />
         </li>
       ))}

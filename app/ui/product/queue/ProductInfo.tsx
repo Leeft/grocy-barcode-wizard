@@ -78,7 +78,7 @@ export async function ProductInfo({ product }: { product: any }) {
               {unitIcon} Using <span className="lowercase">{unitSystem}</span>{" "}
               units:{" "}
               <em>
-                <span className="">{unitAmount}</span>{" "}
+                <span>{unitAmount}</span>{" "}
                 <span className="lowercase">{unitChosen}</span>
               </em>
             </div>
@@ -141,10 +141,7 @@ export async function ProductInfo({ product }: { product: any }) {
               <div className="flex-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={
-                    `data:image/png;base64,` +
-                    photo.data.toBase64()
-                  }
+                  src={`data:image/png;base64,` + photo.data.toBase64()}
                   alt="Product photo"
                   className="float-right my-3 mr-2 block rounded-sm md:my-3 md:mt-2 md:ml-5 md:max-h-80 md:max-w-80"
                 />
