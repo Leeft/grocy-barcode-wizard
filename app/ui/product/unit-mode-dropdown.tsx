@@ -7,15 +7,15 @@ import CustomisableSelect, { CustomisableSelectProps } from "@/ui/customisable-s
 export function ModeToQuantityTitle(mode: UnitSystem | string | undefined) {
   let value: string = "Amount";
   switch (mode) {
-    case UnitSystem.WEIGHT:
-      value = "Weight amount";
-      break;
-    case UnitSystem.VOLUME:
-      value = "Volume amount";
-      break;
-    case UnitSystem.ABSTRACT:
-      value = "Unit amount";
-      break;
+    // case UnitSystem.WEIGHT:
+    //   value = "Weight amount";
+    //   break;
+    // case UnitSystem.VOLUME:
+    //   value = "Volume amount";
+    //   break;
+    // case UnitSystem.ABSTRACT:
+    //   value = "Unit amount";
+    //   break;
     default:
       value = "Amount";
       break;
@@ -26,15 +26,15 @@ export function ModeToQuantityTitle(mode: UnitSystem | string | undefined) {
 export function ModeToUnitTitle(mode: UnitSystem | string | undefined) {
   let value: string = "Unit";
   switch (mode) {
-    case UnitSystem.WEIGHT:
-      value = "Weight unit";
-      break;
-    case UnitSystem.VOLUME:
-      value = "Volume unit";
-      break;
-    case UnitSystem.ABSTRACT:
-      value = "Abstract/discrete unit";
-      break;
+    // case UnitSystem.WEIGHT:
+    //   value = "Weight unit";
+    //   break;
+    // case UnitSystem.VOLUME:
+    //   value = "Volume unit";
+    //   break;
+    // case UnitSystem.ABSTRACT:
+    //   value = "Abstract/discrete unit";
+    //   break;
     default:
       value = "Unit";
       break;
