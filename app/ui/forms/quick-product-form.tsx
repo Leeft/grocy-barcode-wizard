@@ -21,9 +21,6 @@ import { QuickProductFormSchema } from "@/forms/quick-product-form-schema";
 import { Button } from "../button";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "../product/location-dropdown";
-import { FormLabel } from "./inputs/form-label";
-import { FormField } from "./inputs/form-field";
-import { FormErrors } from "./inputs/form-errors";
 import {
   ModeToQuantityTitle,
   ModeToUnitTitle,
@@ -49,6 +46,10 @@ import {
   ShouldNotBeFrozenTooltip,
   WeightModeTooltip,
   PackagingDateTooltip,
+  FormLabel,
+  FormErrors,
+  FormField,
+  FormRowGroup,
 } from "@/ui/forms/form-utils";
 import { dateToISODate } from "@/lib/date";
 

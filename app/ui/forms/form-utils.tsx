@@ -1,3 +1,4 @@
+import React from "react";
 import { dueDaysInputCommonStyles } from "@/lib/product-form-shared";
 import { FieldMetadata, getInputProps } from "@conform-to/react";
 import TooltipWrapper from "../tooltip-wrapper";
@@ -6,10 +7,15 @@ import clsx from "clsx";
 export function FormRow({
   children,
   className,
+  comment,
 }: {
   className?: string;
   children: React.ReactNode;
+  comment?: string;
 }) {
+  if (comment) {
+    // NOOP, just making the variable used
+  }
   return (
     <div className={`flex flex-row flex-wrap gap-x-5 ${className}`}>
       {children}
@@ -17,14 +23,106 @@ export function FormRow({
   );
 }
 
+export function FormRowGroup({
+  children,
+  className,
+  comment,
+}: {
+  className?: string;
+  children: React.ReactNode;
+  comment?: string;
+}) {
+  if (comment) {
+    // NOOP, just making the variable used
+  }
+  return <div className={className}>{children}</div>;
+}
+
 export function FormColumn({
   children,
-  className = "mb-4 flex-auto",
+  className = "flex-auto",
+  comment,
 }: {
   children?: React.ReactNode;
   className?: string;
+  comment?: string;
 }) {
-  return <div className={className}>{children}</div>;
+  if (comment) {
+    // NOOP, just making the variable used
+  }
+  return <div className={clsx(className)}>{children}</div>;
+}
+
+export function FormLabel({
+  htmlFor,
+  className = "text-sm",
+  children,
+  title,
+}: {
+  htmlFor: string;
+  className?: string;
+  title: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <>
+      <label
+        htmlFor={htmlFor}
+        className={clsx(
+          "text-sm",
+          "font-light",
+          "text-blue-200",
+          "block",
+          "mt-2",
+          "mb-2",
+          className,
+        )}
+      >
+        {title}
+      </label>
+      {children && <>&nbsp;&nbsp;{children}</>}
+    </>
+  );
+}
+
+export function FormField({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={clsx("w-full", className)}>{children}</div>;
+}
+
+export function FormErrors({
+  id,
+  errors,
+  className,
+}: {
+  id: string;
+  errors: string[] | undefined;
+  className?: string;
+}) {
+  if (errors === undefined) {
+    return <></>;
+  }
+
+  return (
+    <div
+      id={id}
+      aria-live="polite"
+      aria-atomic="true"
+      className={clsx("w-full", "pt-2", className)}
+    >
+      {errors &&
+        errors?.map((error: string) => (
+          <p className={clsx("text-sm", "text-red-500")} key={error}>
+            {error}
+          </p>
+        ))}
+    </div>
+  );
 }
 
 interface DueDaysInputProps extends React.SelectHTMLAttributes<HTMLInputElement> {
@@ -158,6 +256,25 @@ export function PackagingDateTooltip() {
       <br />
       Besides this utility the packaging date input currently has no function
       other than to calculate this date difference for you.
+    </TooltipWrapper>
+  );
+}
+
+export function WeightModeAmountTooltip() {
+  return (
+    <TooltipWrapper id="weight-mode-amount-tooltip">
+      The value you enter here is not directly used for the product itself, but
+      for the conversions that will also be set up as required by the product
+      configuration. We're asking for it now as it is easy to read off the
+      packaging during initial data entry, and then you can put the product in
+      storage.
+      <br />
+      <br />
+      Enter the value that matters for repeat purchases. Enter e.g.{" "}
+      <code>&ldquo;1&rdquo;</code> for a &ldquo;1 litre carton of milk&rdquo;,{" "}
+      <code>&ldquo;0.7&rdquo;</code> for &ldquo;70cl bottles of wine&rdquo;, or{" "}
+      <code>&ldquo;450&rdquo;</code> for bags of frozen vegetables that come in
+      450 gram bags.
     </TooltipWrapper>
   );
 }
