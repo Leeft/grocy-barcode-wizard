@@ -16,9 +16,7 @@ export const QuickProductFormSchema = z
 
     unitSystem: z.enum(
       [UnitSystem.WEIGHT, UnitSystem.VOLUME, UnitSystem.ABSTRACT],
-      {
-        message: "The unit system must be chosen",
-      },
+      "The unit system must be chosen",
     ),
 
     unitId: z

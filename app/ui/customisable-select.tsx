@@ -24,30 +24,32 @@ export interface CustomisableSelectProps extends React.SelectHTMLAttributes<HTML
   className?: string;
   options: CustomisableSelectOptionArray;
   ref?: RefObject<HTMLSelectElement>;
+  onChange?: React.ChangeEventHandler<HTMLSelectElement>;
 }
 
 export const CustomisableSelect: React.FC<CustomisableSelectProps> = ({
   className,
   options,
   ref,
+  onChange,
   ...rest
 }) => {
+  //console.log( "rest is", rest );
   return (
-    <div className="customisable-select-wrapper">
-      <select
-        {...rest}
-        ref={ref}
-        className={`customisable relative top-[-1] ${inputCommonStyles} ${className}`}
-      >
-        {options.map((optionOrGroup) => (
-          <OptGroup
-            key={`top_` + rest.name + `_` + optionOrGroup.label}
-            group={optionOrGroup}
-            prefix={rest.name!}
-          />
-        ))}
-      </select>
-    </div>
+    <select
+      {...rest}
+      ref={ref}
+      onChange={onChange}
+      className={`customisable ${inputCommonStyles} ${className}`}
+    >
+      {options.map((optionOrGroup) => (
+        <OptGroup
+          key={`top_` + rest.name + `_` + optionOrGroup.label}
+          group={optionOrGroup}
+          prefix={rest.name!}
+        />
+      ))}
+    </select>
   );
 };
 

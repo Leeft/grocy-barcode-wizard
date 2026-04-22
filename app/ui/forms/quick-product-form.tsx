@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  ChangeEvent,
-  use,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  KeyboardEvent,
-  useActionState,
-} from "react";
+import { use, useContext, KeyboardEvent, useActionState } from "react";
 import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
 import {
   ProductLocation as PrLocation,
@@ -350,34 +341,36 @@ export function QuickProductForm({ code }: { code: string }) {
           )}
         </FormRow>
 
-        {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
+        <FormRowGroup comment="Default due days rows">
+          {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
             <FormRow className="flex-col gap-y-5">
-            <DueDaysColumn
-              fieldInfo={fields.dueDays}
-              title="Default due days *"
-              placeholder="default due days"
-            />
-            <DueDaysColumn
-              fieldInfo={fields.dueDaysAfterOpen}
-              title="Default due days after open *"
-              placeholder="days after open"
-            />
-            {!fields.shouldNotBeFrozen.value && (
-              <>
-                <DueDaysColumn
-                  fieldInfo={fields.dueDaysAfterFreezing}
-                  title="Default due days after freezing *"
-                  placeholder="days after freezing"
-                />
-                <DueDaysColumn
-                  fieldInfo={fields.dueDaysAfterThawing}
-                  title="Default due days after thawing *"
-                  placeholder="days after thawing"
-                />
-              </>
-            )}
-          </FormRow>
-        )}
+              <DueDaysColumn
+                fieldInfo={fields.dueDays}
+                title="Default due days *"
+                placeholder="default due days"
+              />
+              <DueDaysColumn
+                fieldInfo={fields.dueDaysAfterOpen}
+                title="Default due days after open *"
+                placeholder="days after open"
+              />
+              {!fields.shouldNotBeFrozen.value && (
+                <>
+                  <DueDaysColumn
+                    fieldInfo={fields.dueDaysAfterFreezing}
+                    title="Default due days after freezing *"
+                    placeholder="days after freezing"
+                  />
+                  <DueDaysColumn
+                    fieldInfo={fields.dueDaysAfterThawing}
+                    title="Default due days after thawing *"
+                    placeholder="days after thawing"
+                  />
+                </>
+              )}
+            </FormRow>
+          )}
+        </FormRowGroup>
 
         <CameraApp />
 

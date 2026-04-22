@@ -47,14 +47,26 @@ export const EditProductFormSchema = QuickProductFormSchema.extend({
   quantityUnitStock: z.coerce.string().readonly(),
 
   defaultQuantityUnitPurchase: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    .string("Select a unit from the list")
+    .regex(/^[0-9]+$/,{ message: "Select a unit from the list" }),
 
   defaultQuantityUnitConsume: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    .string("Select a unit from the list")
+    .regex(/^[0-9]+$/,{ message: "Select a unit from the list" }),
 
   quantityUnitPrices: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    .string("Select a unit from the list")
+    .regex(/^[0-9]+$/,{ message: "Select a unit from the list" }),
+
+  purchaseConversionFactor: z
+    .number()
+    .gt(0, { message: `Must be greater than 0` }),
+
+  consumeConversionFactor: z
+    .number()
+    .gt(0, { message: `Must be greater than 0` }),
+
+  priceConversionFactor: z
+    .number()
+    .gt(0, { message: `Must be greater than 0` }),
 });
