@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { BarcodeModel } from "@/generated/prisma/models";
 import { NotFoundError } from "@/lib/errors";
 

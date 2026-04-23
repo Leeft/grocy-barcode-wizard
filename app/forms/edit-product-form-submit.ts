@@ -4,7 +4,7 @@ import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { EditProductFormSchema } from "@/forms/edit-product-form-schema";
 import { dataURLtoFile } from "@/lib/utils";
 import { dateToISODate } from "@/lib/date";
