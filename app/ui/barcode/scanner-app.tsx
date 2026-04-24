@@ -14,7 +14,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   const [redirect, setRedirect] = useState(false);
   const router = useRouter();
 
-  const debug = true;
+  const debug = false;
 
   useEffect(() => {
     if (slug !== undefined && (!barcode || barcode.barcode != slug)) {
@@ -45,10 +45,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
         const barcode = Barcode.fromJSON(data);
         if (debug)
           console.log(
-            "Received barcode data:",
-            event.data,
-            "barcode:",
-            barcode,
+            "Received barcode data:", barcode,
           );
 
         setBarcode(barcode);
