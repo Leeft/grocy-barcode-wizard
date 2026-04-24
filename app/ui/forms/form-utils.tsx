@@ -126,6 +126,7 @@ const DueDaysInput: React.FC<DueDaysInputProps> = ({
   ...rest
 }) => {
   if (value !== undefined && setValue !== undefined) {
+    rest.defaultValue = undefined;
     return (
       <input
         {...getInputProps(fieldInfo, {
