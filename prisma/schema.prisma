@@ -56,6 +56,7 @@ model Product {
   quantity                      Int               @default(1)
   // Additional capture fields
   productGroup                  Int?
+  parentProductId               Int?
   consumeLocationId             Int?
   defaultShop                   Int?
   moveOnOpen                    Boolean           @default(false)
@@ -70,7 +71,6 @@ model Product {
   purchasePriceType             PurchasePriceType @default(UNSPECIFIED)
   cantOpen                      Boolean           @default(false)
   dontShowOnStock               Boolean           @default(false)
-  disableOwnStock               Boolean           @default(false)
   quantityUnitStock             Int?
   defaultQuantityUnitPurchase   Int?
   defaultQuantityUnitConsume    Int?
