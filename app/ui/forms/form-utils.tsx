@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { dueDaysInputCommonStyles } from "@/lib/product-form-shared";
 import { FieldMetadata, getInputProps } from "@conform-to/react";
 import TooltipWrapper from "../tooltip-wrapper";
@@ -113,23 +113,51 @@ interface DueDaysInputProps extends React.SelectHTMLAttributes<HTMLInputElement>
   fieldInfo: FieldMetadata<unknown>;
   placeholder?: string;
   className?: string;
+  value?: string;
+  setValue?: Dispatch<SetStateAction<string>>;
 }
 
-const DueDaysInput: React.FC<DueDaysInputProps> = ({ fieldInfo, placeholder, className, ...rest }) => {
-  return (
-    <input
-      {...getInputProps(fieldInfo, {
-        type: "number",
-      })}
-      className={`${dueDaysInputCommonStyles} ${className}`}
-      placeholder={placeholder}
-      min={0}
-      max={10000}
-      step={1}
-      required
-      {...rest}
-    />
-  );
+const DueDaysInput: React.FC<DueDaysInputProps> = ({
+  fieldInfo,
+  placeholder,
+  className,
+  value,
+  setValue,
+  ...rest
+}) => {
+  if (value !== undefined && setValue !== undefined) {
+    return (
+      <input
+        {...getInputProps(fieldInfo, {
+          type: "number",
+        })}
+        className={`${dueDaysInputCommonStyles} ${className}`}
+        placeholder={placeholder}
+        min={0}
+        max={10000}
+        step={1}
+        required
+        value={value}
+        onChange={(e) => setValue(e.currentTarget.value)}
+        {...rest}
+      />
+    );
+  } else {
+    return (
+      <input
+        {...getInputProps(fieldInfo, {
+          type: "number",
+        })}
+        className={`${dueDaysInputCommonStyles} ${className}`}
+        placeholder={placeholder}
+        min={0}
+        max={10000}
+        step={1}
+        required
+        {...rest}
+      />
+    );
+  }
 };
 
 export function DueDaysColumn({
@@ -138,12 +166,16 @@ export function DueDaysColumn({
   title,
   fieldInfo,
   placeholder,
+  value,
+  setValue,
 }: {
   className?: string;
   labelClassName?: string;
   title: string;
   fieldInfo: FieldMetadata<unknown>;
   placeholder: string;
+  value?: string;
+  setValue?: Dispatch<SetStateAction<string>>;
 }) {
   return (
     <FormColumn className={className}>
@@ -153,7 +185,13 @@ export function DueDaysColumn({
         title={title}
       />
       <FormField>
-        <DueDaysInput fieldInfo={fieldInfo} className="w-full" placeholder={placeholder} />
+        <DueDaysInput
+          fieldInfo={fieldInfo}
+          value={value}
+          setValue={setValue}
+          className="w-full"
+          placeholder={placeholder}
+        />
       </FormField>
       <FormErrors id={fieldInfo.errorId} errors={fieldInfo.errors} className="w-full" />
     </FormColumn>
