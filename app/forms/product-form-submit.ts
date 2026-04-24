@@ -135,19 +135,24 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
 
   console.log("updated product is", queuedProduct);
 
-  // if (data.image) {
-  //   const file = dataURLtoFile(data.image, "filename-not-used-yet");
-  //   const arr = new Uint8Array(await file.arrayBuffer());
-  //   await prisma.productPhoto.create({
-  //     data: {
-  //       userId: 1, // TODO: Actual users
-  //       filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
-  //       data: arr,
-  //       productId: queuedProduct.id,
-  //       grocyFileGroup: "productpictures",
-  //     },
-  //   });
-  // }
+  if (data.image) {
+    const file = dataURLtoFile(data.image, "filename-not-used-yet");
+    const arr = new Uint8Array(await file.arrayBuffer());
+    await prisma.productPhoto.upsert({
+      where: { productId: queuedProduct.id },
+      update: {
+        filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+        data: arr,
+      },
+      create: {
+        userId: 1, // TODO: Actual users
+        filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+        data: arr,
+        productId: queuedProduct.id,
+        grocyFileGroup: "productpictures",
+      },
+    });
+  }
 
   // await prisma.barcode.update({
   //   where: { barcode: data.barcode },
