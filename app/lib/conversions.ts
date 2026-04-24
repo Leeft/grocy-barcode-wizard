@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const conversionSources = ["PURCHASE", "CONSUME", "PRICE"] as const;
 export type ConversionSource = (typeof conversionSources)[number];
 export type ConversionSources = ConversionSource[];
@@ -9,11 +10,8 @@ export default class UnitConversions {
     this.conversions = [];
   }
 
-  track(conversion: UnitConversion): UnitConversion | undefined {
-    if (
-      conversion.noConversion ||
-      this.conversions.find((conv) => conv.key === conversion.key)
-    ) {
+  #track(conversion: UnitConversion): UnitConversion | undefined {
+    if (conversion.noConversion || this.conversions.find((conv) => conv.key === conversion.key)) {
       return undefined;
     }
 
@@ -21,8 +19,20 @@ export default class UnitConversions {
     return conversion;
   }
 
-  untrack(from: string, to: string | undefined ) {
-    if ( from === undefined || to === undefined ) return;
+  trackConversion(from: string, to: string, source: ConversionSource) {
+    //console.log("trackConversion", from, to, source);
+    if (from === undefined || to === undefined) return;
+    const conversion = new UnitConversion({
+      from_qu_id: from,
+      to_qu_id: to,
+      factor: 1.0,
+      for: source,
+    });
+    this.#track(conversion);
+  }
+
+  untrack(from: string, to: string | undefined) {
+    if (from === undefined || to === undefined) return;
     const key = `${from}-${to}`;
     this.conversions.find((conv, index) => {
       if (conv !== undefined && conv.key === key) {
@@ -33,11 +43,11 @@ export default class UnitConversions {
 
   find(from: string, to: string) {
     const key = `${from}-${to}`;
-    const keys = this.conversions.filter((c) => c !== undefined).map((c) => c.key);
+    // const keys = this.conversions
+    //   .filter((c) => c !== undefined)
+    //   .map((c) => c.key);
     // console.log( "find key is", key, "; conversions have keys", keys);
-    return this.conversions.find(
-      (conv) => conv.key == key,
-    );
+    return this.conversions.find((conv) => conv.key == key);
   }
 }
 
