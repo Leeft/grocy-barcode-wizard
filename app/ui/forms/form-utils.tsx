@@ -16,11 +16,14 @@ export function FormRow({
   if (comment) {
     // NOOP, just making the variable used
   }
-  return (
-    <div className={`flex flex-row flex-wrap gap-x-5 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`flex flex-row flex-wrap gap-x-5 ${className}`}>{children}</div>;
+}
+
+export function FormContainer({ children, comment }: { children: React.ReactNode; comment?: string }) {
+  if (comment) {
+    // NOOP, just making the variable used
+  }
+  return <>{children}</>;
 }
 
 export function FormRowGroup({
@@ -68,15 +71,7 @@ export function FormLabel({
     <>
       <label
         htmlFor={htmlFor}
-        className={clsx(
-          "text-sm",
-          "font-light",
-          "text-blue-200",
-          "block",
-          "mt-2",
-          "mb-2",
-          className,
-        )}
+        className={clsx("text-sm", "font-light", "text-blue-200", "block", "mt-2", "mb-2", className)}
       >
         {title}
       </label>
@@ -85,13 +80,7 @@ export function FormLabel({
   );
 }
 
-export function FormField({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+export function FormField({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={clsx("w-full", className)}>{children}</div>;
 }
 
@@ -109,12 +98,7 @@ export function FormErrors({
   }
 
   return (
-    <div
-      id={id}
-      aria-live="polite"
-      aria-atomic="true"
-      className={clsx("w-full", "pt-2", className)}
-    >
+    <div id={id} aria-live="polite" aria-atomic="true" className={clsx("w-full", "pt-2", className)}>
       {errors &&
         errors?.map((error: string) => (
           <p className={clsx("text-sm", "text-red-500")} key={error}>
@@ -131,12 +115,7 @@ interface DueDaysInputProps extends React.SelectHTMLAttributes<HTMLInputElement>
   className?: string;
 }
 
-const DueDaysInput: React.FC<DueDaysInputProps> = ({
-  fieldInfo,
-  placeholder,
-  className,
-  ...rest
-}) => {
+const DueDaysInput: React.FC<DueDaysInputProps> = ({ fieldInfo, placeholder, className, ...rest }) => {
   return (
     <input
       {...getInputProps(fieldInfo, {
@@ -170,24 +149,13 @@ export function DueDaysColumn({
     <FormColumn className={className}>
       <FormLabel
         htmlFor={fieldInfo.name}
-        className={clsx(
-          "block w-full align-bottom text-xs text-wrap",
-          labelClassName,
-        )}
+        className={clsx("block w-full align-bottom text-xs text-wrap", labelClassName)}
         title={title}
       />
       <FormField>
-        <DueDaysInput
-          fieldInfo={fieldInfo}
-          className="w-full"
-          placeholder={placeholder}
-        />
+        <DueDaysInput fieldInfo={fieldInfo} className="w-full" placeholder={placeholder} />
       </FormField>
-      <FormErrors
-        id={fieldInfo.errorId}
-        errors={fieldInfo.errors}
-        className="w-full"
-      />
+      <FormErrors id={fieldInfo.errorId} errors={fieldInfo.errors} className="w-full" />
     </FormColumn>
   );
 }
@@ -215,10 +183,7 @@ export const FormCheckbox: React.FC<FormCheckBoxProps> = ({
         className={className}
         onChange={rest.onChange}
       />
-      <label
-        htmlFor={fieldInfo.id}
-        className={`cursor-pointer ` + labelClassName}
-      >
+      <label htmlFor={fieldInfo.id} className={`cursor-pointer ` + labelClassName}>
         {children}
       </label>
     </>
@@ -228,8 +193,8 @@ export const FormCheckbox: React.FC<FormCheckBoxProps> = ({
 export function ShouldNotBeFrozenTooltip() {
   return (
     <TooltipWrapper id="not-frozen-tooltip">
-      Checking this checkbox will hide or disable some options for you, making
-      it a bit faster to fill out this form.
+      Checking this checkbox will hide or disable some options for you, making it a bit faster to fill out
+      this form.
     </TooltipWrapper>
   );
 }
@@ -237,11 +202,10 @@ export function ShouldNotBeFrozenTooltip() {
 export function WeightModeTooltip() {
   return (
     <TooltipWrapper id="weight-mode-tooltip">
-      For the units specify the discrete weight, volume or more abstract unit
-      you buy this product at. E.g. if you buy it in a 450g package, specify
-      just that. Or your bell peppers might come in a bag of 3 without listing
-      the weight, so you specify &ldquo;1 bag&rdquo; as the abstract unit here.
-      We will refine required conversions before submitting the data to Grocy.
+      For the units specify the discrete weight, volume or more abstract unit you buy this product at. E.g. if
+      you buy it in a 450g package, specify just that. Or your bell peppers might come in a bag of 3 without
+      listing the weight, so you specify &ldquo;1 bag&rdquo; as the abstract unit here. We will refine
+      required conversions before submitting the data to Grocy.
     </TooltipWrapper>
   );
 }
@@ -249,13 +213,12 @@ export function WeightModeTooltip() {
 export function PackagingDateTooltip() {
   return (
     <TooltipWrapper id="packaging-date-tooltip">
-      When you set or change <em>both</em> the due- and packaging dates the
-      &ldquo;default due days&rdquo; will be set to the difference between these
-      two dates.
+      When you set or change <em>both</em> the due- and packaging dates the &ldquo;default due days&rdquo;
+      will be set to the difference between these two dates.
       <br />
       <br />
-      Besides this utility the packaging date input currently has no function
-      other than to calculate this date difference for you.
+      Besides this utility the packaging date input currently has no function other than to calculate this
+      date difference for you.
     </TooltipWrapper>
   );
 }
@@ -263,18 +226,14 @@ export function PackagingDateTooltip() {
 export function WeightModeAmountTooltip() {
   return (
     <TooltipWrapper id="weight-mode-amount-tooltip">
-      The value you enter here is not directly used for the product itself, but
-      for the conversions that will also be set up as required by the product
-      configuration. We're asking for it now as it is easy to read off the
-      packaging during initial data entry, and then you can put the product in
-      storage.
+      The value you enter here is not directly used for the product itself, but for the conversions that will
+      also be set up as required by the product configuration. You&apos;re asked for it now as it is easy to
+      read off the packaging during initial data entry, and then you can put the product in storage.
       <br />
       <br />
-      Enter the value that matters for repeat purchases. Enter e.g.{" "}
-      <code>&ldquo;1&rdquo;</code> for a &ldquo;1 litre carton of milk&rdquo;,{" "}
-      <code>&ldquo;0.7&rdquo;</code> for &ldquo;70cl bottles of wine&rdquo;, or{" "}
-      <code>&ldquo;450&rdquo;</code> for bags of frozen vegetables that come in
-      450 gram bags.
+      Enter the value that matters for repeat purchases. Enter e.g. <code>&ldquo;1&rdquo;</code> for a
+      &ldquo;1 litre carton of milk&rdquo;, <code>&ldquo;0.7&rdquo;</code> for &ldquo;70cl bottles of
+      wine&rdquo;, or <code>&ldquo;450&rdquo;</code> for bags of frozen vegetables that come in 450 gram bags.
     </TooltipWrapper>
   );
 }
