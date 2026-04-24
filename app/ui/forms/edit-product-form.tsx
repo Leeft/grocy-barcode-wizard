@@ -40,6 +40,7 @@ import { ProductContext } from "@/providers/product-context";
 import Grocy from "@/components/icons/grocy";
 import { ArrowLeftFromLine } from "lucide-react";
 import Form from "next/dist/client/form";
+import { UnitForAmount } from "@/components/unit-for-amount";
 
 const unitClass = "text-green-200!";
 const unitTaggedLabelClass = clsx("w-60 flex grow");
@@ -705,40 +706,5 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
         </div>
       </form>
     </FormProvider>
-  );
-}
-
-function UnitForAmount({
-  unit,
-  className,
-  ref,
-}: {
-  unit: number | string;
-  className?: string;
-  ref?: RefObject<HTMLSelectElement>;
-}) {
-  "use client";
-  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
-  const unitsMap = units.reduce(toMap, {}) as Record<string, QuantityUnit>;
-  return (
-    <>
-      {Number(unit) > 0 ? (
-        <div
-          className={clsx("cursor-pointer", unitClass, className)}
-          onClick={() => ref?.current?.focus({ preventScroll: false })}
-          title="This unit is set at the beginning as part of the 'stock unit system'; choose wisely as Grocy uses the same 'stock unit' for many things, with added conversions filling in the gaps."
-        >
-          {unitsMap[unit]!.name}
-        </div>
-      ) : (
-        <div
-          className={clsx("cursor-pointer", "text-amber-700", className)}
-          onClick={() => ref?.current?.focus({ preventScroll: false })}
-          title="This unit is set at the beginning as part of the 'stock unit system'; choose wisely as Grocy uses the same 'stock unit' for many things, with added conversions filling in the gaps."
-        >
-          ???
-        </div>
-      )}
-    </>
   );
 }
