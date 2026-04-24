@@ -65,6 +65,9 @@ export default function CreateProductFields({
   const [dueDays, setDueDays] = useState<string>(fields.dueDays.value);
 
   const form = useFormMetadata(formId);
+  if ( form ) {
+    // NOOP to make the variable used
+  }
 
   const unitIdRef = useRef<HTMLSelectElement>(null);
   const unitIdControl = useInputControl(fields.unitId);

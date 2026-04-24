@@ -7,7 +7,6 @@ import { RotateCw, Trash, SwitchCamera, Camera, VideoOff } from "lucide-react";
 import clsx from "clsx";
 import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
 import { GetProductPhoto } from "@/lib/product-db";
-import { ProductPhotoModel } from "@/generated/prisma/models";
 
 type CapturedImage = {
   width?: number;
@@ -15,6 +14,7 @@ type CapturedImage = {
   dataUrl: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CameraApp({ photo: _photo }: { photo?: any }) {
   const [photo, setPhoto] = useState<GetProductPhoto | undefined>(_photo);
   const [images, setImages] = useState<CapturedImage[]>([]);
@@ -231,6 +231,7 @@ function Photo({
   buttonClassCommon,
   setPhoto,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   photo: any;
   buttonClassCommon: string;
   setPhoto: Dispatch<SetStateAction<GetProductPhoto | undefined>>;
@@ -254,8 +255,8 @@ function Photo({
       referrer: "",
     });
 
-    if ( response.status === 200 ) {
-      setPhoto( undefined );
+    if (response.status === 200) {
+      setPhoto(undefined);
     }
   }
 
