@@ -184,11 +184,12 @@ export const EditProductFormSchema = CreateProductFormSchema.safeExtend({
   dontShowOnStock: z.coerce.boolean(),
 
   // These all have quantityUnitStock (unitId, in this app) as their unit
-  tareWeight: z.number().gte(0, { message: `Must be 0 or greater` }),
-  energy: z.number().gte(0, { message: `Must be 0 or greater` }),
-  energyCalculationHelper: z.number().optional(),
+  tareWeight: z.coerce.number().gte(0, { message: `Must be 0 or greater` }),
+  energy: z.coerce.number().gte(0, { message: `Must be 0 or greater` }),
   quickConsumeAmount: z.number().gt(0, { message: `Must greater than zero` }),
   quickOpenAmount: z.number().gt(0, { message: `Must be greater than zero` }),
+
+  energyCalculationHelper: z.number().optional(),
   energyCalculatorOptions: z.enum(["PER100G"]).optional(),
 
   defaultShop: z
