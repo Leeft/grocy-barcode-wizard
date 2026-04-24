@@ -8,17 +8,11 @@ import clsx from "clsx";
 import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
 import { GetProductPhoto } from "@/lib/product-db";
 
-type CapturedImage = {
-  width?: number;
-  height?: number;
-  dataUrl: string;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CameraApp({ photo: _photo }: { photo?: any }) {
-  const [photo, setPhoto] = useState<GetProductPhoto | undefined>(_photo);
-  const [images, setImages] = useState<CapturedImage[]>([]);
-  const [cameraIsEnabled, setCameraIsEnabled] = useState<boolean>(photo !== undefined);
+  const [photo, setPhoto] = useState<GetProductPhoto | undefined>(_photo ?? undefined);
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [cameraIsEnabled, setCameraIsEnabled] = useState<boolean>(photo !== undefined && photo !== null);
   const shutterHandler = useRef<OneOffSoundHandler>(null);
 
   const buttonClassCommon = clsx(
@@ -37,20 +31,20 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
     <div className="relative py-4">
       <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
       {cameraIsEnabled ? (
-        images.length == 0 && photo === undefined && photo !== null ? (
+        image === undefined && (photo === undefined || photo === null) ? (
           <CameraUI
             setCameraIsEnabled={setCameraIsEnabled}
-            setImages={setImages}
+            setImage={setImage}
             setPhoto={setPhoto}
             buttonClassCommon={buttonClassCommon}
             shutterHandler={shutterHandler}
           />
         ) : (
           <>
-            {photo !== undefined && photo !== null ? (
+            {image === undefined ? (
               <Photo photo={photo} setPhoto={setPhoto} buttonClassCommon={buttonClassCommon} />
             ) : (
-              <Images images={images} setImages={setImages} buttonClassCommon={buttonClassCommon} />
+              <Images image={image} setImage={setImage} buttonClassCommon={buttonClassCommon} />
             )}
           </>
         )
@@ -77,31 +71,26 @@ function CameraIsDisabled({ setCameraIsEnabled }: { setCameraIsEnabled: Dispatch
 
 function CameraUI({
   buttonClassCommon,
-  setImages,
-  setCameraIsEnabled,
+  setImage,
   setPhoto,
+  setCameraIsEnabled,
   shutterHandler,
 }: {
   buttonClassCommon: string;
-  setImages: Dispatch<SetStateAction<CapturedImage[]>>;
-  setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
+  setImage: Dispatch<SetStateAction<string | undefined>>;
   setPhoto: Dispatch<SetStateAction<GetProductPhoto | undefined>>;
+  setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
   shutterHandler: RefObject<OneOffSoundHandler | null>;
 }) {
   const cameraHandler = useRef<WebCameraHandler>(null);
 
   async function handleCapture() {
-    shutterHandler.current?.play();
     const file = await cameraHandler.current?.capture();
     if (file) {
+      shutterHandler.current?.play();
       const base64 = await fileToBase64(file);
       setPhoto(undefined);
-      setImages((_images) => [
-        ..._images,
-        {
-          dataUrl: base64,
-        },
-      ]);
+      setImage(base64);
     }
   }
 
@@ -154,74 +143,62 @@ function CameraUI({
 }
 
 function Images({
-  images,
+  image,
   buttonClassCommon,
-  setImages,
+  setImage,
 }: {
-  images: CapturedImage[];
+  image: string;
   buttonClassCommon: string;
-  setImages: Dispatch<SetStateAction<CapturedImage[]>>;
+  setImage: Dispatch<SetStateAction<string | undefined>>;
 }) {
-  async function handleRotateRight(index: number) {
-    images.map((imageInfo, blobIndex) => {
-      if (blobIndex === index) {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = img.height;
-          canvas.height = img.width;
-          if (ctx !== null) {
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate((90 * Math.PI) / 180);
-            ctx.drawImage(img, -img.width / 2, -img.height / 2);
-            const imagesCopy = [...images];
-            imagesCopy.splice(index, 1, {
-              dataUrl: canvas.toDataURL("image/png"),
-              width: img.width,
-              height: img.height,
-            });
-            setImages(imagesCopy);
-          }
-        };
-        img.src = imageInfo.dataUrl;
+  if (image === "") return <></>;
+
+  async function handleRotateRight(image: string) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = img.height;
+      canvas.height = img.width;
+      if (ctx !== null) {
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        setImage(canvas.toDataURL("image/png"));
       }
-    });
+    };
+    img.src = image;
   }
 
-  function handleDelete(index: number) {
-    const img = [...images];
-    img.splice(index, 1);
-    setImages(img);
+  function handleDelete() {
+    setImage(undefined);
   }
 
   return (
     <div className="flex flex-wrap gap-5">
-      {images.map((image, ind) => (
-        <div key={`captured-image-${ind}-container`} className="relative">
-          <div className="absolute top-5 left-5 flex gap-3">
-            <button
-              className={clsx(buttonClassCommon, "bg-red-600")}
-              onClick={() => handleDelete(ind)}
-              title="Discard this image"
-              type="button"
-            >
-              <Trash size="28" className="relative top-2.5" />
-            </button>
-            <button
-              onClick={() => handleRotateRight(ind)}
-              className={clsx(buttonClassCommon, "bg-amber-600")}
-              title="Rotate 90 degrees clockwise"
-              type="button"
-            >
-              <RotateCw size="28" className="relative top-2.5" />
-            </button>
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={`captured-image-${ind}`} src={image.dataUrl} alt="Captured image from camera" />
-          <input type="hidden" name="image" value={image.dataUrl} />
+      <div key={`captured-image-container`} className="relative">
+        <div className="absolute top-5 left-5 flex gap-3">
+          <button
+            className={clsx(buttonClassCommon, "bg-red-600")}
+            onClick={() => handleDelete()}
+            title="Discard this image"
+            type="button"
+          >
+            <Trash size="28" className="relative top-2.5" />
+          </button>
+          <button
+            onClick={() => handleRotateRight(image)}
+            className={clsx(buttonClassCommon, "bg-amber-600")}
+            title="Rotate 90 degrees clockwise"
+            type="button"
+          >
+            <RotateCw size="28" className="relative top-2.5" />
+          </button>
         </div>
-      ))}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img key={`captured-image`} src={image} alt="Captured image from camera" />
+        <input type="hidden" name="image" value={image} />
+      </div>
     </div>
   );
 }
