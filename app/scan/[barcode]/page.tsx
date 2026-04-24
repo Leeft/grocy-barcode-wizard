@@ -1,19 +1,15 @@
 import Barcode from "@/lib/barcode";
 import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
-import { QuickProductForm } from "@/ui/forms/quick-product-form";
+import { CreateProductForm } from "@/ui/forms/create-product-form";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import BarcodeActions from "@/ui/product/actions";
 import QueuedProduct from "@/ui/product/queued-product";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
-export default async function BarcodePage({
-  params,
-}: {
-  params: Promise<{ barcode: string }>;
-}) {
+export default async function BarcodePage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
 
   try {
@@ -45,11 +41,7 @@ export default async function BarcodePage({
         <>
           <BarcodeScannerApp slug={barcode} />
           <ExistingProductForm barcode={barcodeObject} />
-          <BarcodeActions
-            barcode={barcodeObject}
-            className="w-auto"
-            editing={false}
-          />
+          <BarcodeActions barcode={barcodeObject} className="w-auto" editing={false} />
         </>
       );
     }
@@ -68,8 +60,7 @@ export default async function BarcodePage({
 
   let grocyBarcode: Barcode | null = null;
   try {
-    if (barcode !== "installHook.js.map")
-      grocyBarcode = await processReceivedBarcode(barcode);
+    if (barcode !== "installHook.js.map") grocyBarcode = await processReceivedBarcode(barcode);
   } catch {
     console.log(`Couldn't get product by barcode: ${barcode}`);
   }
@@ -79,11 +70,7 @@ export default async function BarcodePage({
       <>
         <BarcodeScannerApp slug={grocyBarcode.code} />
         <ExistingProductForm barcode={grocyBarcode} />
-        <BarcodeActions
-          barcode={grocyBarcode}
-          className="w-auto"
-          editing={false}
-        />
+        <BarcodeActions barcode={grocyBarcode} className="w-auto" editing={false} />
       </>
     );
   }
@@ -96,7 +83,7 @@ export default async function BarcodePage({
   return (
     <>
       <BarcodeScannerApp slug={barcode} />
-      <QuickProductForm code={barcode} />
+      <CreateProductForm code={barcode} />
     </>
   );
 }

@@ -71,10 +71,12 @@ model Product {
   purchasePriceType             PurchasePriceType @default(UNSPECIFIED)
   cantOpen                      Boolean           @default(false)
   dontShowOnStock               Boolean           @default(false)
-  quantityUnitStock             Int?
   defaultQuantityUnitPurchase   Int?
   defaultQuantityUnitConsume    Int?
   quantityUnitPrices            Int?
+  purchaseConversionFactor      String?
+  consumeConversionFactor       String?
+  priceConversionFactor         String?
 }
 
 model Barcode {

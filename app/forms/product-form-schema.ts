@@ -1,9 +1,11 @@
 import { z } from "zod/v4";
+import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
 import { addYears, dateToISODate } from "@/lib/date";
-import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 
-export const QuickProductFormSchema = z
+export const CreateProductFormSchema = z
   .object({
+    intent: z.literal("create"),
+
     barcode: z.string().trim(),
 
     name: z
@@ -19,9 +21,7 @@ export const QuickProductFormSchema = z
       "The unit system must be chosen",
     ),
 
-    unitId: z
-      .number("Select a unit from the list")
-      .gt(0, { message: "Select a unit from the list" }),
+    unitId: z.number("Select a unit from the list").gt(0, { message: "Select a unit from the list" }),
 
     unitAmount: z
       .number(`Must be above 0`)
@@ -105,11 +105,7 @@ export const QuickProductFormSchema = z
       });
     }
 
-    if (
-      dueDateType !== DueDateType.NO_EXPIRY &&
-      !shouldNotBeFrozen &&
-      isNaN(dueDaysAfterFreezing!)
-    ) {
+    if (dueDateType !== DueDateType.NO_EXPIRY && !shouldNotBeFrozen && isNaN(dueDaysAfterFreezing!)) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days after freezing must be 0 or more",
@@ -118,11 +114,7 @@ export const QuickProductFormSchema = z
       });
     }
 
-    if (
-      dueDateType !== DueDateType.NO_EXPIRY &&
-      !shouldNotBeFrozen &&
-      isNaN(dueDaysAfterThawing!)
-    ) {
+    if (dueDateType !== DueDateType.NO_EXPIRY && !shouldNotBeFrozen && isNaN(dueDaysAfterThawing!)) {
       ctx.addIssue({
         code: "custom",
         message: "Default due days after thawing must be 0 or more",
@@ -169,3 +161,68 @@ export const QuickProductFormSchema = z
       path: ["packagingDate"],
     },
   );
+
+export const EditProductFormSchema = CreateProductFormSchema.safeExtend({
+  intent: z.literal("update") as never,
+
+  id: z.number("Existing product id must be set").gt(0, { message: "Existing product id must be set" }),
+
+  productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+
+  parentProductId: z.coerce.number().gt(-1, { message: "Parent product must be unset or greater than zero" }),
+
+  defaultConsumeLocationId: z.coerce
+    .number("Default consume location must be chosen")
+    .gte(0, { message: "Default consume location must be chosen" }),
+
+  moveOnOpen: z.coerce.boolean(),
+  enableTareWeight: z.coerce.boolean(),
+  disableStockChecking: z.coerce.boolean(),
+  openedAsOutOfStock: z.coerce.boolean(),
+  accumulateSubProductsMinStock: z.coerce.boolean(),
+  cantOpen: z.coerce.boolean(),
+  dontShowOnStock: z.coerce.boolean(),
+
+  // These all have quantityUnitStock (unitId, in this app) as their unit
+  tareWeight: z.number().gte(0, { message: `Must be 0 or greater` }),
+  energy: z.number().gte(0, { message: `Must be 0 or greater` }),
+  energyCalculationHelper: z.number().optional(),
+  quickConsumeAmount: z.number().gt(0, { message: `Must greater than zero` }),
+  quickOpenAmount: z.number().gt(0, { message: `Must be greater than zero` }),
+  energyCalculatorOptions: z.enum(["PER100G"]).optional(),
+
+  defaultShop: z
+    .number("Default shop must be a valid number or empty")
+    .gte(0, { message: "Default shop must be a valid number or empty" })
+    .optional(),
+
+  // "this will be used as the default price type selection on purchase"
+  purchasePriceType: z.enum([
+    PurchasePriceType.UNSPECIFIED,
+    PurchasePriceType.UNIT_PRICE,
+    PurchasePriceType.TOTAL_PRICE,
+  ]),
+
+  defaultQuantityUnitPurchase: z.coerce
+    .number("Select a unit from the list")
+    .gt(0, { message: "Select a unit from the list" }),
+
+  defaultQuantityUnitConsume: z.coerce
+    .number("Select a unit from the list")
+    .gt(0, { message: "Select a unit from the list" }),
+
+  quantityUnitPrices: z.coerce
+    .number("Select a unit from the list")
+    .gt(0, { message: "Select a unit from the list" }),
+
+  purchaseConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+
+  consumeConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+
+  priceConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+});
+
+export const ProductFormSchema = z.discriminatedUnion("intent", [
+  CreateProductFormSchema,
+  EditProductFormSchema,
+]);

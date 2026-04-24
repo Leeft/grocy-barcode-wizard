@@ -1,0 +1,324 @@
+"use client";
+
+import { UnitSystem, DueDateType } from "@/generated/prisma/enums";
+import { dateToISODate } from "@/lib/date";
+import {
+  inputCommonStyles,
+  unitSystemOptions,
+  dueDateTypeOptions,
+  dateInputCommonStyles,
+} from "@/lib/product-form-shared";
+import {
+  DueDaysColumn,
+  FormCheckbox,
+  FormColumn,
+  FormErrors,
+  FormField,
+  FormLabel,
+  FormRow,
+  FormRowGroup,
+  PackagingDateTooltip,
+  ShouldNotBeFrozenTooltip,
+  WeightModeAmountTooltip,
+  WeightModeTooltip,
+} from "@/ui/forms/form-utils";
+import { getInputProps, useFormMetadata, useInputControl } from "@conform-to/react";
+import clsx from "clsx";
+import { Dispatch, RefObject, SetStateAction, use, useContext, useRef, useState } from "react";
+import CustomisableSelect from "../customisable-select";
+import { LocationDropdown } from "../product/location-dropdown";
+import { QuantityUnitsDropdown } from "../product/quantity-units-dropdown";
+import { ModeToQuantityTitle, ModeToUnitTitle } from "../product/unit-mode-dropdown";
+import { QuantityUnitContext } from "@/providers/quantity-unit-context";
+import UnitConversions from "@/lib/conversions";
+import { LocationContext } from "@/providers/location-context";
+import { ProductLocation as PrLocation, QuantityUnit } from "@/interfaces/grocy";
+
+const unitClass = "text-green-200!";
+
+export default function CreateProductFields({
+  formId,
+  fields,
+  selectedUnit,
+  setSelectedUnit,
+  unitConversions,
+  selectedPurchaseQuId,
+  setSelectedPurchaseQuId,
+  selectedConsumeQuId,
+  setSelectedConsumeQuId,
+  selectedPriceQuId,
+  setSelectedPriceQuId,
+}: {
+  formId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fields: any;
+  selectedUnit: string;
+  setSelectedUnit: Dispatch<SetStateAction<string>>;
+  unitConversions?: UnitConversions;
+  selectedPurchaseQuId?: string;
+  setSelectedPurchaseQuId?: Dispatch<SetStateAction<string>>;
+  selectedConsumeQuId?: string;
+  setSelectedConsumeQuId?: Dispatch<SetStateAction<string>>;
+  selectedPriceQuId?: string;
+  setSelectedPriceQuId?: Dispatch<SetStateAction<string>>;
+}) {
+  const [dueDays, setDueDays] = useState<string>(fields.dueDays.value);
+
+  const form = useFormMetadata(formId);
+
+  const unitIdRef = useRef<HTMLSelectElement>(null);
+  const unitIdControl = useInputControl(fields.unitId);
+  const unitAmountRef = useRef<HTMLInputElement>(null);
+  const unitAmountControl = useInputControl(fields.unitAmount);
+
+  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
+  const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
+
+  const calculateDueDays = (expiryDate: Date, packagingDate: Date): string => {
+    if (expiryDate === null) return "";
+    if (packagingDate === null) return "";
+    return Math.abs(
+      Math.round((packagingDate.getTime() - expiryDate.getTime()) / (1000 * 60 * 60 * 24)),
+    ).toString();
+  };
+
+  return (
+    <>
+      <FormRow comment="Product name">
+        <FormColumn>
+          <FormLabel htmlFor={fields.name.name} title="Product name *" />
+          <FormField>
+            <input
+              {...getInputProps(fields.name, { type: "text" })}
+              placeholder="Name of the product to create"
+              className={clsx(inputCommonStyles, "w-full")}
+            />
+          </FormField>
+          <FormErrors id={fields.name.errorId} errors={fields.name.errors} />
+        </FormColumn>
+      </FormRow>
+
+      <FormRow comment="[ ] Should not be frozen">
+        <FormColumn>
+          <div className="flex flex-col leading-7">
+            <FormField>
+              <FormCheckbox fieldInfo={fields.shouldNotBeFrozen}>
+                This product should not be frozen
+                <ShouldNotBeFrozenTooltip />
+              </FormCheckbox>
+            </FormField>
+            <FormErrors id={fields.shouldNotBeFrozen.errorId} errors={fields.shouldNotBeFrozen.errors} />
+          </div>
+        </FormColumn>
+      </FormRow>
+
+      <FormRow className="flex-wrap" comment="Unit system configuration">
+        <FormColumn className="w-50" comment="Unit system">
+          <FormLabel htmlFor="unitSystem" title="Stock unit system *" className="inline-block">
+            <WeightModeTooltip />
+          </FormLabel>
+          <FormField>
+            <CustomisableSelect
+              {...getInputProps(fields.unitSystem, { type: "number" })}
+              required
+              className="w-full"
+              options={unitSystemOptions}
+              onChange={() => {
+                unitIdControl.change("");
+                unitAmountControl.change("1.0");
+              }}
+            />
+          </FormField>
+          <FormErrors id={fields.unitSystem.errorId} errors={fields.unitSystem.errors} />
+        </FormColumn>
+
+        {fields.unitSystem.value !== "ABSTRACT" ? (
+          <FormColumn className="w-34" comment="Unit amount">
+            <FormLabel
+              htmlFor={fields.unitAmount.name}
+              title={ModeToQuantityTitle(fields.unitSystem?.value)}
+              className="inline-block"
+            >
+              <WeightModeAmountTooltip />
+            </FormLabel>
+            <FormField>
+              <input
+                {...getInputProps(fields.unitAmount, { type: "number" })}
+                ref={unitAmountRef}
+                step={0.001}
+                placeholder="Number"
+                className={clsx("hide-arrows", inputCommonStyles, "w-full", unitClass)}
+              />
+            </FormField>
+            <FormErrors id={fields.unitAmount.errorId} errors={fields.unitAmount.errors} />
+          </FormColumn>
+        ) : (
+          <input
+            {...getInputProps(fields.unitAmount, { type: "hidden" })}
+            step={1}
+            min={1}
+            max={1}
+            defaultValue={1}
+            required
+            readOnly
+          />
+        )}
+
+        <FormColumn className="min-w-50" comment="Unit id">
+          <FormLabel
+            htmlFor={fields.unitId.name}
+            title={ModeToUnitTitle(fields.unitSystem?.value)}
+            className={`text-sm! ${unitClass}!`}
+          ></FormLabel>
+          <FormField className="w-min-30 flex grow">
+            {fields.unitSystem.value === "ABSTRACT" && (
+              <div className="text-md shrink p-2 pl-0 font-bold text-green-200">1</div>
+            )}
+            <QuantityUnitsDropdown
+              ref={unitIdRef as RefObject<HTMLSelectElement>}
+              field={fields.unitId}
+              units={units}
+              unitSystem={fields.unitSystem.value as UnitSystem}
+              className={clsx("w-full", unitClass)}
+              selectedOption={selectedUnit!}
+              setSelectedOption={setSelectedUnit}
+              onChange={(e) => {
+                const id = e.currentTarget.value;
+                if (unitConversions !== undefined) {
+                  if (selectedPurchaseQuId)
+                    unitConversions.untrack(selectedPurchaseQuId, fields.unitId.value);
+                  if (selectedConsumeQuId) unitConversions.untrack(selectedConsumeQuId, fields.unitId.value);
+                  if (selectedPriceQuId) unitConversions.untrack(selectedPriceQuId, fields.unitId.value);
+                  unitConversions.trackConversion(id, id, "PURCHASE");
+                }
+                if (setSelectedPurchaseQuId) setSelectedPurchaseQuId(id);
+                if (setSelectedConsumeQuId) setSelectedConsumeQuId(id);
+                if (setSelectedPriceQuId) setSelectedPriceQuId(id);
+              }}
+            />
+          </FormField>
+          <FormErrors className="grow" id={fields.unitId.errorId} errors={fields.unitId.errors} />
+        </FormColumn>
+      </FormRow>
+
+      <FormRow comment="Initial product location">
+        <FormColumn className="w-80">
+          <FormLabel htmlFor={fields.defaultLocationId.name} title="Initial product location *"></FormLabel>
+          <FormField>
+            <LocationDropdown
+              {...getInputProps(fields.defaultLocationId, {
+                type: "number",
+              })}
+              units={locations}
+              className="w-full"
+              noFreezers={fields.shouldNotBeFrozen.value ? true : false}
+              required
+            />
+          </FormField>
+          <FormErrors id={fields.defaultLocationId.errorId} errors={fields.defaultLocationId.errors} />
+        </FormColumn>
+      </FormRow>
+
+      <FormRow comment="Due date type and expiry" className="gap-y-5">
+        <FormColumn className="flex-none">
+          <FormLabel htmlFor={fields.dueDateType.name} title="Due date type *"></FormLabel>
+          <FormField>
+            <CustomisableSelect
+              {...getInputProps(fields.dueDateType, { type: "hidden" })}
+              options={dueDateTypeOptions}
+              className="w-46"
+            />
+          </FormField>
+          <FormErrors id={fields.dueDateType.errorId} errors={fields.dueDateType.errors} />
+        </FormColumn>
+
+        {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
+          <>
+            <FormColumn className="flex-none">
+              <FormLabel
+                htmlFor={fields.dueOrExpiryDate.name}
+                title={
+                  fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE ? "Best before *" : "Expires at *"
+                }
+              ></FormLabel>
+              <FormField>
+                <input
+                  {...getInputProps(fields.dueOrExpiryDate, {
+                    type: "date",
+                  })}
+                  required
+                  className={dateInputCommonStyles}
+                  onChange={(e) => {
+                    if (fields.packagingDate.value)
+                      setDueDays(
+                        calculateDueDays(
+                          new Date(e.currentTarget.value),
+                          new Date(fields.packagingDate.value),
+                        ),
+                      );
+                  }}
+                />
+              </FormField>
+              <FormErrors id={fields.dueOrExpiryDate.errorId} errors={fields.dueOrExpiryDate.errors} />
+            </FormColumn>
+            <FormColumn className="flex-none">
+              <FormLabel htmlFor={fields.packagingDate.name} title="Packaging date" className="inline-block">
+                <PackagingDateTooltip />
+              </FormLabel>
+              <FormField>
+                <input
+                  {...getInputProps(fields.packagingDate, { type: "date" })}
+                  className={dateInputCommonStyles}
+                  max={dateToISODate(new Date())}
+                  onChange={(e) => {
+                    if (fields.dueOrExpiryDate.value)
+                      setDueDays(
+                        calculateDueDays(
+                          new Date(fields.dueOrExpiryDate.value),
+                          new Date(e.currentTarget.value),
+                        ),
+                      );
+                  }}
+                />
+              </FormField>
+              <FormErrors id={fields.packagingDate.errorId} errors={fields.packagingDate.errors} />
+            </FormColumn>
+          </>
+        )}
+      </FormRow>
+
+      <FormRowGroup comment="Default due days rows">
+        {fields.dueDateType.value !== DueDateType.NO_EXPIRY && (
+          <FormRow className="flex-col gap-y-5" comment="Default due days * configuration">
+            <DueDaysColumn
+              fieldInfo={fields.dueDays}
+              title="Default due days *"
+              placeholder="default due days"
+              value={dueDays}
+              setValue={setDueDays}
+            />
+            <DueDaysColumn
+              fieldInfo={fields.dueDaysAfterOpen}
+              title="Default due days after open *"
+              placeholder="days after open"
+            />
+            {!fields.shouldNotBeFrozen.value && (
+              <>
+                <DueDaysColumn
+                  fieldInfo={fields.dueDaysAfterFreezing}
+                  title="Default due days after freezing *"
+                  placeholder="days after freezing"
+                />
+                <DueDaysColumn
+                  fieldInfo={fields.dueDaysAfterThawing}
+                  title="Default due days after thawing *"
+                  placeholder="days after thawing"
+                />
+              </>
+            )}
+          </FormRow>
+        )}
+      </FormRowGroup>
+    </>
+  );
+}

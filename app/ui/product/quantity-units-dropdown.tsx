@@ -1,7 +1,7 @@
 "use client";
 
 import { QuantityUnit } from "@/interfaces/grocy";
-import React, { RefObject, useState } from "react";
+import React, { Dispatch, RefObject, SetStateAction } from "react";
 import { UnitSystem } from "@/generated/prisma/enums";
 import CustomisableSelect, {
   CustomisableSelectProps,
@@ -9,7 +9,6 @@ import CustomisableSelect, {
   CustomisableSelectGroup,
 } from "../customisable-select";
 import { FieldMetadata } from "@conform-to/react";
-import { group } from "node:console";
 
 const quantityTypes = [
   "weight-metric",
@@ -21,7 +20,6 @@ const quantityTypes = [
 
 const allTypes = ["abstract", ...quantityTypes] as const;
 
-type QuantityType = (typeof quantityTypes)[number];
 type AllType = (typeof allTypes)[number];
 
 const quantityGroupLabels: Record<AllType, string> = {
@@ -33,10 +31,7 @@ const quantityGroupLabels: Record<AllType, string> = {
   "volume-us-dry": "Volume (US; dry)",
 };
 
-interface QuantityUnitsDropdownProps extends Omit<
-  CustomisableSelectProps,
-  "options"
-> {
+interface QuantityUnitsDropdownProps extends Omit<CustomisableSelectProps, "options"> {
   units: QuantityUnit[];
   unitSystem: UnitSystem;
   options?: CustomisableSelectProps["options"];
@@ -45,7 +40,7 @@ interface QuantityUnitsDropdownProps extends Omit<
   ref?: RefObject<HTMLSelectElement>;
   onChange?: React.ChangeEventHandler<HTMLSelectElement>;
   selectedOption: string;
-  setSelectedOption?: Function;
+  setSelectedOption?: Dispatch<SetStateAction<string>>;
   field: FieldMetadata<unknown>;
 }
 
@@ -129,13 +124,10 @@ function quantityUnitsToOptions({
     },
   };
 
-  const regex = new RegExp(`^${unitSystem ? unitSystem.toLowerCase() : ''}`);
+  const regex = new RegExp(`^${unitSystem ? unitSystem.toLowerCase() : ""}`);
 
   units.sort(compareWords).forEach((entity: QuantityUnit) => {
-    const type: AllType =
-      entity.userfields && entity.userfields.type
-        ? entity.userfields.type
-        : "abstract";
+    const type: AllType = entity.userfields && entity.userfields.type ? entity.userfields.type : "abstract";
 
     if (allOptions || regex.test(type)) {
       groupedOptions[type].options.push({

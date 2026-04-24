@@ -4,44 +4,28 @@ import { Product } from "@/interfaces/grocy";
 import CustomisableSelect, {
   CustomisableSelectProps,
   CustomisableSelectOptionArray,
+  CustomisableSelectOption,
 } from "../customisable-select";
 
-interface ProductDropdownProps extends Omit<
-  CustomisableSelectProps,
-  "options"
-> {
+interface ProductDropdownProps extends Omit<CustomisableSelectProps, "options"> {
   units: Product[];
+  insert?: CustomisableSelectOption;
   options?: CustomisableSelectProps["options"];
 }
 
-export const ProductDropdown: React.FC<ProductDropdownProps> = ({
-  units,
-  ...rest
-}) => {
+export const ProductDropdown: React.FC<ProductDropdownProps> = ({ units, insert, ...rest }) => {
   const options = productsToOptions({
     entityObjects: units,
   });
 
-  let defaultValue = undefined;
+  if (!rest.required && insert !== undefined) {
+    options.unshift(insert);
+  }
 
-  // if (!rest.required && insert !== undefined) {
-  //   options.unshift(insert);
-  //   defaultValue = options[0];
-  // }
-
-  return (
-    <CustomisableSelect
-      {...rest}
-      options={options}
-    />
-  );
+  return <CustomisableSelect {...rest} options={options} />;
 };
 
-function productsToOptions({
-  entityObjects,
-}: {
-  entityObjects: Product[];
-}): CustomisableSelectOptionArray {
+function productsToOptions({ entityObjects }: { entityObjects: Product[] }): CustomisableSelectOptionArray {
   if (entityObjects === undefined) return [];
 
   const options: CustomisableSelectOptionArray = [];

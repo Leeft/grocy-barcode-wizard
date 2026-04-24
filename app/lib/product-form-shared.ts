@@ -56,3 +56,9 @@ export const purchasePriceOptions = [
   { value: PurchasePriceType.UNIT_PRICE, label: "Unit price" },
   { value: PurchasePriceType.TOTAL_PRICE, label: "Total price" },
 ];
+
+export const energyCalculatorOptions = [
+  { value: "PER100G", label: "Per 100g/100ml" },
+  //{ value: PurchasePriceType.UNIT_PRICE, label: "Unit price" },
+  //{ value: PurchasePriceType.TOTAL_PRICE, label: "Total price" },
+];

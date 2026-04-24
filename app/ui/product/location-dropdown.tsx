@@ -59,7 +59,7 @@ function locationsToOptions({
 
   options.push({
     value: allowEmpty ? "0" : "",
-    label: "Pick ...",
+    label: allowEmpty ? "[not set]" : "Pick ...",
   });
 
   function compareWords(a: Location, b: Location) {

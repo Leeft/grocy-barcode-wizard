@@ -1,3 +1,7 @@
+import {
+  ProductDetailsResponse,
+  StockEntry,
+} from "@/interfaces/grocy";
 import Barcode from "@/lib/barcode";
 import {
   baseUrl,
@@ -8,7 +12,7 @@ import {
   fetchShoppingLocations,
   grocyClient,
 } from "@/lib/grocy";
-import { toMap } from "@/lib/utils";
+import { toLookup } from "@/lib/utils";
 import { Suspense } from "react";
 
 export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
@@ -61,17 +65,14 @@ export function ExistingProductInfoPlaceholder() {
 }
 
 export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
-  const units = (await fetchQuantityUnits()).reduce(toMap, {});
-  const shopLocations = (await fetchShoppingLocations()).reduce(toMap, {});
-  const productGroups = (await fetchProductGroups()).reduce(toMap, {});
-  const products = (await fetchProducts()).reduce(toMap, {});
+  const units = toLookup(await fetchQuantityUnits());
+  const shopLocations = toLookup(await fetchShoppingLocations());
+  const productGroups = toLookup(await fetchProductGroups());
+  const products = toLookup(await fetchProducts());
 
-  const { data, error } = await grocyClient.GET(
-    "/stock/products/by-barcode/{barcode}",
-    {
-      params: { path: { barcode: barcode.code } },
-    },
-  );
+  const { data, error } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
+    params: { path: { barcode: barcode.code } },
+  });
 
   if (
     data === null ||
@@ -104,28 +105,20 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
 
   return (
     <>
-      {data.product.picture_file_name !== null &&
-        data.product.picture_file_name && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
-            alt="Photo of the product"
-            src={
-              baseUrl +
-              "/files/productpictures/" +
-              btoa(data.product.picture_file_name)
-            }
-          />
-        )}
+      {data.product.picture_file_name !== null && data.product.picture_file_name && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
+          alt="Photo of the product"
+          src={baseUrl + "/files/productpictures/" + btoa(data.product.picture_file_name)}
+        />
+      )}
 
       <dl className="product-info">
         <dt>Name</dt>
         <dd>{data.product.name}</dd>
         <dt>Product group</dt>
-        <dd>
-          {data.product.product_group_id &&
-            productGroups[data.product.product_group_id].name}
-        </dd>
+        <dd>{data.product.product_group_id && productGroups[data.product.product_group_id]!.name}</dd>
         <dt>Parent product</dt>
         <dd>
           {/* @ts-expect-error not in API specification yet */}
@@ -149,12 +142,9 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
               {bc.qu_id
                 ? (bc.amount ? bc.amount : "__") +
                   ` ` +
-                  (bc.amount === 1
-                    ? units[bc.qu_id].name
-                    : units[bc.qu_id].name_plural) +
+                  (bc.amount === 1 ? units[bc.qu_id]!.name : units[bc.qu_id]!.name_plural) +
                   (bc.shopping_location_id
-                    ? ", purchased at " +
-                      shopLocations[bc.shopping_location_id].name
+                    ? ", purchased at " + shopLocations[bc.shopping_location_id]!.name
                     : "") +
                   (bc.last_price ? ` for last price: ${bc.last_price}` : ``)
                 : "-"}
@@ -162,18 +152,14 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
           ))}
         </dd>
         <dt>Last shop</dt>
-        <dd>
-          {data.last_shopping_location_id
-            ? shopLocations[data.last_shopping_location_id].name
-            : "-"}
-        </dd>
+        <dd>{data.last_shopping_location_id ? shopLocations[data.last_shopping_location_id]!.name : "-"}</dd>
         {stock && (
           <>
             <dt>Stock</dt>
             <dd>
-              {stock.map((se) => (
+              {stock.map((se: StockEntry) => (
                 <div key={`stock_${se.id}`} className="mb-2">
-                  <FooFoo data={data} se={se} dueType={dueType} />
+                  <DisplayStockActionButtons data={data} se={se} dueType={dueType} />
                   <div className="flex flex-wrap gap-x-3 text-slate-300">
                     <button
                       type="button"
@@ -243,30 +229,29 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
   );
 }
 
-async function FooFoo({
+async function DisplayStockActionButtons({
   se,
   data,
   dueType,
 }: {
-  se: any;
-  data: any;
+  se: StockEntry;
+  data: ProductDetailsResponse;
   dueType: string;
 }) {
-  const units = (await fetchQuantityUnits()).reduce(toMap, {});
-  const locations = (await fetchLocations()).reduce(toMap, {});
+  const units = toLookup(await fetchQuantityUnits());
+  const locations = toLookup(await fetchLocations());
+
+  if (data === undefined || data.product === undefined) {
+    return <></>;
+  }
 
   return (
     <div className="w-full">
-      <code className="text-xs">{se.stock_id}</code> :{" "}
-      {(se.amount !== null && se.amount) || "??"}&nbsp;
-      {se.amount !== null &&
-      se.amount !== undefined &&
-      se.amount != 1 &&
-      data.product?.qu_id_stock
-        ? units[data.product?.qu_id_stock].name_plural
-        : units[data.product?.qu_id_stock].name}{" "}
-      {se.open ? <span>(opened)</span> : ""} at{" "}
-      {locations[se.location_id!].name}
+      <code className="text-xs">{se.stock_id}</code> : {(se.amount !== null && se.amount) || "??"}&nbsp;
+      {se.amount !== null && se.amount !== undefined && se.amount != 1 && data.product?.qu_id_stock
+        ? units[data.product.qu_id_stock!]!.name_plural
+        : units[data.product.qu_id_stock!]!.name}{" "}
+      {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
       {dueType !== "No expiry" && (
         <>
           ; {dueType} date is <code>{se.best_before_date}</code>{" "}

@@ -8,20 +8,13 @@ import CustomisableSelect, {
   CustomisableSelectProps,
 } from "../customisable-select";
 
-interface ProductGroupDropdownProps extends Omit<
-  CustomisableSelectProps,
-  "options"
-> {
+interface ProductGroupDropdownProps extends Omit<CustomisableSelectProps, "options"> {
   units: ProductGroup[];
   insert?: CustomisableSelectOption;
   options?: CustomisableSelectProps["options"];
 }
 
-export const ProductGroupDropdown: React.FC<ProductGroupDropdownProps> = ({
-  units,
-  insert,
-  ...rest
-}) => {
+export const ProductGroupDropdown: React.FC<ProductGroupDropdownProps> = ({ units, insert, ...rest }) => {
   const options = productGroupsToOptions({
     entityObjects: units,
   });
