@@ -39,10 +39,8 @@ import { ProductDropdown } from "../product/product-dropdown";
 import { ProductContext } from "@/providers/product-context";
 import Grocy from "@/components/icons/grocy";
 import { ArrowLeftFromLine } from "lucide-react";
-import Form from "next/dist/client/form";
 import { UnitForAmount } from "@/components/unit-for-amount";
 
-const unitClass = "text-green-200!";
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
 
@@ -139,6 +137,9 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
       e.preventDefault();
     }
   };
+
+  const awaitedProduct = use(product);
+  const photo = awaitedProduct.productPhoto;
 
   return (
     <FormProvider context={form.context}>
@@ -693,7 +694,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
             </FormColumn>
           </FormRow>
 
-          <CameraApp />
+          <CameraApp photo={photo} />
 
           <FormRow comment="Create product submit button">
             <FormColumn>

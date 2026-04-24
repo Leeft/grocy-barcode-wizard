@@ -1,8 +1,12 @@
+import { prisma } from "@/lib/prisma";
 import { getProductPhoto } from "@/lib/product-db";
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (req: NextRequest): Promise<NextResponse> => {
-  const id = req.nextUrl.searchParams.get("id");
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: { id: string } },
+): Promise<NextResponse> => {
+  const { id } = await params;
 
   if (id !== null && id !== undefined) {
     try {
@@ -14,7 +18,6 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
           "content-disposition": `attachment; filename=${photo.filename}`,
           "content-type": "image/png",
           "content-length": photo.data.length + "",
-          // "content-length": stats.size + "",
         }),
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,4 +37,29 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
     },
     { status: 400 },
   );
+};
+
+export const DELETE = async (
+  req: NextRequest,
+  { params }: { params: { id: string } },
+): Promise<NextResponse> => {
+  const { id } = await params;
+
+  try {
+    await prisma.productPhoto.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    return NextResponse.json({ message: `Photo ${id} deleted successfully` }, { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    return NextResponse.json(
+      {
+        error: `Error while deleting photo ${id}:` + err.message!,
+      },
+      { status: 404 },
+    );
+  }
 };

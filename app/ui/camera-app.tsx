@@ -6,6 +6,8 @@ import { fileToBase64 } from "file64";
 import { RotateCw, Trash, SwitchCamera, Camera, VideoOff } from "lucide-react";
 import clsx from "clsx";
 import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
+import { GetProductPhoto } from "@/lib/product-db";
+import { ProductPhotoModel } from "@/generated/prisma/models";
 
 type CapturedImage = {
   width?: number;
@@ -13,9 +15,10 @@ type CapturedImage = {
   dataUrl: string;
 };
 
-export function CameraApp() {
+export function CameraApp({ photo: _photo }: { photo?: any }) {
+  const [photo, setPhoto] = useState<GetProductPhoto | undefined>(_photo);
   const [images, setImages] = useState<CapturedImage[]>([]);
-  const [cameraEnabled, setCameraEnabled] = useState<boolean>(false);
+  const [cameraIsEnabled, setCameraIsEnabled] = useState<boolean>(photo !== undefined);
   const shutterHandler = useRef<OneOffSoundHandler>(null);
 
   const buttonClassCommon = clsx(
@@ -33,47 +36,56 @@ export function CameraApp() {
   return (
     <div className="relative py-4">
       <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
-      {cameraEnabled ? (
-        images.length == 0 ? (
+      {cameraIsEnabled ? (
+        images.length == 0 && photo === undefined && photo !== null ? (
           <CameraUI
-            setCameraEnabled={setCameraEnabled}
+            setCameraIsEnabled={setCameraIsEnabled}
             setImages={setImages}
+            setPhoto={setPhoto}
             buttonClassCommon={buttonClassCommon}
             shutterHandler={shutterHandler}
           />
         ) : (
-          <Images
-            images={images}
-            setImages={setImages}
-            buttonClassCommon={buttonClassCommon}
-          />
+          <>
+            {photo !== undefined && photo !== null ? (
+              <Photo photo={photo} setPhoto={setPhoto} buttonClassCommon={buttonClassCommon} />
+            ) : (
+              <Images images={images} setImages={setImages} buttonClassCommon={buttonClassCommon} />
+            )}
+          </>
         )
       ) : (
-        <>
-          <button
-            type="button"
-            onClick={() => setCameraEnabled(true)}
-            title="Click to enable camera"
-            className="rounded-1xl h-auto w-full cursor-pointer border border-slate-500 text-slate-500"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/empty-frame.png" alt="" />
-          </button>
-        </>
+        <CameraIsDisabled setCameraIsEnabled={setCameraIsEnabled} />
       )}
     </div>
+  );
+}
+
+function CameraIsDisabled({ setCameraIsEnabled }: { setCameraIsEnabled: Dispatch<SetStateAction<boolean>> }) {
+  return (
+    <button
+      type="button"
+      onClick={() => setCameraIsEnabled(true)}
+      title="Click to enable camera"
+      className="rounded-1xl h-auto w-full cursor-pointer border border-slate-500 text-slate-500"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/empty-frame.png" alt="" />
+    </button>
   );
 }
 
 function CameraUI({
   buttonClassCommon,
   setImages,
-  setCameraEnabled,
+  setCameraIsEnabled,
+  setPhoto,
   shutterHandler,
 }: {
   buttonClassCommon: string;
   setImages: Dispatch<SetStateAction<CapturedImage[]>>;
-  setCameraEnabled: Dispatch<SetStateAction<boolean>>;
+  setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
+  setPhoto: Dispatch<SetStateAction<GetProductPhoto | undefined>>;
   shutterHandler: RefObject<OneOffSoundHandler | null>;
 }) {
   const cameraHandler = useRef<WebCameraHandler>(null);
@@ -83,6 +95,7 @@ function CameraUI({
     const file = await cameraHandler.current?.capture();
     if (file) {
       const base64 = await fileToBase64(file);
+      setPhoto(undefined);
       setImages((_images) => [
         ..._images,
         {
@@ -117,7 +130,7 @@ function CameraUI({
         </button>
         <button
           className={clsx(buttonClassCommon, "bg-amber-800")}
-          onClick={() => setCameraEnabled(false)}
+          onClick={() => setCameraIsEnabled(false)}
           title="Disable camera"
           type="button"
         >
@@ -205,14 +218,68 @@ function Images({
             </button>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            key={`captured-image-${ind}`}
-            src={image.dataUrl}
-            alt="Captured image from camera"
-          />
+          <img key={`captured-image-${ind}`} src={image.dataUrl} alt="Captured image from camera" />
           <input type="hidden" name="image" value={image.dataUrl} />
         </div>
       ))}
+    </div>
+  );
+}
+
+function Photo({
+  photo,
+  buttonClassCommon,
+  setPhoto,
+}: {
+  photo: any;
+  buttonClassCommon: string;
+  setPhoto: Dispatch<SetStateAction<GetProductPhoto | undefined>>;
+}) {
+  async function handleDelete(id: number) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl === undefined) {
+      throw new Error("Can't delete photo; NEXT_PUBLIC_API_URL not set");
+    }
+
+    const request = new Request(`${apiUrl}/image/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    const response = await fetch(request, {
+      body: JSON.stringify({ id: id }),
+      referrer: "",
+    });
+
+    if ( response.status === 200 ) {
+      setPhoto( undefined );
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap gap-5">
+      <div key={`captured-image-${photo.id}-container`} className="relative">
+        <div className="absolute top-5 left-5 flex gap-3">
+          <button
+            className={clsx(buttonClassCommon, "bg-red-600")}
+            onClick={() => handleDelete(photo.id)}
+            title="Discard this image"
+            type="button"
+          >
+            <Trash size="28" className="relative top-2.5" />
+          </button>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={`captured-image-${photo.id}`}
+          //className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
+          alt={`Photo of the product ${photo.id}`}
+          src={`/api/image/${photo.id}`}
+        />
+      </div>
     </div>
   );
 }
