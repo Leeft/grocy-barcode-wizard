@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useContext, KeyboardEvent, useActionState, RefObject, useState } from "react";
+import { use, useContext, KeyboardEvent, useActionState, useState } from "react";
 import { QuantityUnitsDropdown } from "@/ui/product/quantity-units-dropdown";
 import { ProductLocation as PrLocation, Product, ProductGroup, QuantityUnit } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
@@ -78,9 +78,9 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
     energy: data.energy ?? 0,
     quickConsumeAmount: data.quickConsumeAmount ?? 1,
     quickOpenAmount: data.quickOpenAmount ?? 1,
-    defaultQuantityUnitPurchase: data.unitChosen.toString(),
-    defaultQuantityUnitConsume: data.unitChosen.toString(),
-    quantityUnitPrices: data.unitChosen.toString(),
+    defaultQuantityUnitPurchase: data.defaultQuantityUnitPurchase ?? data.unitChosen.toString(),
+    defaultQuantityUnitConsume: data.defaultQuantityUnitConsume ?? data.unitChosen.toString(),
+    quantityUnitPrices: data.quantityUnitPrices ?? data.unitChosen.toString(),
     purchaseConversionFactor: data.purchaseConversionFactor ?? 1,
     consumeConversionFactor: data.consumeConversionFactor ?? 1,
     priceConversionFactor: data.priceConversionFactor ?? 1,
@@ -122,6 +122,18 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   const [selectedPriceQuId, setSelectedPriceQuId] = useState<string>(
     fields.quantityUnitPrices.value as string,
   );
+
+  if (selectedPurchaseQuId !== selectedUnit) {
+    unitConversions.trackConversion(selectedUnit, selectedPurchaseQuId, "PURCHASE");
+  }
+  
+  if (selectedConsumeQuId !== selectedUnit) {
+    unitConversions.trackConversion(selectedUnit, selectedConsumeQuId, "CONSUME");
+  }
+
+  if (selectedPriceQuId !== selectedUnit) {
+    unitConversions.trackConversion(selectedUnit, selectedPriceQuId, "PRICE");
+  }
 
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
   const products = use(useContext(ProductContext) as Promise<Product[]>);
@@ -306,10 +318,10 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <UnitConversionsEditor
                 field={fields.purchaseConversionFactor}
                 conversions={unitConversions}
-                //unitSystem={fields.unitSystem.value as UnitSystem}
                 from={selectedUnit}
                 to={selectedPurchaseQuId}
                 toValue={fields.unitAmount.value}
+                initialFactor={fields.purchaseConversionFactor.value}
               />
             ) : (
               <input
@@ -326,10 +338,10 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <UnitConversionsEditor
                 field={fields.consumeConversionFactor}
                 conversions={unitConversions}
-                //unitSystem={fields.unitSystem.value as UnitSystem}
                 from={selectedUnit}
                 to={selectedConsumeQuId}
                 toValue={fields.unitAmount.value}
+                initialFactor={fields.consumeConversionFactor.value}
               />
             ) : (
               <input
@@ -346,10 +358,10 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <UnitConversionsEditor
                 field={fields.priceConversionFactor}
                 conversions={unitConversions}
-                //unitSystem={fields.unitSystem.value as UnitSystem}
                 from={selectedUnit}
                 to={selectedPriceQuId}
                 toValue={fields.unitAmount.value}
+                initialFactor={fields.priceConversionFactor.value}
               />
             ) : (
               <input

@@ -65,7 +65,7 @@ export default function CreateProductFields({
   const [dueDays, setDueDays] = useState<string>(fields.dueDays.value);
 
   const form = useFormMetadata(formId);
-  if ( form ) {
+  if (form) {
     // NOOP to make the variable used
   }
 
@@ -187,16 +187,19 @@ export default function CreateProductFields({
               setSelectedOption={setSelectedUnit}
               onChange={(e) => {
                 const id = e.currentTarget.value;
-                if (unitConversions !== undefined) {
-                  if (selectedPurchaseQuId)
-                    unitConversions.untrack(selectedPurchaseQuId, fields.unitId.value);
-                  if (selectedConsumeQuId) unitConversions.untrack(selectedConsumeQuId, fields.unitId.value);
-                  if (selectedPriceQuId) unitConversions.untrack(selectedPriceQuId, fields.unitId.value);
-                  unitConversions.trackConversion(id, id, "PURCHASE");
+                if (id !== fields.unitId.value) {
+                  if (unitConversions !== undefined) {
+                    if (selectedPurchaseQuId)
+                      unitConversions.untrack(selectedPurchaseQuId, fields.unitId.value);
+                    if (selectedConsumeQuId)
+                      unitConversions.untrack(selectedConsumeQuId, fields.unitId.value);
+                    if (selectedPriceQuId) unitConversions.untrack(selectedPriceQuId, fields.unitId.value);
+                    unitConversions.trackConversion(id, id, "PURCHASE");
+                  }
+                  if (setSelectedPurchaseQuId) setSelectedPurchaseQuId(id);
+                  if (setSelectedConsumeQuId) setSelectedConsumeQuId(id);
+                  if (setSelectedPriceQuId) setSelectedPriceQuId(id);
                 }
-                if (setSelectedPurchaseQuId) setSelectedPurchaseQuId(id);
-                if (setSelectedConsumeQuId) setSelectedConsumeQuId(id);
-                if (setSelectedPriceQuId) setSelectedPriceQuId(id);
               }}
             />
           </FormField>

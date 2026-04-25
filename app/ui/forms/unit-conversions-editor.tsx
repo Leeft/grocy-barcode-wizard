@@ -14,12 +14,14 @@ export default function UnitConversionsEditor({
   from,
   to,
   toValue,
+  initialFactor,
 }: {
   field: FieldMetadata;
   conversions: UnitConversions;
   from: string;
   to: string;
   toValue: string | undefined;
+  initialFactor?: string;
 }) {
   const existingConversions = use(
     useContext(QuantityUnitConversionContext) as Promise<QuantityUnitConversion[]>,
@@ -29,9 +31,12 @@ export default function UnitConversionsEditor({
 
   const conv = conversions.find(from, to);
 
-  const [convFactor, setConvFactor] = useState<number>(conv ? conv.factor : 1.0);
+  const [convFactor, setConvFactor] = useState<number>(
+    initialFactor ? Number(initialFactor) : conv ? conv.factor : 1.0,
+  );
 
   if (conv === undefined) {
+    console.log("no conversion", field.name);
     return <></>;
   }
 
