@@ -139,7 +139,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
   if (data.imageData != "" && data.imageData !== undefined) {
     const file = dataURLtoFile(data.imageData, "filename-not-used-yet");
     const arr = new Uint8Array(await file.arrayBuffer());
-    await prisma.productPhoto.upsert({
+    const productPhoto = await prisma.productPhoto.upsert({
       where: { productId: queuedProduct.id },
       update: {
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
@@ -154,6 +154,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
         grocyFileGroup: "productpictures",
       },
     });
+    revalidatePath(`/api/image/${productPhoto.id}`, "page");
   }
 
   // await prisma.barcode.update({

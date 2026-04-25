@@ -74,13 +74,21 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
           />
           <ButtonSwitch enabled={cameraIsEnabled && !data && !photoId} cameraHandler={cameraHandler} />
           <ButtonUpload setData={setData} setType={setType} setName={setName} />
-          <ButtonRotateImageCounterclockwise data={data} setData={setData} setType={setType} />
-          <ButtonRotateImageClockwise data={data} setData={setData} setType={setType} />
+          {(data !== "" || (photoId !== undefined && photoId > 0)) && (
+            <>
+              <ButtonRotateImageCounterclockwise data={data ? data : `/api/image/${photoId}`} setData={setData} setType={setType} />
+              <ButtonRotateImageClockwise
+                data={data ? data : `/api/image/${photoId}`}
+                setData={setData}
+                setType={setType}
+              />
+            </>
+          )}
           <ButtonDeleteImage photoId={photoId} data={data} setData={setData} setPhotoId={setPhotoId} />
         </Toolbar>
         <div className="relative">
           {(() => {
-            if (data !== undefined && data !== '') {
+            if (data !== undefined && data !== "") {
               return <BackgroundCapturedImage data={data} />;
             } else if (photoId !== undefined && photoId > 0) {
               return <BackgroundSavedImage photoId={photoId} />;
@@ -480,7 +488,7 @@ function BackgroundSavedImage({ photoId }: { photoId: number }) {
         key={`captured-image-${photoId}`}
         //className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
         alt={`BackgroundSavedImage of the product ${photoId}`}
-        src={`/api/image/${photoId}`}
+        src={`/api/image/${photoId}?ts=${Math.floor(Date.now()/1000)}`}
       />
     </div>
   );

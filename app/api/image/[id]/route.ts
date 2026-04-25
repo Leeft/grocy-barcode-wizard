@@ -18,6 +18,7 @@ export const GET = async (
           "content-disposition": `attachment; filename=${photo.filename}`,
           "content-type": "image/png",
           "content-length": photo.data.length + "",
+          "cache-control": "no-cache",
         }),
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
