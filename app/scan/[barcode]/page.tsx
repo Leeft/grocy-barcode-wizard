@@ -62,7 +62,7 @@ export default async function BarcodePage({ params }: { params: Promise<{ barcod
   try {
     if (barcode !== "installHook.js.map") grocyBarcode = await processReceivedBarcode(barcode);
   } catch {
-    console.log(`Couldn't get product by barcode: ${barcode}`);
+    console.log(`Couldn't get product from grocy by barcode: ${barcode}`);
   }
 
   if (grocyBarcode !== null) {
