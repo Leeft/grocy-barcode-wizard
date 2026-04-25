@@ -126,7 +126,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   if (selectedPurchaseQuId !== selectedUnit) {
     unitConversions.trackConversion(selectedUnit, selectedPurchaseQuId, "PURCHASE");
   }
-  
+
   if (selectedConsumeQuId !== selectedUnit) {
     unitConversions.trackConversion(selectedUnit, selectedConsumeQuId, "CONSUME");
   }
@@ -186,19 +186,21 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
             </FormColumn>
           </FormRow>
 
-          <CreateProductFields
-            formId={form.id}
-            fields={fields}
-            selectedUnit={selectedUnit}
-            setSelectedUnit={setSelectedUnit}
-            unitConversions={unitConversions}
-            selectedPurchaseQuId={selectedPurchaseQuId}
-            setSelectedPurchaseQuId={setSelectedPurchaseQuId}
-            selectedConsumeQuId={selectedConsumeQuId}
-            setSelectedConsumeQuId={setSelectedConsumeQuId}
-            selectedPriceQuId={selectedPriceQuId}
-            setSelectedPriceQuId={setSelectedPriceQuId}
-          />
+          <FormContainer comment="Quick capture product fields">
+            <CreateProductFields
+              formId={form.id}
+              fields={fields}
+              selectedUnit={selectedUnit}
+              setSelectedUnit={setSelectedUnit}
+              unitConversions={unitConversions}
+              selectedPurchaseQuId={selectedPurchaseQuId}
+              setSelectedPurchaseQuId={setSelectedPurchaseQuId}
+              selectedConsumeQuId={selectedConsumeQuId}
+              setSelectedConsumeQuId={setSelectedConsumeQuId}
+              selectedPriceQuId={selectedPriceQuId}
+              setSelectedPriceQuId={setSelectedPriceQuId}
+            />
+          </FormContainer>
 
           <hr className="mt-0 mb-2 text-slate-500" />
 
@@ -314,63 +316,39 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
           </FormRowGroup>
 
           <FormContainer comment="Unit conversion for 'purchase'">
-            {selectedPurchaseQuId !== selectedUnit ? (
-              <UnitConversionsEditor
-                field={fields.purchaseConversionFactor}
-                conversions={unitConversions}
-                from={selectedUnit}
-                to={selectedPurchaseQuId}
-                toValue={fields.unitAmount.value}
-                initialFactor={fields.purchaseConversionFactor.value}
-              />
-            ) : (
-              <input
-                {...getInputProps(fields.purchaseConversionFactor, {
-                  type: "hidden",
-                })}
-                defaultValue={1}
-              />
-            )}
+            <UnitConversionsEditor
+              field={fields.purchaseConversionFactor}
+              conversions={unitConversions}
+              from={selectedUnit}
+              to={selectedPurchaseQuId}
+              toValue={fields.unitAmount.value}
+              initialFactor={fields.purchaseConversionFactor.value}
+              active={selectedPurchaseQuId !== selectedUnit}
+            />
           </FormContainer>
 
           <FormContainer comment="Unit conversion for 'consume'">
-            {selectedConsumeQuId !== selectedPurchaseQuId ? (
-              <UnitConversionsEditor
-                field={fields.consumeConversionFactor}
-                conversions={unitConversions}
-                from={selectedUnit}
-                to={selectedConsumeQuId}
-                toValue={fields.unitAmount.value}
-                initialFactor={fields.consumeConversionFactor.value}
-              />
-            ) : (
-              <input
-                {...getInputProps(fields.consumeConversionFactor, {
-                  type: "hidden",
-                })}
-                defaultValue={1}
-              />
-            )}
+            <UnitConversionsEditor
+              field={fields.consumeConversionFactor}
+              conversions={unitConversions}
+              from={selectedUnit}
+              to={selectedConsumeQuId}
+              toValue={fields.unitAmount.value}
+              initialFactor={fields.consumeConversionFactor.value}
+              active={selectedConsumeQuId !== selectedPurchaseQuId}
+            />
           </FormContainer>
 
           <FormContainer comment="Unit conversion for 'price tracking'">
-            {selectedPriceQuId !== selectedConsumeQuId && selectedPriceQuId !== selectedPurchaseQuId ? (
-              <UnitConversionsEditor
-                field={fields.priceConversionFactor}
-                conversions={unitConversions}
-                from={selectedUnit}
-                to={selectedPriceQuId}
-                toValue={fields.unitAmount.value}
-                initialFactor={fields.priceConversionFactor.value}
-              />
-            ) : (
-              <input
-                {...getInputProps(fields.priceConversionFactor, {
-                  type: "hidden",
-                })}
-                defaultValue={1}
-              />
-            )}
+            <UnitConversionsEditor
+              field={fields.priceConversionFactor}
+              conversions={unitConversions}
+              from={selectedUnit}
+              to={selectedPriceQuId}
+              toValue={fields.unitAmount.value}
+              initialFactor={fields.priceConversionFactor.value}
+              active={selectedPriceQuId !== selectedConsumeQuId && selectedPriceQuId !== selectedPurchaseQuId}
+            />
           </FormContainer>
 
           <hr className="mt-2 mb-2 text-slate-500" />

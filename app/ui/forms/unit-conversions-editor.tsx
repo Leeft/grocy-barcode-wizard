@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { use, useContext, useState } from "react";
 import { toLookup } from "@/lib/utils";
 import { QuantityUnitConversionContext } from "@/providers/quantity-unit-conversion-context";
-import { FieldMetadata } from "@conform-to/react";
+import { FieldMetadata, getInputProps } from "@conform-to/react";
 
 export default function UnitConversionsEditor({
   field,
@@ -15,6 +15,7 @@ export default function UnitConversionsEditor({
   to,
   toValue,
   initialFactor,
+  active,
 }: {
   field: FieldMetadata;
   conversions: UnitConversions;
@@ -22,12 +23,17 @@ export default function UnitConversionsEditor({
   to: string;
   toValue: string | undefined;
   initialFactor?: string;
+  active: boolean;
 }) {
   const existingConversions = use(
     useContext(QuantityUnitConversionContext) as Promise<QuantityUnitConversion[]>,
   );
 
   const units = toLookup(use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>));
+
+  if (!active) {
+    return <input {...getInputProps(field, { type: "hidden" })} defaultValue={1} />;
+  }
 
   const conv = conversions.find(from, to);
 
@@ -63,8 +69,7 @@ export default function UnitConversionsEditor({
   //console.log( 'f->t', units[nFrom], units[nTo] )
   //console.log(...conversions.conversions);
   return (
-    <div key={`conversion-${conv.key}-outer`}>
-      {/* <h1>{conv.key}</h1> */}
+    <div key={`conversion-${conv.key}-outer`} className="min-h-10 pt-3">
       Add conversion:{" "}
       <span className="text-green-200">
         {toValue ? toValue : "???"} {Number(toValue) !== 1.0 ? unitFrom.name_plural : unitFrom.name}
@@ -90,7 +95,7 @@ export default function UnitConversionsEditor({
           placeholder={"> 0"}
           // aria-invalid={!field.valid || undefined}
           // aria-describedby={!field.valid ? field.errorId : undefined}
-          className={clsx(inputCommonStyles, "w-20")}
+          className={clsx(inputCommonStyles, "w-20", "mt-[-11]")}
           onChange={(e) => setConvFactor(Number(e.currentTarget.value))}
           onInput={(e) => setConvFactor(Number(e.currentTarget.value))}
           onBlur={(e) => setConvFactor(Number(e.currentTarget.value))}
