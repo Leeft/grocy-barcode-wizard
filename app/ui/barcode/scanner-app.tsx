@@ -2,8 +2,10 @@
 
 import Barcode from "@/lib/barcode";
 import BarcodeScanStatus from "@/ui/barcode/scan-status";
-import { useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { UserContext } from "@/providers/user-context";
+import { GetUser } from "@/lib/user-db";
 
 export type ConnectionStatus = "connecting" | "connected" | "error";
 
@@ -13,6 +15,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   const [retryCount, setRetryCount] = useState(0);
   const [redirect, setRedirect] = useState(false);
   const router = useRouter();
+  const user = use(useContext(UserContext) as Promise<GetUser>);
 
   const debug = false;
 
@@ -47,13 +50,15 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
 
         setBarcode(barcode);
 
-        // Yeah, this is not the react way, but we need the sound to continue
-        // playing, and only playing _once_. Proving to be really tricky to do
-        // with proper react approaches, particularly because the layout sits
-        // server side and the sound needs to be triggered client side.
-        const el = document.getElementById('notificationSound') as HTMLAudioElement;
-        if ( el ) {
-          el.play();
+        if (user.settings?.playSoundOnScan) {
+          // Yeah, this is not the react way, but we need the sound to continue
+          // playing, and only playing _once_. Proving to be really tricky to do
+          // with proper react approaches, particularly because the layout sits
+          // server side and the sound needs to be triggered client side.
+          const el = document.getElementById("notificationSound") as HTMLAudioElement;
+          if (el) {
+            el.play();
+          }
         }
 
         if (main) main.classList.add("flash");

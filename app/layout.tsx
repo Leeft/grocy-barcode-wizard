@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 // @ts-expect-error can't import CSS in typescript
 import "@/styles/globals.css";
 import Navbar from "@/ui/navbar";
+import UserProvider from "@/providers/user-context";
+import { getUser } from "./lib/user-db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Grocy Barcode Wizard",
-  description:
-    "A no-frills, opinionated, quick to use barcode scanner frontend for your Grocy instance",
+  description: "A no-frills, opinionated, quick to use barcode scanner frontend for your Grocy instance",
 };
 
 export const viewport: Viewport = {
@@ -34,17 +35,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen w-screen">
           <div className="hidden w-10 md:flex-auto lg:block"></div>
-          <main
-            id="main"
-            className="relative w-full max-w-240 grow bg-slate-800 px-2 py-2 text-sm md:px-4"
-          >
-            <Navbar />
-            {children}
+          <main id="main" className="relative w-full max-w-240 grow bg-slate-800 px-2 py-2 text-sm md:px-4">
+            <UserProvider promise={getUser(1)}>
+              <Navbar />
+              {children}
+            </UserProvider>
           </main>
           <div className="hidden w-10 md:flex-auto lg:block"></div>
         </div>
