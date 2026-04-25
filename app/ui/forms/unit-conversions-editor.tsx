@@ -31,15 +31,15 @@ export default function UnitConversionsEditor({
 
   const units = toLookup(use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>));
 
-  if (!active) {
-    return <input {...getInputProps(field, { type: "hidden" })} defaultValue={1} />;
-  }
-
   const conv = conversions.find(from, to);
 
   const [convFactor, setConvFactor] = useState<number>(
     initialFactor ? Number(initialFactor) : conv ? conv.factor : 1.0,
   );
+
+  if (!active) {
+    return <input {...getInputProps(field, { type: "hidden" })} defaultValue={1} />;
+  }
 
   if (conv === undefined) {
     console.log("no conversion", field.name);
