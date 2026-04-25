@@ -15,7 +15,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import clsx from "clsx";
-import OneOffSound, { OneOffSoundHandler } from "./one-off-sound";
+import { OneOffSound, OneOffSoundHandler } from "./one-off-sound";
 import { GetProductPhoto } from "@/lib/product-db";
 
 const buttonClassCommon = clsx(

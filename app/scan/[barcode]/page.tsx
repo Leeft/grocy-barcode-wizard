@@ -75,11 +75,6 @@ export default async function BarcodePage({ params }: { params: Promise<{ barcod
     );
   }
 
-  // const notFoundBarcode = new Barcode({
-  //   barcode: barcode,
-  //   scannedAt: new Date(),
-  // });
-
   return (
     <>
       <BarcodeScannerApp slug={barcode} />

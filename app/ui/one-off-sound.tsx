@@ -10,24 +10,20 @@ interface OneOffSoundProps {
   src: string;
 }
 
-const OneOffSound = forwardRef<OneOffSoundHandler, OneOffSoundProps>(
-  ({ src }, ref) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
+export const OneOffSound = forwardRef<OneOffSoundHandler, OneOffSoundProps>(({ src }, ref) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-    useImperativeHandle(ref, () => ({
-      play: () => {
-        if (audioRef.current) {
-          audioRef.current.play().catch((error) => {
-            console.error("Playback failed:", error);
-          });
-        }
-      },
-    }));
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch((error) => {
+          console.error("Playback failed:", error);
+        });
+      }
+    },
+  }));
 
-    return <audio ref={audioRef} src={src} preload="auto" />;
-  },
-);
+  return <audio ref={audioRef} src={src} preload="auto" />;
+});
 
 OneOffSound.displayName = "OneOffSound";
-
-export default OneOffSound;

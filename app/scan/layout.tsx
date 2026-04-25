@@ -21,20 +21,21 @@ export default function ScanLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <QuantityUnitProvider promise={fetchQuantityUnits()}>
-      <QuantityUnitConversionProvider promise={fetchQuantityUnitConversions()}>
-        <ProductGroupProvider promise={fetchProductGroups()}>
-          <ProductProvider promise={fetchProducts()}>
-            <ShoppingLocationProvider promise={fetchShoppingLocations()}>
-              <LocationProvider promise={fetchLocations()}>
-                <GrocyConfigProvider promise={fetchConfig()}>
-                  {children}
-                </GrocyConfigProvider>
-              </LocationProvider>
-            </ShoppingLocationProvider>
-          </ProductProvider>
-        </ProductGroupProvider>
-      </QuantityUnitConversionProvider>
-    </QuantityUnitProvider>
+    <>
+      <audio id="notificationSound" src="/sound/dragon-studio-notification-ping-372479.mp3" preload="auto" />
+      <QuantityUnitProvider promise={fetchQuantityUnits()}>
+        <QuantityUnitConversionProvider promise={fetchQuantityUnitConversions()}>
+          <ProductGroupProvider promise={fetchProductGroups()}>
+            <ProductProvider promise={fetchProducts()}>
+              <ShoppingLocationProvider promise={fetchShoppingLocations()}>
+                <LocationProvider promise={fetchLocations()}>
+                  <GrocyConfigProvider promise={fetchConfig()}>{children}</GrocyConfigProvider>
+                </LocationProvider>
+              </ShoppingLocationProvider>
+            </ProductProvider>
+          </ProductGroupProvider>
+        </QuantityUnitConversionProvider>
+      </QuantityUnitProvider>
+    </>
   );
 }

@@ -43,12 +43,18 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
       try {
         const data = JSON.parse(event.data);
         const barcode = Barcode.fromJSON(data);
-        if (debug)
-          console.log(
-            "Received barcode data:", barcode,
-          );
+        if (debug) console.log("Received barcode data:", barcode);
 
         setBarcode(barcode);
+
+        // Yeah, this is not the react way, but we need the sound to continue
+        // playing, and only playing _once_. Proving to be really tricky to do
+        // with proper react approaches, particularly because the layout sits
+        // server side and the sound needs to be triggered client side.
+        const el = document.getElementById('notificationSound') as HTMLAudioElement;
+        if ( el ) {
+          el.play();
+        }
 
         if (main) main.classList.add("flash");
         setTimeout(() => {
@@ -86,10 +92,8 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   }, [redirect, barcode, router]);
 
   return (
-    <BarcodeScanStatus
-      barcode={barcode}
-      connectionStatus={status}
-      retries={retryCount}
-    />
+    <>
+      <BarcodeScanStatus barcode={barcode} connectionStatus={status} retries={retryCount} />
+    </>
   );
 }
