@@ -1,8 +1,13 @@
+import { getSettings } from "@/lib/settings-db";
+import { SettingsForm } from "@/ui/forms/settings-form";
+
 export default function Settings() {
+
+  const settings = getSettings(1);
+
   return (
     <div>
-      <h1 className="text-lg font-bold uppercase">Settings</h1>
-      <p>TODO</p>
+      <SettingsForm settings={settings} />
     </div>
   );
 }
