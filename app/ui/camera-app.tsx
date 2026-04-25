@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Dispatch, RefObject, SetStateAction, useRef, useState } from "react";
+import React, { Dispatch, RefObject, SetStateAction, use, useContext, useRef, useState } from "react";
 import { WebCamera, WebCameraHandler } from "@shivantra/react-web-camera";
 import { fileToBase64 } from "file64";
 import {
@@ -17,6 +17,8 @@ import {
 import clsx from "clsx";
 import { OneOffSound, OneOffSoundHandler } from "./one-off-sound";
 import { GetProductPhoto } from "@/lib/product-db";
+import { GetUser } from "@/lib/user-db";
+import { UserContext } from "@/providers/user-context";
 
 const buttonClassCommon = clsx(
   "flex-row",
@@ -38,7 +40,10 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
   const cameraHandler = useRef<WebCameraHandler>(null);
   const shutterHandler = useRef<OneOffSoundHandler>(null);
 
-  const [cameraIsEnabled, setCameraIsEnabled] = useState<boolean>(false);
+  const user = use(useContext(UserContext) as Promise<GetUser>);
+  const [cameraIsEnabled, setCameraIsEnabled] = useState<boolean>(
+    user.settings?.openCameraByDefault ? true : false,
+  );
 
   const [photoId, setPhotoId] = useState<number | undefined>(photo !== undefined ? photo.id : undefined);
   const [data, setData] = useState<string>("");
@@ -76,7 +81,11 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
           <ButtonUpload setData={setData} setType={setType} setName={setName} />
           {(data !== "" || (photoId !== undefined && photoId > 0)) && (
             <>
-              <ButtonRotateImageCounterclockwise data={data ? data : `/api/image/${photoId}`} setData={setData} setType={setType} />
+              <ButtonRotateImageCounterclockwise
+                data={data ? data : `/api/image/${photoId}`}
+                setData={setData}
+                setType={setType}
+              />
               <ButtonRotateImageClockwise
                 data={data ? data : `/api/image/${photoId}`}
                 setData={setData}
@@ -488,7 +497,7 @@ function BackgroundSavedImage({ photoId }: { photoId: number }) {
         key={`captured-image-${photoId}`}
         //className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
         alt={`BackgroundSavedImage of the product ${photoId}`}
-        src={`/api/image/${photoId}?ts=${Math.floor(Date.now()/1000)}`}
+        src={`/api/image/${photoId}?ts=${Math.floor(Date.now() / 1000)}`}
       />
     </div>
   );
