@@ -203,3 +203,40 @@ dl.product-info {
     grid-column-start: 2;
   }
 }
+
+label[for="file"] {
+  background: #47a26b;
+  border-radius: 25px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.spinner {
+  animation-name: ckw;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes ckw {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-ccw {
+  animation-name: ccw;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes ccw {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}

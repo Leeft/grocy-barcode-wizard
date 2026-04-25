@@ -45,14 +45,15 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
 
   console.log("queued product is", queuedProduct);
 
-  if (data.image) {
-    const file = dataURLtoFile(data.image, "filename-not-used-yet");
+  if (data.imageData != "" && data.imageData !== undefined) {
+    const file = dataURLtoFile(data.imageData, "filename-not-used-yet");
     const arr = new Uint8Array(await file.arrayBuffer());
     await prisma.productPhoto.create({
       data: {
         userId: 1, // TODO: Actual users
         productId: queuedProduct.id,
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+        tiletype: data.imageType,
         data: arr,
         grocyFileGroup: "productpictures",
       },
@@ -135,8 +136,8 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
 
   console.log("updated product is", queuedProduct);
 
-  if (data.image) {
-    const file = dataURLtoFile(data.image, "filename-not-used-yet");
+  if (data.imageData != "" && data.imageData !== undefined) {
+    const file = dataURLtoFile(data.imageData, "filename-not-used-yet");
     const arr = new Uint8Array(await file.arrayBuffer());
     await prisma.productPhoto.upsert({
       where: { productId: queuedProduct.id },
@@ -147,6 +148,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
       create: {
         userId: 1, // TODO: Actual users
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
+        filetype: data.imageType,
         data: arr,
         productId: queuedProduct.id,
         grocyFileGroup: "productpictures",

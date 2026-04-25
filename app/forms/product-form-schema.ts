@@ -75,7 +75,9 @@ export const CreateProductFormSchema = z
       .lte(10000, { message: `Must be less than 10000` })
       .optional(),
 
-    image: z.string().optional(),
+    imageData: z.string().optional(),
+    imageType: z.string().optional(),
+    imageName: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const {
