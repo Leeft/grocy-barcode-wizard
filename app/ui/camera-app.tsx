@@ -37,6 +37,8 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
   const [photo /*, setPhoto*/] = useState<GetProductPhoto | undefined>(_photo ?? undefined);
   // const [image, setImage] = useState<string | undefined>(undefined);
 
+  const cameraAppRef = useRef<React.RefObject<HTMLDivElement | null>>(null);
+
   const cameraHandler = useRef<WebCameraHandler>(null);
   const shutterHandler = useRef<OneOffSoundHandler>(null);
 
@@ -57,17 +59,19 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
       <input type="hidden" name="imageName" value={name} />
 
       <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
-      <div className="flex flex-wrap gap-5">
+      <div className="flex flex-wrap gap-5" ref={cameraAppRef as any}>
         <Toolbar>
           <ButtonEnableCamera
             enabled={cameraIsEnabled || data || photoId ? true : false}
             cameraHandler={cameraHandler}
             setEnabled={setCameraIsEnabled}
+            ref={cameraAppRef}
           />
           <ButtonDisableCamera
             enabled={cameraIsEnabled && !data && !photoId}
             cameraHandler={cameraHandler}
             setEnabled={setCameraIsEnabled}
+            ref={cameraAppRef}
           />
           <ButtonSnapshot
             enabled={cameraIsEnabled && !data && !photoId}
@@ -76,24 +80,37 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
             setName={setName}
             cameraHandler={cameraHandler}
             shutterHandler={shutterHandler}
+            ref={cameraAppRef}
           />
-          <ButtonSwitch enabled={cameraIsEnabled && !data && !photoId} cameraHandler={cameraHandler} />
-          <ButtonUpload setData={setData} setType={setType} setName={setName} />
+          <ButtonSwitch
+            ref={cameraAppRef}
+            enabled={cameraIsEnabled && !data && !photoId}
+            cameraHandler={cameraHandler}
+          />
+          <ButtonUpload ref={cameraAppRef} setData={setData} setType={setType} setName={setName} />
           {(data !== "" || (photoId !== undefined && photoId > 0)) && (
             <>
               <ButtonRotateImageCounterclockwise
                 data={data ? data : `/api/image/${photoId}`}
                 setData={setData}
                 setType={setType}
+                ref={cameraAppRef}
               />
               <ButtonRotateImageClockwise
                 data={data ? data : `/api/image/${photoId}`}
                 setData={setData}
                 setType={setType}
+                ref={cameraAppRef}
               />
             </>
           )}
-          <ButtonDeleteImage photoId={photoId} data={data} setData={setData} setPhotoId={setPhotoId} />
+          <ButtonDeleteImage
+            ref={cameraAppRef}
+            photoId={photoId}
+            data={data}
+            setData={setData}
+            setPhotoId={setPhotoId}
+          />
         </Toolbar>
         <div className="relative">
           {(() => {
@@ -104,7 +121,7 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
             } else if (cameraIsEnabled && cameraHandler) {
               return <BackgroundWebcam cameraHandler={cameraHandler} />;
             } else {
-              return <BackgroundCameraInactive setCameraIsEnabled={setCameraIsEnabled} />;
+              return <BackgroundCameraInactive ref={cameraAppRef} setCameraIsEnabled={setCameraIsEnabled} />;
             }
           })()}
         </div>
@@ -117,15 +134,29 @@ function Toolbar({ children }: { children: React.ReactNode }) {
   return <div className="absolute top-8 left-5 z-10 flex gap-3">{children}</div>;
 }
 
+function scrollIntoView(cameraAppRef: React.RefObject<unknown>) {
+  // @ts-expect-error TS being TS as usual
+  cameraAppRef.current!.scrollIntoView({
+    behavior: "smooth",
+    block: "end",
+    inline: "center",
+  });
+}
+
 function BackgroundCameraInactive({
+  ref,
   setCameraIsEnabled,
 }: {
+  ref: React.RefObject<unknown>;
   setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
 }) {
   return (
     <button
       type="button"
-      onClick={() => setCameraIsEnabled(true)}
+      onClick={() => {
+        setCameraIsEnabled(true);
+        scrollIntoView(ref);
+      }}
       title="Click to enable camera"
       className="rounded-1xl h-auto w-full cursor-pointer border border-slate-500 text-slate-500"
     >
@@ -139,17 +170,22 @@ function ButtonEnableCamera({
   cameraHandler,
   enabled,
   setEnabled,
+  ref,
 }: {
   cameraHandler: React.RefObject<WebCameraHandler | null>;
   enabled: boolean;
   setEnabled: Dispatch<SetStateAction<boolean>>;
+  ref: React.RefObject<unknown>;
 }) {
   if (cameraHandler !== undefined && enabled === true) return <></>;
 
   return (
     <button
       className={clsx(buttonClassCommon, "bg-red-800")}
-      onClick={() => setEnabled(true)}
+      onClick={() => {
+        setEnabled(true);
+        scrollIntoView(ref);
+      }}
       title="Enable camera"
       type="button"
     >
@@ -162,17 +198,22 @@ function ButtonDisableCamera({
   cameraHandler,
   enabled,
   setEnabled,
+  ref,
 }: {
   cameraHandler: React.RefObject<WebCameraHandler | null>;
   enabled: boolean;
   setEnabled: Dispatch<SetStateAction<boolean>>;
+  ref: React.RefObject<unknown>;
 }) {
   if (cameraHandler === undefined || enabled === false) return <></>;
 
   return (
     <button
       className={clsx(buttonClassCommon, "bg-green-800")}
-      onClick={() => setEnabled(false)}
+      onClick={() => {
+        setEnabled(false);
+        scrollIntoView(ref);
+      }}
       title="Disable camera"
       type="button"
     >
@@ -187,12 +228,14 @@ function ButtonUpload({
   setData,
   setType,
   setName,
+  ref,
 }: {
   id?: string;
   name?: string;
   setData: Dispatch<SetStateAction<string>>;
   setType: Dispatch<SetStateAction<string>>;
   setName: Dispatch<SetStateAction<string>>;
+  ref: React.RefObject<unknown>;
 }) {
   return (
     <div>
@@ -215,6 +258,7 @@ function ButtonUpload({
             const file = event.target.files[0];
             setName(file.name);
             setType(file.type);
+            scrollIntoView(ref);
             //setData(URL.createObjectURL(event.target.files[0]));
             const reader = new FileReader();
             reader.addEventListener("load", () => {
@@ -224,6 +268,7 @@ function ButtonUpload({
             });
             if (file) {
               reader.readAsDataURL(file);
+              scrollIntoView(ref);
             }
           }
         }}
@@ -239,6 +284,7 @@ function ButtonSnapshot({
   setName,
   cameraHandler,
   shutterHandler,
+  ref,
 }: {
   enabled: boolean;
   setData: Dispatch<SetStateAction<string>>;
@@ -246,10 +292,12 @@ function ButtonSnapshot({
   setName: Dispatch<SetStateAction<string>>;
   cameraHandler: React.RefObject<WebCameraHandler | null>;
   shutterHandler: RefObject<OneOffSoundHandler | null>;
+  ref: React.RefObject<unknown>;
 }) {
   if (cameraHandler === null || enabled === false) return <></>;
 
   async function handleCapture() {
+    scrollIntoView(ref);
     const file = await cameraHandler.current?.capture();
     if (file) {
       shutterHandler.current?.play();
@@ -275,14 +323,17 @@ function ButtonSnapshot({
 function ButtonSwitch({
   cameraHandler,
   enabled,
+  ref,
 }: {
   cameraHandler: React.RefObject<WebCameraHandler | null>;
   enabled: boolean;
+  ref: React.RefObject<unknown>;
 }) {
   if (cameraHandler === null || enabled === false) return <></>;
 
   function handleSwitch() {
     cameraHandler.current?.switch();
+    scrollIntoView(ref);
   }
 
   return (
@@ -301,10 +352,12 @@ function ButtonRotateImageCounterclockwise({
   data,
   setData,
   setType,
+  ref,
 }: {
   data: string | undefined;
   setData: Dispatch<SetStateAction<string>>;
   setType: Dispatch<SetStateAction<string>>;
+  ref: React.RefObject<unknown>;
 }) {
   const [busy, setBusy] = useState<boolean>(false);
 
@@ -324,6 +377,7 @@ function ButtonRotateImageCounterclockwise({
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setData(canvas.toDataURL("image/png"));
         setType("image/png");
+        scrollIntoView(ref);
       }
       setBusy(false);
     };
@@ -350,10 +404,12 @@ function ButtonRotateImageClockwise({
   data,
   setData,
   setType,
+  ref,
 }: {
   data: string | undefined;
   setData: Dispatch<SetStateAction<string>>;
   setType: Dispatch<SetStateAction<string>>;
+  ref: React.RefObject<unknown>;
 }) {
   const [busy, setBusy] = useState<boolean>(false);
 
@@ -373,6 +429,7 @@ function ButtonRotateImageClockwise({
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         setData(canvas.toDataURL("image/png"));
         setType("image/png");
+        scrollIntoView(ref);
       }
       setBusy(false);
     };
@@ -414,11 +471,13 @@ function ButtonDeleteImage({
   data,
   setData,
   setPhotoId,
+  ref,
 }: {
   photoId: number | undefined;
   data: string | undefined;
   setData: Dispatch<SetStateAction<string>>;
   setPhotoId: Dispatch<SetStateAction<number | undefined>>;
+  ref: React.RefObject<unknown>;
 }) {
   if ((data === undefined || data === "") && !photoId) return <></>;
 
@@ -449,6 +508,7 @@ function ButtonDeleteImage({
     if (response.status === 200) {
       setData("");
       setPhotoId(undefined);
+      scrollIntoView(ref);
     }
   }
 
