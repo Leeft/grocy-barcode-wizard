@@ -223,6 +223,8 @@ export const EditProductFormSchema = CreateProductFormSchema.safeExtend({
   consumeConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
 
   priceConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+
+  submitMode: z.enum(["updateOnly", "createInGrocy"]),
 });
 
 export const ProductFormSchema = z.discriminatedUnion("intent", [

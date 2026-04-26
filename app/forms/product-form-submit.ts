@@ -171,8 +171,10 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
     revalidatePath(`/api/image/${productPhoto.id}`, "page");
   }
 
-  // TODO: notification
-  await syncProductToGrocy(data.id);
+  if ( data.submitMode === 'createInGrocy') {
+    // TODO: notification
+    await syncProductToGrocy(data.id);
+  }
 
   // Revalidate the cache for the invoices page and redirect the user.
   revalidatePath(`/queue/[barcode]`, "page");

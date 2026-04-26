@@ -84,6 +84,7 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
     purchaseConversionFactor: data.purchaseConversionFactor ?? 1,
     consumeConversionFactor: data.consumeConversionFactor ?? 1,
     priceConversionFactor: data.priceConversionFactor ?? 1,
+    submitMode: "createInGrocy",
 
     energyCalculationHelper: 0,
     energyCalculatorOptions: "PER100G",
@@ -111,6 +112,8 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
     // shouldValidate: "onBlur",
     // shouldRevalidate: "onInput",
   });
+
+  const [submitMode, setSubmitMode] = useState<"createInGrocy" | "updateOnly">("createInGrocy");
 
   const [selectedUnit, setSelectedUnit] = useState<string>(fields.unitId.value!);
   const [selectedPurchaseQuId, setSelectedPurchaseQuId] = useState<string>(
@@ -167,6 +170,8 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
         <input {...getInputProps(fields.id, { type: "hidden" })} />
         <input {...getInputProps(fields.barcode, { type: "hidden" })} />
         <input {...getInputProps(fields.intent, { type: "hidden" })} defaultValue="update" />
+        <input {...getInputProps(fields.submitMode, { type: "hidden" })} defaultValue={undefined} value={submitMode} />
+
         <div id={form.errorId}>{form.errors}</div>
         <div className="mr-2 flex flex-col gap-y-5">
           <FormRow comment="Page header">
@@ -687,10 +692,15 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
           <CameraApp photo={photo} />
 
           <FormRow comment="Create product submit button">
-            <FormColumn>
-              <Button type="submit" disabled={submitPending}>
+            <FormColumn className="shrink">
+              <Button type="submit" onClick={() => setSubmitMode("createInGrocy")} disabled={submitPending}>
                 <Grocy className="ml-[-3] w-8 fill-[#e99629] stroke-[#191902] pr-2 pl-0" />
                 Create product in Grocy
+              </Button>
+            </FormColumn>
+            <FormColumn className="shrink">
+              <Button type="submit" onClick={() => setSubmitMode("updateOnly")} disabled={submitPending}>
+                Update local only
               </Button>
             </FormColumn>
           </FormRow>
