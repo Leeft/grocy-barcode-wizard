@@ -96,6 +96,18 @@ export const purchasePriceTypeToGrocy = (purchasePriceType: PurchasePriceType): 
   }
 };
 
+export const purchasePriceTypeToPlaceholder = (purchasePriceType: PurchasePriceType): string => {
+  switch (purchasePriceType) {
+    case "UNSPECIFIED":
+      return 'Price';
+    case "UNIT_PRICE":
+      return 'Price per unit';
+    case "TOTAL_PRICE":
+      return 'Total price';
+  }
+};
+
+
 export const dueDateTypeToGrocy = (dueDateType: DueDateType): 1 | 2 => {
   switch (dueDateType) {
     case "BEST_BEFORE":

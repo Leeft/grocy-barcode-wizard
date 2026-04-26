@@ -15,7 +15,7 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { GetProduct } from "@/lib/product-db";
 import clsx from "clsx";
-import { energyCalculatorOptions, inputCommonStyles, purchasePriceOptions } from "@/lib/product-form-shared";
+import { energyCalculatorOptions, inputCommonStyles } from "@/lib/product-form-shared";
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 import CustomisableSelect from "@/ui/customisable-select";
 import {
@@ -84,6 +84,8 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
     purchaseConversionFactor: data.purchaseConversionFactor ?? 1,
     consumeConversionFactor: data.consumeConversionFactor ?? 1,
     priceConversionFactor: data.priceConversionFactor ?? 1,
+    purchasePrice: data.purchasePrice,
+    quantity: data.quantity,
     submitMode: "createInGrocy",
 
     energyCalculationHelper: 0,
@@ -207,7 +209,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
             />
           </FormContainer>
 
-          <hr className="mt-0 mb-2 text-slate-500" />
+          <hr className="mt-4 mb-2 text-slate-500" />
 
           <FormRowGroup comment="Default quantity unit for purchase *">
             <FormRow>
@@ -669,25 +671,6 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <input {...getInputProps(fields.quickOpenAmount, { type: "hidden" })} value="1" />
             )}
           </FormContainer>
-
-          <FormRow comment="Default purchase price type">
-            <FormColumn className="w-full">
-              <FormLabel
-                htmlFor={fields.purchasePriceType.name}
-                title="Default purchase price type"
-              ></FormLabel>
-              <FormField>
-                <CustomisableSelect
-                  {...getInputProps(fields.purchasePriceType, {
-                    type: "hidden",
-                  })}
-                  options={purchasePriceOptions}
-                  className="w-40"
-                />
-              </FormField>
-              <FormErrors id={fields.purchasePriceType.errorId} errors={fields.purchasePriceType.errors} />
-            </FormColumn>
-          </FormRow>
 
           <CameraApp photo={photo} />
 

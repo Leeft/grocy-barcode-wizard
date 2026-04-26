@@ -86,6 +86,7 @@ model Product {
   priceConversionFactor         String?
   autoReprintStockLabel         Boolean           @default(false)
   defaultStockLabelType         StockLabelType    @default(NO_LABEL)
+  purchasePrice                 String?
 }
 
 model Barcode {

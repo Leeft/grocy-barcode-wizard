@@ -1,12 +1,13 @@
 "use client";
 
-import { UnitSystem, DueDateType } from "@/generated/prisma/enums";
+import { UnitSystem, DueDateType, PurchasePriceType } from "@/generated/prisma/enums";
 import { dateToISODate } from "@/lib/date";
 import {
   inputCommonStyles,
   unitSystemOptions,
   dueDateTypeOptions,
   dateInputCommonStyles,
+  purchasePriceOptions,
 } from "@/lib/product-form-shared";
 import {
   DueDaysColumn,
@@ -32,7 +33,11 @@ import { ModeToQuantityTitle, ModeToUnitTitle } from "../product/unit-mode-dropd
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import UnitConversions from "@/lib/conversions";
 import { LocationContext } from "@/providers/location-context";
-import { ProductLocation as PrLocation, QuantityUnit } from "@/interfaces/grocy";
+import {
+  ProductLocation as PrLocation,
+  purchasePriceTypeToPlaceholder,
+  QuantityUnit,
+} from "@/interfaces/grocy";
 
 const unitClass = "text-green-200!";
 
@@ -325,6 +330,51 @@ export default function CreateProductFields({
           </FormRow>
         )}
       </FormRowGroup>
+
+      <FormRow comment="Purchase price type">
+        <FormColumn className="w-38">
+          <FormLabel htmlFor={fields.purchasePriceType.name} title="Purchase price type"></FormLabel>
+          <FormField>
+            <CustomisableSelect
+              {...getInputProps(fields.purchasePriceType, {
+                type: "hidden",
+              })}
+              options={purchasePriceOptions}
+              className="w-full"
+            />
+          </FormField>
+          <FormErrors id={fields.purchasePriceType.errorId} errors={fields.purchasePriceType.errors} />
+        </FormColumn>
+        <FormColumn className="w-40">
+          <FormLabel htmlFor={fields.purchasePrice.name} title="Purchase price"></FormLabel>
+          <FormField>
+            <input
+              defaultValue={"0"}
+              {...getInputProps(fields.purchasePrice, {
+                type: "number",
+              })}
+              className={clsx(inputCommonStyles, "w-full")}
+              placeholder={purchasePriceTypeToPlaceholder(
+                fields.purchasePriceType.value as PurchasePriceType,
+              )}
+            />
+          </FormField>
+          <FormErrors id={fields.purchasePrice.errorId} errors={fields.purchasePrice.errors} />
+        </FormColumn>
+        <FormColumn className="w-30">
+          <FormLabel htmlFor={fields.quantity.name} title="Quantity to add"></FormLabel>
+          <FormField>
+            <input
+              defaultValue={"1"}
+              {...getInputProps(fields.quantity, {
+                type: "number",
+              })}
+              className={clsx(inputCommonStyles, "w-full")}
+            />
+          </FormField>
+          <FormErrors id={fields.quantity.errorId} errors={fields.quantity.errors} />
+        </FormColumn>
+      </FormRow>
     </>
   );
 }

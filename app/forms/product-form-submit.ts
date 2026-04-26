@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
-import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
+import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
 import { dataURLtoFile } from "@/lib/utils";
 import { dateToISODate } from "@/lib/date";
 import { CreateProductFormSchema, EditProductFormSchema } from "@/forms/product-form-schema";
@@ -19,6 +19,18 @@ import {
 } from "@/interfaces/grocy";
 import { getProduct, getProductPhoto } from "@/lib/product-db";
 import { fetchQuantityUnitConversionsForProduct, updateQuantityUnitConversion } from "@/lib/grocy-fetch";
+
+function normalisePrice(priceType: PurchasePriceType, price: number, amount: number): number {
+  if (priceType === PurchasePriceType.UNIT_PRICE) {
+    return price;
+  }
+  return price / amount;
+}
+
+function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
+  if (dueDateType === DueDateType.NO_EXPIRY) return new Date("2999-12-31");
+  return dueDate;
+}
 
 export async function productCreateSubmit(prevstate: unknown, formData: FormData) {
   const submission = parseWithZod(formData, { schema: CreateProductFormSchema });
@@ -51,6 +63,9 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
       dueDaysAfterOpen: expiresOrNull(data.dueDaysAfterOpen),
       dueDaysAfterFreezing: expiresOrNull(data.dueDaysAfterFreezing),
       dueDaysAfterThawing: expiresOrNull(data.dueDaysAfterThawing),
+      quantity: data.quantity,
+      purchasePriceType: data.purchasePriceType,
+      purchasePrice: data.purchasePrice ? data.purchasePrice.toString() : "0",
     },
   });
 
@@ -130,7 +145,9 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
       disableStockChecking: data.disableStockChecking,
       enableTareWeight: data.enableTareWeight,
       moveOnOpen: data.moveOnOpen,
+      quantity: data.quantity,
       purchasePriceType: data.purchasePriceType,
+      purchasePrice: data.purchasePrice ? data.purchasePrice.toString() : "0",
       tareWeight: data.tareWeight.toString(),
       energy: data.energy.toString(),
       openedAsOutOfStock: data.openedAsOutOfStock,
@@ -171,9 +188,9 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
     revalidatePath(`/api/image/${productPhoto.id}`, "page");
   }
 
-  if ( data.submitMode === 'createInGrocy') {
+  if (data.submitMode === "createInGrocy") {
     // TODO: notification
-    await syncProductToGrocy(data.id);
+    await syncProductToGrocy(data.id, data.dueOrExpiryDate!);
   }
 
   // Revalidate the cache for the invoices page and redirect the user.
@@ -181,7 +198,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
   redirect(`/queue/${data.barcode}`);
 }
 
-async function syncProductToGrocy(productId: number) {
+async function syncProductToGrocy(productId: number, dueDate: Date) {
   const product = await getProduct(productId);
   const photo = product.productPhoto ? await getProductPhoto(product.productPhoto.id) : null;
 
@@ -247,9 +264,14 @@ async function syncProductToGrocy(productId: number) {
     const createdObjectId = body.created_object_id;
     console.log("created_object_id:", createdObjectId);
 
-    //
-    // TODO: Save id in db
-    //
+    await prisma.product.update({
+      where: {
+        id: product.id,
+      },
+      data: {
+        grocyProductId: Number(createdObjectId),
+      },
+    });
 
     const productBarcode: ProductBarcode = {
       product_id: body.created_object_id,
@@ -365,7 +387,23 @@ async function syncProductToGrocy(productId: number) {
       }
     });
 
-    // TODO: Add stock
+    // +-----+------------+--------+------------------+----------------+---------------+-------+------+-------------+-----------------------+-------------+----------------------+---------+
+    // | id  | product_id | amount | best_before_date | purchased_date |   stock_id    | price | open | opened_date | row_created_timestamp | location_id | shopping_location_id |  note   |
+    // +-----+------------+--------+------------------+----------------+---------------+-------+------+-------------+-----------------------+-------------+----------------------+---------+
+    // | 247 | 188        | 2      | 2999-12-31       | 2026-04-26     | 69ee6a2f90994 | 12    | 0    |             | 2026-04-26 21:40:31   | 3           | 1                    | Bla bla |
+    // +-----+------------+--------+------------------+----------------+---------------+-------+------+-------------+-----------------------+-------------+----------------------+---------+
+    await grocyClient.POST("/stock/products/{productId}/add", {
+      params: { path: { productId: createdObjectId } },
+      body: {
+        amount: product.quantity,
+        best_before_date: dueOrNoExpiryDate(product.dueDateType, dueDate).toISOString(),
+        //purchased_date: '',
+        transaction_type: "purchase",
+        price: normalisePrice(product.purchasePriceType, Number(product.purchasePrice!), product.quantity),
+        //open: 0,
+        //opened_date: '',
+      },
+    });
   } else {
     //console.log("request is", createProductRequest.text());
     console.error("Error response is", response, await response.text());

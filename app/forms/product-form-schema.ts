@@ -75,6 +75,17 @@ export const CreateProductFormSchema = z
       .lte(10000, { message: `Must be less than 10000` })
       .optional(),
 
+    // "this will be used as the default price type selection on purchase"
+    purchasePriceType: z.enum([
+      PurchasePriceType.UNSPECIFIED,
+      PurchasePriceType.UNIT_PRICE,
+      PurchasePriceType.TOTAL_PRICE,
+    ]),
+
+    purchasePrice: z.number().gte(0, "Must be zero or above").optional(),
+
+    quantity: z.number().gte(1, "Must be 1 or greater"),
+
     imageData: z.string().optional(),
     imageType: z.string().optional(),
     imageName: z.string().optional(),
@@ -198,13 +209,6 @@ export const EditProductFormSchema = CreateProductFormSchema.safeExtend({
     .number("Default shop must be a valid number or empty")
     .gte(0, { message: "Default shop must be a valid number or empty" })
     .optional(),
-
-  // "this will be used as the default price type selection on purchase"
-  purchasePriceType: z.enum([
-    PurchasePriceType.UNSPECIFIED,
-    PurchasePriceType.UNIT_PRICE,
-    PurchasePriceType.TOTAL_PRICE,
-  ]),
 
   defaultQuantityUnitPurchase: z.coerce
     .number("Select a unit from the list")
