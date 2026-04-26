@@ -11,18 +11,14 @@ import {
 import { cache } from "react";
 import Barcode from "@/lib/barcode";
 
-export let baseUrl = process.env.GROCY_API_URL;
-if (baseUrl === undefined) {
-  baseUrl = process.env.NEXT_PUBLIC_GROCY_API_URL;
-}
+export const baseUrl = process.env.GROCY_API_URL ?? process.env.NEXT_PUBLIC_GROCY_API_URL;
+
 if (baseUrl === undefined) {
   throw new Error("GROCY_API_URL is not configured");
 }
 
-let apiKey = process.env.GROCY_API_KEY;
-if (apiKey === undefined) {
-  apiKey = process.env.NEXT_PUBLIC_GROCY_API_KEY;
-}
+export const apiKey = process.env.GROCY_API_KEY ?? process.env.NEXT_PUBLIC_GROCY_API_KEY;
+
 if (apiKey === undefined) {
   throw new Error("GROCY_API_KEY is not configured");
 }
@@ -157,9 +153,7 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
   const productNumber: number | null = barcode.grocyProductNumber();
 
   if (productNumber !== null && productNumber > 0) {
-    console.log(
-      `Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`,
-    );
+    console.log(`Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`);
 
     const {
       data, // only present if 2XX response
@@ -195,12 +189,9 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
 
   // There is no productnumber, but there may be a barcode for it
 
-  const { data, error } = await grocyClient.GET(
-    "/stock/products/by-barcode/{barcode}",
-    {
-      params: { path: { barcode: barcode.code } },
-    },
-  );
+  const { data, error } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
+    params: { path: { barcode: barcode.code } },
+  });
 
   if (error) {
     console.error("Could not retrieve by barcode from grocy:", error);
