@@ -51,6 +51,7 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
   const [data, setData] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [lastSaved, setLastSaved] = useState<number>(photo?.lastChanged ?? Math.floor(Date.now() / 1000));
 
   return (
     <div className="relative py-4">
@@ -117,7 +118,7 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
             if (data !== undefined && data !== "") {
               return <BackgroundCapturedImage data={data} />;
             } else if (photoId !== undefined && photoId > 0) {
-              return <BackgroundSavedImage photoId={photoId} />;
+              return <BackgroundSavedImage photoId={photoId} lastSaved={lastSaved} />;
             } else if (cameraIsEnabled && cameraHandler) {
               return <BackgroundWebcam cameraHandler={cameraHandler} />;
             } else {
@@ -250,7 +251,7 @@ function ButtonUpload({
         id={id ?? name}
         name={name}
         type="file"
-        accept=".jpg,.jpeg,.png"
+        accept=".jpg,.jpeg,.png,.webp"
         className="w-0 p-0 opacity-0"
         onChange={(event) => {
           if (event.target.files !== null && event.target.files[0] !== undefined) {
@@ -549,7 +550,7 @@ function BackgroundCapturedImage({ data }: { data: string | undefined }) {
   );
 }
 
-function BackgroundSavedImage({ photoId }: { photoId: number }) {
+function BackgroundSavedImage({ photoId, lastSaved }: { photoId: number; lastSaved: number }) {
   return (
     <div key={`captured-image-${photoId}-container`} className="relative">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -557,7 +558,7 @@ function BackgroundSavedImage({ photoId }: { photoId: number }) {
         key={`captured-image-${photoId}`}
         //className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
         alt={`BackgroundSavedImage of the product ${photoId}`}
-        src={`/api/image/${photoId}?ts=${Math.floor(Date.now() / 1000)}`}
+        src={`/api/image/${photoId}?ts=${lastSaved}`}
       />
     </div>
   );

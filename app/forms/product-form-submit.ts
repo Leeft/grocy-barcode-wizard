@@ -56,6 +56,7 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
         tiletype: data.imageType,
         data: arr,
         grocyFileGroup: "productpictures",
+        lastChanged: Math.floor(Date.now() / 1000),
       },
     });
   }
@@ -144,6 +145,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
       update: {
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
         data: arr,
+        lastChanged: Math.floor(Date.now() / 1000),
       },
       create: {
         userId: 1, // TODO: Actual users
@@ -152,6 +154,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
         data: arr,
         productId: queuedProduct.id,
         grocyFileGroup: "productpictures",
+        lastChanged: Math.floor(Date.now() / 1000),
       },
     });
     revalidatePath(`/api/image/${productPhoto.id}`, "page");
