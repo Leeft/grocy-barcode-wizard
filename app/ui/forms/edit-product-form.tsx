@@ -322,7 +322,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               from={selectedUnit}
               to={selectedPurchaseQuId}
               toValue={fields.unitAmount.value}
-              initialFactor={fields.purchaseConversionFactor.value}
+              initialFactor={fields.purchaseConversionFactor.value ?? "1"}
               active={selectedPurchaseQuId !== selectedUnit}
             />
           </FormContainer>
@@ -334,7 +334,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               from={selectedUnit}
               to={selectedConsumeQuId}
               toValue={fields.unitAmount.value}
-              initialFactor={fields.consumeConversionFactor.value}
+              initialFactor={fields.consumeConversionFactor.value ?? "1"}
               active={selectedConsumeQuId !== selectedPurchaseQuId}
             />
           </FormContainer>
@@ -346,7 +346,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               from={selectedUnit}
               to={selectedPriceQuId}
               toValue={fields.unitAmount.value}
-              initialFactor={fields.priceConversionFactor.value}
+              initialFactor={fields.priceConversionFactor.value ?? "1"}
               active={selectedPriceQuId !== selectedConsumeQuId && selectedPriceQuId !== selectedPurchaseQuId}
             />
           </FormContainer>
