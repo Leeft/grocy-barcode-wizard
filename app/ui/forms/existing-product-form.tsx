@@ -1,7 +1,4 @@
-import {
-  ProductDetailsResponse,
-  StockEntry,
-} from "@/interfaces/grocy";
+import { Product, ProductDetailsResponse, StockEntry } from "@/interfaces/grocy";
 import Barcode from "@/lib/barcode";
 import {
   baseUrl,
@@ -84,15 +81,6 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
     return <>Could not get product information: {error}</>;
   }
 
-  let dueType = "Best before";
-  /* @ts-expect-error not in API specification yet */
-  if (data.product.due_type === 2) {
-    dueType = "Expiration";
-  }
-  if (data.product.default_best_before_days === -1) {
-    dueType = "No expiry";
-  }
-
   const { data: stock /* error: stockError  */ } = await grocyClient.GET(
     "/stock/products/{productId}/entries",
     {
@@ -103,35 +91,43 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
     },
   );
 
+  const product = data.product as Product;
+
+  let dueType = "Best before";
+  if (product.due_type === 2) {
+    dueType = "Expiration";
+  }
+  if (product.default_best_before_days === -1) {
+    dueType = "No expiry";
+  }
+
   return (
     <>
-      {data.product.picture_file_name !== null && data.product.picture_file_name && (
+      {product.picture_file_name !== null && product.picture_file_name && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
           alt="Photo of the product"
-          src={baseUrl + "/files/productpictures/" + btoa(data.product.picture_file_name)}
+          src={baseUrl + "/files/productpictures/" + btoa(product.picture_file_name)}
         />
       )}
 
       <dl className="product-info">
         <dt>Name</dt>
-        <dd>{data.product.name}</dd>
+        <dd>{product.name}</dd>
         <dt>Product group</dt>
-        <dd>{data.product.product_group_id && productGroups[data.product.product_group_id]!.name}</dd>
+        <dd>{product.product_group_id && productGroups[product.product_group_id]!.name}</dd>
         <dt>Parent product</dt>
         <dd>
-          {/* @ts-expect-error not in API specification yet */}
-          {data.product.parent_product_id
+          {product.parent_product_id
             ? /* @ts-expect-error not in API specification yet */
-              products[data.product.parent_product_id].name
+              products[product.parent_product_id].name
             : "-"}
         </dd>
         <dt>Active</dt>
-        {/* @ts-expect-error not in API specification yet */}
-        <dd>{data.product.active ? "✓" : "✗"}</dd>
+        <dd>{product.active ? "✓" : "✗"}</dd>
         <dt>May be frozen</dt>
-        <dd>{data.product.should_not_be_frozen ? "✗" : "✓"}</dd>
+        <dd>{product.should_not_be_frozen ? "✗" : "✓"}</dd>
         <dt>Location</dt>
         <dd>{data.location !== undefined && data.location.name}</dd>
         <dt>Barcodes</dt>
@@ -194,10 +190,10 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
                       title={`Open stock entry ${se.stock_id}`}
                       className={
                         `mt-2 rounded-md border p-1 px-2 ` +
-                        `${se.open ? "bg-slate-800" : "bg-slate-700"} ` +
-                        `${se.open ? "cursor-not-allowed text-slate-500" : "cursor-pointer"}`
+                        `${se.open || product.disable_open === 1 ? "bg-slate-800" : "bg-slate-700"} ` +
+                        `${se.open || product.disable_open === 1 ? "cursor-not-allowed text-slate-500" : "cursor-pointer"}`
                       }
-                      disabled={se.open ? true : false}
+                      disabled={se.open || product.disable_open === 1 ? true : false}
                     >
                       Open
                     </button>
