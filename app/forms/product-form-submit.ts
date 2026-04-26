@@ -8,6 +8,17 @@ import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
 import { dataURLtoFile } from "@/lib/utils";
 import { dateToISODate } from "@/lib/date";
 import { CreateProductFormSchema, EditProductFormSchema } from "@/forms/product-form-schema";
+import { apiKey, baseUrl, grocyClient } from "@/lib/grocy";
+import {
+  dueDateTypeToGrocy,
+  labelTypeToGrocy,
+  Product,
+  ProductBarcode,
+  purchasePriceTypeToGrocy,
+  QuantityUnitConversion,
+} from "@/interfaces/grocy";
+import { getProduct, getProductPhoto } from "@/lib/product-db";
+import { fetchQuantityUnitConversionsForProduct, updateQuantityUnitConversion } from "@/lib/grocy-fetch";
 
 export async function productCreateSubmit(prevstate: unknown, formData: FormData) {
   const submission = parseWithZod(formData, { schema: CreateProductFormSchema });
@@ -160,12 +171,205 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
     revalidatePath(`/api/image/${productPhoto.id}`, "page");
   }
 
-  // await prisma.barcode.update({
-  //   where: { barcode: data.barcode },
-  //   data: { productId: queuedProduct.id },
-  // });
+  // TODO: notification
+  await syncProductToGrocy(data.id);
 
-  // // Revalidate the cache for the invoices page and redirect the user.
+  // Revalidate the cache for the invoices page and redirect the user.
   revalidatePath(`/queue/[barcode]`, "page");
   redirect(`/queue/${data.barcode}`);
+}
+
+async function syncProductToGrocy(productId: number) {
+  const product = await getProduct(productId);
+  const photo = product.productPhoto ? await getProductPhoto(product.productPhoto.id) : null;
+
+  const grocyApiHeaders = new Headers({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "GROCY-API-KEY": apiKey!,
+  });
+
+  const dueDayOrMinusZero = (dueDateType: DueDateType, dueDays: number | null) => {
+    if (dueDays === null || dueDays === undefined) return 0;
+    return dueDateType === DueDateType.NO_EXPIRY ? -1 : dueDays;
+  };
+
+  const createProduct: Product = {
+    name: product.name,
+    description: undefined,
+    location_id: product.defaultLocation,
+    qu_id_stock: product.unitChosen,
+    qu_id_purchase: product.defaultQuantityUnitPurchase ?? undefined,
+    qu_id_consume: product.defaultQuantityUnitConsume ?? undefined,
+    qu_id_price: product.quantityUnitPrices ?? undefined,
+    min_stock_amount: 0,
+    default_best_before_days: dueDayOrMinusZero(product.dueDateType, product.dueDays),
+    default_best_before_days_after_open: product.dueDaysAfterOpen ?? 0,
+    default_best_before_days_after_freezing: dueDayOrMinusZero(
+      product.dueDateType,
+      product.dueDaysAfterFreezing,
+    ),
+    default_best_before_days_after_thawing: product.dueDaysAfterThawing ?? 0,
+    product_group_id: product.productGroup ?? undefined,
+    picture_file_name: photo ? photo.filename : undefined,
+    enable_tare_weight_handling: product.enableTareWeight ? 1 : 0,
+    tare_weight: Number(product.tareWeight),
+    not_check_stock_fulfillment_for_recipes: product.disableStockChecking ? 1 : 0,
+    shopping_location_id: product.defaultShop ?? undefined,
+    should_not_be_frozen: product.canBeFrozen ? 0 : 1,
+    default_consume_location_id: product.consumeLocationId ?? undefined,
+    move_on_open: product.moveOnOpen ? 1 : 0,
+    treat_opened_as_out_of_stock: 0,
+    default_purchase_price_type: purchasePriceTypeToGrocy(product.purchasePriceType),
+    calories: product.energy ? Number(product.energy) : undefined,
+    parent_product_id: product.parentProductId ?? undefined,
+    due_type: dueDateTypeToGrocy(product.dueDateType),
+    quick_consume_amount: product.quickConsumeAmount ? Number(product.quickConsumeAmount) : 0,
+    hide_on_stock_overview: product.dontShowOnStock ? 1 : 0,
+    default_stock_label_type: labelTypeToGrocy(product.defaultStockLabelType),
+    auto_reprint_stock_label: product.autoReprintStockLabel ? 1 : 0,
+    quick_open_amount: product.quickOpenAmount ? Number(product.quickOpenAmount) : 0,
+    disable_open: product.cantOpen ? 1 : 0,
+  };
+
+  const createProductRequest = new Request(`${baseUrl}objects/products`, {
+    method: "POST",
+    body: JSON.stringify(createProduct),
+    headers: grocyApiHeaders,
+  });
+
+  let response = await fetch(createProductRequest);
+
+  if (response.status === 200) {
+    let body = JSON.parse(await response.text());
+    const createdObjectId = body.created_object_id;
+    console.log("created_object_id:", createdObjectId);
+
+    //
+    // TODO: Save id in db
+    //
+
+    const productBarcode: ProductBarcode = {
+      product_id: body.created_object_id,
+      barcode: product.barcodes[0]?.barcode,
+      qu_id: product.unitChosen,
+      shopping_location_id: product.defaultShop ?? 0,
+      amount: Number(product.unitAmount),
+      //last_price: ... // TODO
+      note: "Added by Grocy Barcode Wizard",
+    };
+
+    const addBarcodeRequest = new Request(`${baseUrl}objects/product_barcodes`, {
+      method: "POST",
+      body: JSON.stringify(productBarcode),
+      headers: grocyApiHeaders,
+    });
+    response = await fetch(addBarcodeRequest);
+    if (response.status === 200) {
+      let body = JSON.parse(await response.text());
+      console.log("created barcode:", body);
+      // => { created_object_id: '139' }
+    } else {
+      console.error("Error creating barcode for product", await response.text());
+    }
+
+    if (photo !== undefined && photo?.data !== undefined && photo?.data !== null) {
+      const grocyApiFileHeaders = new Headers({
+        "Content-Type": "application/octet-stream",
+        Accept: "application/json",
+        "GROCY-API-KEY": apiKey!,
+      });
+
+      const addPictureRequest = new Request(`${baseUrl}files/productpictures/${btoa(photo.filename)}`, {
+        method: "PUT",
+        body: photo.data,
+        headers: grocyApiFileHeaders,
+      });
+      response = await fetch(addPictureRequest);
+      if (response.status === 204) {
+        console.log("created picture OK");
+
+        await prisma.productPhoto.update({
+          where: {
+            id: photo.id,
+          },
+          data: {
+            grocyFileGroup: "productpictures",
+            grocyFileName: photo.filename,
+          },
+        });
+        //
+      } else {
+        // Note: It might already exist ...
+        console.error(
+          "Error uploading picture for product:",
+          response.status,
+          response.statusText,
+          await response.text(),
+        );
+        //
+      }
+    }
+
+    // Update updated stock units
+
+    const units = (await fetchQuantityUnitConversionsForProduct(createdObjectId))
+      .data as QuantityUnitConversion[];
+
+    units.forEach((qu) => {
+      if (
+        product.unitChosen !== product.defaultQuantityUnitPurchase &&
+        product.purchaseConversionFactor !== product.unitAmount
+      ) {
+        const factor = Number(product.purchaseConversionFactor) / Number(product.unitAmount);
+
+        if (qu.from_qu_id === product.unitChosen && qu.to_qu_id === product.defaultQuantityUnitPurchase) {
+          updateQuantityUnitConversion(qu.id, factor);
+        }
+
+        if (qu.to_qu_id === product.unitChosen && qu.from_qu_id === product.defaultQuantityUnitPurchase) {
+          updateQuantityUnitConversion(qu.id, 1 / factor);
+        }
+      }
+
+      if (
+        product.unitChosen !== product.defaultQuantityUnitConsume &&
+        product.consumeConversionFactor !== product.unitAmount
+      ) {
+        const factor = Number(product.consumeConversionFactor) / Number(product.unitAmount);
+
+        if (qu.from_qu_id === product.unitChosen && qu.to_qu_id === product.defaultQuantityUnitConsume) {
+          updateQuantityUnitConversion(qu.id, factor);
+        }
+
+        if (qu.to_qu_id === product.unitChosen && qu.from_qu_id === product.defaultQuantityUnitConsume) {
+          updateQuantityUnitConversion(qu.id, 1 / factor);
+        }
+      }
+
+      if (
+        product.unitChosen !== product.quantityUnitPrices &&
+        product.priceConversionFactor !== product.unitAmount
+      ) {
+        const factor = Number(product.priceConversionFactor) / Number(product.unitAmount);
+
+        if (qu.from_qu_id === product.unitChosen && qu.to_qu_id === product.quantityUnitPrices) {
+          updateQuantityUnitConversion(qu.id, factor);
+        }
+
+        if (qu.to_qu_id === product.unitChosen && qu.from_qu_id === product.quantityUnitPrices) {
+          updateQuantityUnitConversion(qu.id, 1 / factor);
+        }
+      }
+    });
+
+    // TODO: Add stock
+  } else {
+    //console.log("request is", createProductRequest.text());
+    console.error("Error response is", response, await response.text());
+    // await prisma.barcode.update({
+    //   where: { barcode: data.barcode },
+    //   data: { productId: queuedProduct.id },
+    // });
+  }
 }
