@@ -30,6 +30,13 @@ enum PurchasePriceType {
   TOTAL_PRICE // 3 in Grocy
 }
 
+// grocy: default_stock_label_type
+enum StockLabelType {
+  NO_LABEL // 0
+  SINGLE_LABEL // 1
+  LABEL_PER_UNIT // 2
+}
+
 model Product {
   id                            Int               @id @default(autoincrement())
   userId                        Int
@@ -77,6 +84,8 @@ model Product {
   purchaseConversionFactor      String?
   consumeConversionFactor       String?
   priceConversionFactor         String?
+  autoReprintStockLabel         Boolean           @default(false)
+  defaultStockLabelType         StockLabelType    @default(NO_LABEL)
 }
 
 model Barcode {
@@ -111,6 +120,7 @@ model ProductPhoto {
   grocyFileGroup GrocyFileGroup? @default(productpictures)
   grocyFileName  String?
   data           Bytes
+  lastChanged    Int?
 }
 
 model User {
