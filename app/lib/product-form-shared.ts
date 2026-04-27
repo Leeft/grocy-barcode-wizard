@@ -1,4 +1,4 @@
-import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
+import { DueDateType, PurchasePriceType, StockLabelType, UnitSystem } from "@/generated/prisma/enums";
 import clsx from "clsx";
 
 export const inputCommonStyles: string = clsx(
@@ -53,4 +53,10 @@ export const energyCalculatorOptions = [
   { value: "PER100G", label: "Per 100g/100ml" },
   //{ value: PurchasePriceType.UNIT_PRICE, label: "Unit price" },
   //{ value: PurchasePriceType.TOTAL_PRICE, label: "Total price" },
+];
+
+export const stockLabelOptions = [
+  { value: StockLabelType.NO_LABEL, label: "No label" },
+  { value: StockLabelType.SINGLE_LABEL, label: "Single label" },
+  { value: StockLabelType.LABEL_PER_UNIT, label: "Label per unit" },
 ];
