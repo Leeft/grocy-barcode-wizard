@@ -12,15 +12,25 @@ import {
 import { pluralUnit, toLookup } from "@/lib/utils";
 import { Suspense } from "react";
 import {
+  ConsumeOneOfStockEntryButton,
   ConsumeSpoiledStockEntryButton,
   ConsumeStockEntryButton,
   OpenStockEntryButton,
   TransferStockEntryButton,
 } from "./stock-buttons";
 import { LocationDropdown } from "../product/location-dropdown";
-import { MoveRight, PackageOpen, Trash2, X } from "lucide-react";
+import { MoveRight, PackageOpen, Tally1, Trash2, X } from "lucide-react";
+import ActionShortcuts from "../barcode/action-shortcuts";
 
-export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
+export async function ExistingProductForm({
+  barcode,
+  showShortcuts = false,
+  showStock = false,
+}: {
+  barcode: Barcode;
+  showShortcuts?: boolean;
+  showStock?: boolean;
+}) {
   let quantity: string = "0";
 
   if (barcode.quantity !== undefined && barcode.quantity >= 0) {
@@ -33,14 +43,20 @@ export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
 
   return (
     <div className="text-left">
-      <Suspense fallback={<ExistingProductInfoPlaceholder />}>
-        <ExistingProductInfo barcode={barcode} />
+      <Suspense fallback={<ExistingProductInfoPlaceholder stock={showStock} shortcuts={showShortcuts} />}>
+        <ExistingProductInfo barcode={barcode} showShortcuts={showShortcuts} showStock={showStock} />
       </Suspense>
     </div>
   );
 }
 
-export function ExistingProductInfoPlaceholder() {
+export function ExistingProductInfoPlaceholder({
+  shortcuts = false,
+  stock = false,
+}: {
+  shortcuts?: boolean;
+  stock?: boolean;
+}) {
   return (
     <>
       <dl className="product-info">
@@ -54,14 +70,22 @@ export function ExistingProductInfoPlaceholder() {
         <dd>...</dd>
         <dt>May be frozen</dt>
         <dd>...</dd>
-        <dt>Location</dt>
-        <dd>...</dd>
         <dt>Barcodes</dt>
         <dd>...</dd>
         <dt>Last shop</dt>
         <dd>...</dd>
-        <dt>Stock</dt>
-        <dd>...</dd>
+        {shortcuts && (
+          <>
+            <dt>Action shortcuts</dt>
+            <dd>...</dd>
+          </>
+        )}
+        {stock && (
+          <>
+            <dt>Stock</dt>
+            <dd>...</dd>
+          </>
+        )}
       </dl>
     </>
   );
@@ -78,7 +102,15 @@ function dueTypeToString(dueType: number, bestBeforeDays: number): string {
   return dueTypeString;
 }
 
-export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
+export async function ExistingProductInfo({
+  barcode,
+  showShortcuts = false,
+  showStock = false,
+}: {
+  barcode: Barcode;
+  showShortcuts?: boolean;
+  showStock?: boolean;
+}) {
   const units = toLookup(await fetchQuantityUnits());
   const shopLocations = toLookup(await fetchShoppingLocations());
   const productGroups = toLookup(await fetchProductGroups());
@@ -142,8 +174,6 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
         <dd>{product.active ? "✓" : "✗"}</dd>
         <dt>May be frozen</dt>
         <dd>{product.should_not_be_frozen ? "✗" : "✓"}</dd>
-        <dt>Location</dt>
-        <dd>{data.location !== undefined && data.location.name}</dd>
         <dt>Barcodes</dt>
         <dd>
           {data.product_barcodes?.map((bc) => (
@@ -163,7 +193,15 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
         </dd>
         <dt>Last shop</dt>
         <dd>{data.last_shopping_location_id ? shopLocations[data.last_shopping_location_id]!.name : "-"}</dd>
-        {stock && (
+        {showShortcuts && (
+          <>
+            <dt>Action shortcuts</dt>
+            <dd>
+              <ActionShortcuts barcode={barcode} />
+            </dd>
+          </>
+        )}
+        {stock && showStock && (
           <>
             <dt>Stock</dt>
             <dd className="pb-5">
@@ -203,7 +241,7 @@ async function StockEntryRow({
     <form>
       <fieldset
         key={`stock_${se.id}`}
-        className="radiu mb-2 rounded-md border border-dashed border-slate-500 tracking-[0.9]"
+        className="mb-2 rounded-2xl border border-dashed border-yellow-300 tracking-[0.9] p-2"
       >
         <legend className="ml-3 px-3 text-slate-300">
           <DisplayStockActionButtons product={product} se={se} />
@@ -212,23 +250,33 @@ async function StockEntryRow({
           <div className="mx-3 flex flex-row flex-wrap gap-x-3 py-3 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />
+            <input type="hidden" name="stockAmount" value={se.amount} />
             <input type="hidden" name="barcode" value={barcode} />
             <input type="hidden" name="fromLocationId" value={se.location_id} />
             <input type="hidden" name="transferAmount" value={se.amount} />
+
             <OpenStockEntryButton
               disabled={se.open || product.disable_open ? true : false}
               title={`Open stock entry ${se.stock_id}`}
             >
               <PackageOpen className="mr-2 size-5" /> Open
             </OpenStockEntryButton>
+
+            <ConsumeOneOfStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
+              <Tally1 className="ml-1 mr-0 size-5" /> Consume one
+            </ConsumeOneOfStockEntryButton>
+
             <ConsumeStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
-              <X className="mr-2 size-5" /> Consume stock
+              <X className="mr-2 size-5" /> Consume all
             </ConsumeStockEntryButton>
+
+
             <ConsumeSpoiledStockEntryButton
               title={`Consume all of this stock entry ${se.stock_id} as spoiled`}
             >
               <Trash2 className="mr-2 size-5" /> Spoiled
             </ConsumeSpoiledStockEntryButton>
+
             {/* <button
                         type="button"
                         title={`Inventory (add or remove) stock entry ${se.stock_id}`}
@@ -236,6 +284,7 @@ async function StockEntryRow({
                       >
                         Inventory <ChevronUp size={24} />
                       </button> */}
+
           </div>
           <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 pb-3 text-slate-300">
             <LocationDropdown

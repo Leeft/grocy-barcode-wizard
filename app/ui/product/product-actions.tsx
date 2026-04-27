@@ -1,5 +1,7 @@
 import Barcode from "@/lib/barcode";
 import QRCode from "@/components/qrcode";
+import clsx from "clsx";
+import React from "react";
 
 export default function BarcodeActions({
   barcode,
@@ -18,92 +20,136 @@ export default function BarcodeActions({
   }
 
   return (
-    <div className={className}>
-      <div>
-        <div className="relative flex flex-col rounded-lg">
-          <nav className="flex w-auto flex-col gap-1 p-1.5">
-            <BarcodeAction
-              qr="sho:c"
-              qrBgColor="#61e6d0"
-              logoImage={"/icons/consume.png"}
-              logoWidth={logoWidth}
-              logoHeight={logoHeight}
-              title="Consume"
-              description="Consume stock associated with the barcode"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
-              ecLevel={"H"}
-            />
-            <BarcodeAction
-              qr="sho:ca"
-              qrBgColor="hsl(24, 63%, 60%)"
-              logoImage="/icons/consume_all.png"
-              logoWidth={logoWidth}
-              logoHeight={logoHeight}
-              title="Consume all"
-              description="Remove all remaining inventory as consumed"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
-              ecLevel={"H"}
-            />
-            <BarcodeAction
-              qr="sho:cs"
-              qrBgColor="hsl(345, 25%, 65%)"
-              logoImage="/icons/spoiled.png"
-              logoWidth={logoWidth * 0.8}
-              logoHeight={logoHeight * 0.8}
-              title="Consume spoiled"
-              description="Remove remaining inventory and mark it as spoiled"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
-              ecLevel={"Q"}
-            />
-            <BarcodeAction
-              qr="sho:p"
-              qrBgColor="hsl(121, 24%, 56%)"
-              logoImage="/icons/purchased.png"
-              logoWidth={logoWidth * 0.8}
-              logoHeight={logoHeight * 0.8}
-              title="Purchase"
-              description="Add the item to the inventory, and remove from shopping list if this is configured"
-              ecLevel={"H"}
-            />
-            <BarcodeAction
-              qr="sho:o"
-              qrBgColor="hsl(171, 55%, 78%)"
-              logoImage="/icons/open.png"
-              logoWidth={logoWidth * 0.9}
-              logoHeight={logoHeight * 0.9}
-              title="Open"
-              description="Mark item as having been opened"
-              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
-              ecLevel={"H"}
-            />
-            <BarcodeAction
-              qr="sho:i"
-              qrBgColor="hsl(281, 46%, 66%)"
-              logoImage="/icons/inventory.png"
-              logoWidth={logoWidth * 0.9}
-              logoHeight={logoHeight * 0.9}
-              title="Inventory"
-              description="Refresh inventory information"
-              ecLevel={"H"}
-            />
-            <BarcodeAction
-              qr="sho:as"
-              qrBgColor="hsl(219, 37%, 58%)"
-              logoImage="/icons/shopping_list.png"
-              logoWidth={logoWidth * 0.9}
-              logoHeight={logoHeight * 0.9}
-              title="Add to shopping list"
-              description="Add the item to the shopping list for restocking"
-              ecLevel={"H"}
-            />
-          </nav>
-        </div>
-      </div>
+    <div className={clsx("flex", "flex-col", "gap-y-5", "tracking-normal", "pb-20", className)}>
+      <BarcodeAction>
+        <legend className="text-add ml-3 px-2 font-bold tracking-wide uppercase">Add / purchase</legend>
+        amount; best_before_date; transaction_type = 'purchase'; price; location_id; shopping_location_id;
+        stock_label_type; note
+      </BarcodeAction>
+      <BarcodeAction>
+        <legend className="text-consume ml-3 px-2 font-bold tracking-wide uppercase">Consume</legend>
+        amount; transaction_type = 'consume'; spoiled = 'false'; recipe_id; location_id; exact_amount;
+        allow_subproduct_substitution;
+      </BarcodeAction>
+      <BarcodeAction>
+        <legend className="text-spoiled ml-3 px-2 font-bold tracking-wide uppercase">Consume spoiled</legend>
+        amount; transaction_type = 'consume'; spoiled = 'true'; recipe_id; location_id; exact_amount;
+        allow_subproduct_substitution;
+      </BarcodeAction>
+      <BarcodeAction>
+        <legend className="text-open ml-3 px-2 font-bold tracking-wide uppercase">Open</legend>
+        amount; allow_subproduct_substitution;
+      </BarcodeAction>
+      <BarcodeAction>
+        <legend className="text-inventory ml-3 px-2 font-bold tracking-wide uppercase">Inventory</legend>
+        new_amount; best_before_date; shopping_location_id; location_id; price; stock_label_type; note;
+      </BarcodeAction>
+      <BarcodeAction>
+        <legend className="text-shopping-list ml-3 px-2 font-bold tracking-wide uppercase">
+          Add to shopping list
+        </legend>
+        <a target="_blank" href="http://192.168.10.54/api#/Stock/post_stock_shoppinglist_add_product">
+          /shoppinglist/add_product
+        </a>
+        : product_id; qu_id; list_id; product_amount; note;
+      </BarcodeAction>
     </div>
   );
 }
+// return (
+//   <div className={className}>
+//     <div>
+//       <div className="relative flex flex-col rounded-lg">
+//         <nav className="flex w-auto flex-col gap-1 p-1.5">
+//           <BarcodeAction
+//             qr="sho:c"
+//             qrBgColor="#61e6d0"
+//             logoImage={"/icons/consume.png"}
+//             logoWidth={logoWidth}
+//             logoHeight={logoHeight}
+//             title="Consume"
+//             description="Consume stock associated with the barcode"
+//             disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+//             ecLevel={"H"}
+//           />
+//           <BarcodeAction
+//             qr="sho:ca"
+//             qrBgColor="hsl(24, 63%, 60%)"
+//             logoImage="/icons/consume_all.png"
+//             logoWidth={logoWidth}
+//             logoHeight={logoHeight}
+//             title="Consume all"
+//             description="Remove all remaining inventory as consumed"
+//             disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+//             ecLevel={"H"}
+//           />
+//           <BarcodeAction
+//             qr="sho:cs"
+//             qrBgColor="hsl(345, 25%, 65%)"
+//             logoImage="/icons/spoiled.png"
+//             logoWidth={logoWidth * 0.8}
+//             logoHeight={logoHeight * 0.8}
+//             title="Consume spoiled"
+//             description="Remove remaining inventory and mark it as spoiled"
+//             disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+//             ecLevel={"Q"}
+//           />
+//           <BarcodeAction
+//             qr="sho:p"
+//             qrBgColor="hsl(121, 24%, 56%)"
+//             logoImage="/icons/purchased.png"
+//             logoWidth={logoWidth * 0.8}
+//             logoHeight={logoHeight * 0.8}
+//             title="Purchase"
+//             description="Add the item to the inventory, and remove from shopping list if this is configured"
+//             ecLevel={"H"}
+//           />
+//           <BarcodeAction
+//             qr="sho:o"
+//             qrBgColor="hsl(171, 55%, 78%)"
+//             logoImage="/icons/open.png"
+//             logoWidth={logoWidth * 0.9}
+//             logoHeight={logoHeight * 0.9}
+//             title="Open"
+//             description="Mark item as having been opened"
+//             disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
+//             ecLevel={"H"}
+//           />
+//           <BarcodeAction
+//             qr="sho:i"
+//             qrBgColor="hsl(281, 46%, 66%)"
+//             logoImage="/icons/inventory.png"
+//             logoWidth={logoWidth * 0.9}
+//             logoHeight={logoHeight * 0.9}
+//             title="Inventory"
+//             description="Refresh inventory information"
+//             ecLevel={"H"}
+//           />
+//           <BarcodeAction
+//             qr="sho:as"
+//             qrBgColor="hsl(219, 37%, 58%)"
+//             logoImage="/icons/shopping_list.png"
+//             logoWidth={logoWidth * 0.9}
+//             logoHeight={logoHeight * 0.9}
+//             title="Add to shopping list"
+//             description="Add the item to the shopping list for restocking"
+//             ecLevel={"H"}
+//           />
+//         </nav>
+//       </div>
+//     </div>
+//   </div>
+// );
 
-function BarcodeAction({
+function BarcodeAction({ children }: { children: React.ReactNode }) {
+  return (
+    <form>
+      <fieldset className="rounded-lg border border-dotted px-3 py-2">{children}</fieldset>
+    </form>
+  );
+}
+
+function BarcodeAction2({
   qr,
   qrBgColor,
   title,

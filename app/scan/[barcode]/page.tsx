@@ -9,7 +9,7 @@ import { findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { prisma } from "@/lib/prisma";
 
-export default async function BarcodePage({ params }: { params: Promise<{ barcode: string }> }) {
+export default async function BarcodeScannedPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
 
   try {
@@ -41,7 +41,7 @@ export default async function BarcodePage({ params }: { params: Promise<{ barcod
       return (
         <>
           <BarcodeScannerApp slug={barcode} />
-          <ExistingProductForm barcode={grocyBarcode} />
+          <ExistingProductForm barcode={grocyBarcode} showShortcuts={true} showStock={true} />
           <BarcodeActions barcode={grocyBarcode} className="w-auto" editing={false} />
         </>
       );
