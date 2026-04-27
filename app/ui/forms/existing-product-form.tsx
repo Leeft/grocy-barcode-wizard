@@ -1,4 +1,4 @@
-import { Product, ProductDetailsResponse, StockEntry } from "@/interfaces/grocy";
+import { Product, StockEntry } from "@/interfaces/grocy";
 import Barcode from "@/lib/barcode";
 import {
   baseUrl,
@@ -11,10 +11,17 @@ import {
 } from "@/lib/grocy";
 import { toLookup } from "@/lib/utils";
 import { Suspense } from "react";
+import {
+  ConsumeSpoiledStockEntryButton,
+  ConsumeStockEntryButton,
+  OpenStockEntryButton,
+  TransferStockEntryButton,
+} from "./stock-buttons";
+import { LocationDropdown } from "../product/location-dropdown";
+import { MoveRight, PackageOpen, Trash2, X } from "lucide-react";
 
 export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
   let quantity: string = "0";
-  //let className: string = "";
 
   if (barcode.quantity !== undefined && barcode.quantity >= 0) {
     quantity = barcode.quantity.toString();
@@ -22,15 +29,14 @@ export async function ExistingProductForm({ barcode }: { barcode: Barcode }) {
 
   if (barcode.id !== undefined && barcode.id > 0 && quantity === "0") {
     quantity = "-- not in stock --";
-    //className = "text-amber-500";
   }
 
   return (
-    <form className="text-left">
+    <div className="text-left">
       <Suspense fallback={<ExistingProductInfoPlaceholder />}>
         <ExistingProductInfo barcode={barcode} />
       </Suspense>
-    </form>
+    </div>
   );
 }
 
@@ -59,6 +65,17 @@ export function ExistingProductInfoPlaceholder() {
       </dl>
     </>
   );
+}
+
+function dueTypeToString(dueType: number, bestBeforeDays: number): string {
+  let dueTypeString = "Best before";
+  if (dueType === 2) {
+    dueTypeString = "Expiration";
+  }
+  if (bestBeforeDays === -1) {
+    dueTypeString = "No expiry";
+  }
+  return dueTypeString;
 }
 
 export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
@@ -92,14 +109,6 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
   );
 
   const product = data.product as Product;
-
-  let dueType = "Best before";
-  if (product.due_type === 2) {
-    dueType = "Expiration";
-  }
-  if (product.default_best_before_days === -1) {
-    dueType = "No expiry";
-  }
 
   return (
     <>
@@ -152,101 +161,114 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
         {stock && (
           <>
             <dt>Stock</dt>
-            <dd>
-              {stock.map((se: StockEntry) => (
-                <div key={`stock_${se.id}`} className="mb-2">
-                  <DisplayStockActionButtons data={data} se={se} dueType={dueType} />
-                  <div className="flex flex-wrap gap-x-3 text-slate-300">
-                    <button
-                      type="button"
-                      title={`Consume stock entry ${se.stock_id}`}
-                      className="mt-2 cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
-                    >
-                      Consume
-                    </button>
-                    <button
-                      type="button"
-                      title={`Consume stock entry ${se.stock_id} as spoiled`}
-                      className="mt-2 cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
-                    >
-                      Spoiled
-                    </button>
-                    <button
-                      type="button"
-                      title={`Inventory (add or remove) stock entry ${se.stock_id}`}
-                      className="mt-2 cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
-                    >
-                      Inventory
-                    </button>
-                    <button
-                      type="button"
-                      title={`Transfer stock entry ${se.stock_id}`}
-                      className="mt-2 cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
-                    >
-                      Transfer
-                    </button>
-                    <button
-                      type="button"
-                      title={`Open stock entry ${se.stock_id}`}
-                      className={
-                        `mt-2 rounded-md border p-1 px-2 ` +
-                        `${se.open || product.disable_open === 1 ? "bg-slate-800" : "bg-slate-700"} ` +
-                        `${se.open || product.disable_open === 1 ? "cursor-not-allowed text-slate-500" : "cursor-pointer"}`
-                      }
-                      disabled={se.open || product.disable_open === 1 ? true : false}
-                    >
-                      Open
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {stock.length === 0 && <>No stock</>}
+            <dd className="pb-5">
+              <div className="flex flex-col gap-y-3">
+                {stock.map((se: StockEntry) => (
+                  <StockEntryRow
+                    key={`stock-entry-row-${se.id}`}
+                    barcode={barcode.code}
+                    se={se}
+                    product={product}
+                  />
+                ))}
+                {stock.length === 0 && <>No stock</>}
+              </div>
             </dd>
           </>
         )}
       </dl>
-
-      {false && (
-        <>
-          <hr />
-          <pre className="text-xs">{JSON.stringify(stock, null, 2)}</pre>
-          <hr />
-        </>
-      )}
-
-      {false && (
-        <>
-          <hr />
-          <pre className="text-xs">{JSON.stringify(data, null, 2)}</pre>
-          <hr />
-        </>
-      )}
     </>
   );
 }
 
-async function DisplayStockActionButtons({
+async function StockEntryRow({
+  barcode,
   se,
-  data,
-  dueType,
+  product,
 }: {
+  barcode: string;
   se: StockEntry;
-  data: ProductDetailsResponse;
-  dueType: string;
+  product: Product;
 }) {
+  const locations = await fetchLocations();
+
+  //const [showTransferOptions, setShowTransferOptions] = useState<boolean>(false);
+
+  return (
+    <form>
+      <fieldset
+        key={`stock_${se.id}`}
+        className="radiu mb-2 rounded-md border border-dashed border-slate-500 tracking-[0.9]"
+      >
+        <legend className="ml-3 px-3 text-slate-300">
+          <DisplayStockActionButtons product={product} se={se} />
+        </legend>
+        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-slate-600">
+          <div className="mx-3 flex flex-row flex-wrap gap-x-3 py-3 text-slate-300">
+            <input type="hidden" name="productId" value={se.product_id} />
+            <input type="hidden" name="stockId" value={se.stock_id} />
+            <input type="hidden" name="barcode" value={barcode} />
+            <input type="hidden" name="fromLocationId" value={se.location_id} />
+            <input type="hidden" name="transferAmount" value={se.amount} />
+            <OpenStockEntryButton
+              disabled={se.open || product.disable_open ? true : false}
+              title={`Open stock entry ${se.stock_id}`}
+            >
+              <PackageOpen className="mr-2 size-5" /> Open
+            </OpenStockEntryButton>
+            <ConsumeStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
+              <X className="mr-2 size-5" /> Consume stock
+            </ConsumeStockEntryButton>
+            <ConsumeSpoiledStockEntryButton
+              title={`Consume all of this stock entry ${se.stock_id} as spoiled`}
+            >
+              <Trash2 className="mr-2 size-5" /> Spoiled
+            </ConsumeSpoiledStockEntryButton>
+            {/* <button
+                        type="button"
+                        title={`Inventory (add or remove) stock entry ${se.stock_id}`}
+                        className="mt-2 inline-flex cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
+                      >
+                        Inventory <ChevronUp size={24} />
+                      </button> */}
+          </div>
+          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 pb-3 text-slate-300">
+            <LocationDropdown
+              name="toLocationId"
+              units={locations}
+              className="h-6! w-68 border-slate-300! bg-slate-700 text-sm/4 tracking-[0.8]"
+              noFreezers={product.should_not_be_frozen ? true : false}
+              firstOptionTitle="Transfer to ..."
+              disableOption={se.location_id?.toString()}
+            />
+            <TransferStockEntryButton
+              disabled={product.enable_tare_weight_handling ? true : false}
+              title={`Transfer stock entry ${se.stock_id}`}
+            >
+              <MoveRight className="mr-2 size-5" /> Transfer
+            </TransferStockEntryButton>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  );
+}
+
+async function DisplayStockActionButtons({ se, product }: { se: StockEntry; product: Product }) {
   const units = toLookup(await fetchQuantityUnits());
   const locations = toLookup(await fetchLocations());
+  const dueType = dueTypeToString(product.due_type!, product.default_best_before_days);
 
-  if (data === undefined || data.product === undefined) {
+  if (product === undefined) {
     return <></>;
   }
 
   return (
     <div className="w-full">
       <code className="text-xs">{se.stock_id}</code> : {(se.amount !== null && se.amount) || "??"}&nbsp;
-      {se.amount !== null && se.amount !== undefined && se.amount != 1 && data.product?.qu_id_stock
-        ? units[data.product.qu_id_stock!]!.name_plural
-        : units[data.product.qu_id_stock!]!.name}{" "}
+      {se.amount !== null && se.amount !== undefined && se.amount != 1 && product?.qu_id_stock
+        ? units[product.qu_id_stock!]!.name_plural
+        : units[product.qu_id_stock!]!.name}{" "}
       {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
       {dueType !== "No expiry" && (
         <>

@@ -196,7 +196,8 @@ dl.product-info {
   grid-template-columns: max-content;
 
   & dt {
-    font-weight: bold;
+    font-weight: normal;
+    letter-spacing: 0px;
   }
   & dd {
     margin: 0;

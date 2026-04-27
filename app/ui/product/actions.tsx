@@ -30,11 +30,7 @@ export default function BarcodeActions({
               logoHeight={logoHeight}
               title="Consume"
               description="Consume stock associated with the barcode"
-              disable={
-                barcode.quantity === undefined || barcode.quantity <= 0
-                  ? true
-                  : false
-              }
+              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -45,11 +41,7 @@ export default function BarcodeActions({
               logoHeight={logoHeight}
               title="Consume all"
               description="Remove all remaining inventory as consumed"
-              disable={
-                barcode.quantity === undefined || barcode.quantity <= 0
-                  ? true
-                  : false
-              }
+              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -60,11 +52,7 @@ export default function BarcodeActions({
               logoHeight={logoHeight * 0.8}
               title="Consume spoiled"
               description="Remove remaining inventory and mark it as spoiled"
-              disable={
-                barcode.quantity === undefined || barcode.quantity <= 0
-                  ? true
-                  : false
-              }
+              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"Q"}
             />
             <BarcodeAction
@@ -85,11 +73,7 @@ export default function BarcodeActions({
               logoHeight={logoHeight * 0.9}
               title="Open"
               description="Mark item as having been opened"
-              disable={
-                barcode.quantity === undefined || barcode.quantity <= 0
-                  ? true
-                  : false
-              }
+              disable={barcode.quantity === undefined || barcode.quantity <= 0 ? true : false}
               ecLevel={"H"}
             />
             <BarcodeAction
@@ -174,9 +158,7 @@ function BarcodeAction({
         />
       </div>
       <div className={disable ? "pr-4 line-through opacity-60" : "pr-4"}>
-        <h6 className="text-left font-bold text-slate-400 uppercase">
-          {title}
-        </h6>
+        <h6 className="text-left font-bold text-slate-400 uppercase">{title}</h6>
         <p className="text-left text-sm text-slate-500">{description}</p>
       </div>
     </button>

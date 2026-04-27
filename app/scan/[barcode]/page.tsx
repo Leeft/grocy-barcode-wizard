@@ -37,11 +37,12 @@ export default async function BarcodePage({ params }: { params: Promise<{ barcod
     // Does it also exist in grocy? If so, can jump straight to things
     // that can be done with the barcode.
     if (products[0].grocyProductId) {
+      const grocyBarcode = await findProductInGrocy(barcodeObject);
       return (
         <>
           <BarcodeScannerApp slug={barcode} />
-          <ExistingProductForm barcode={barcodeObject} />
-          <BarcodeActions barcode={barcodeObject} className="w-auto" editing={false} />
+          <ExistingProductForm barcode={grocyBarcode} />
+          <BarcodeActions barcode={grocyBarcode} className="w-auto" editing={false} />
         </>
       );
     }
