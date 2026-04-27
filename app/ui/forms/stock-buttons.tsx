@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  consumeOneOfSpecificStockEntry,
   consumeSpecificStockEntry,
   consumeSpoiledSpecificStockEntry,
   openSpecificStockEntry,
@@ -18,7 +19,6 @@ const stockButtonCommon = clsx(
   "bg-slate-700",
   "p-1",
   "px-2",
-  "bg-slate-700",
   "cursor-pointer",
   "disabled:bg-slate-800",
   "disabled:cursor-not-allowed",
@@ -31,6 +31,20 @@ const stockButtonCommon = clsx(
 export function ConsumeStockEntryButton({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <button title={title} className={stockButtonCommon} formAction={consumeSpecificStockEntry}>
+      {children}
+    </button>
+  );
+}
+
+export function ConsumeOneOfStockEntryButton({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button title={title} className={stockButtonCommon} formAction={consumeOneOfSpecificStockEntry}>
       {children}
     </button>
   );
@@ -49,6 +63,7 @@ export function ConsumeSpoiledStockEntryButton({
     </button>
   );
 }
+
 export function TransferStockEntryButton({
   title,
   disabled,
