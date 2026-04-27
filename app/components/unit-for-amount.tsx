@@ -8,10 +8,14 @@ export function UnitForAmount({
   unit,
   className,
   ref,
+  plural = false,
+  title = "This unit is set at the beginning as part of the 'stock unit system'; choose wisely as Grocy uses the same 'stock unit' for many things, with added conversions filling in the gaps.",
 }: {
   unit: number | string;
   className?: string;
   ref?: RefObject<HTMLSelectElement>;
+  plural?: boolean;
+  title?: string;
 }) {
   "use client";
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
@@ -20,17 +24,17 @@ export function UnitForAmount({
     <>
       {Number(unit) > 0 ? (
         <div
-          className={clsx("cursor-pointer", 'text-green-200', className)}
+          className={clsx("cursor-pointer", "text-green-200", className)}
           onClick={() => ref?.current?.focus({ preventScroll: false })}
-          title="This unit is set at the beginning as part of the 'stock unit system'; choose wisely as Grocy uses the same 'stock unit' for many things, with added conversions filling in the gaps."
+          title={title}
         >
-          {unitsMap[unit]!.name}
+          {plural ? unitsMap[unit]!.name_plural : unitsMap[unit]!.name}
         </div>
       ) : (
         <div
           className={clsx("cursor-pointer", "text-amber-700", className)}
           onClick={() => ref?.current?.focus({ preventScroll: false })}
-          title="This unit is set at the beginning as part of the 'stock unit system'; choose wisely as Grocy uses the same 'stock unit' for many things, with added conversions filling in the gaps."
+          title={title}
         >
           ???
         </div>
