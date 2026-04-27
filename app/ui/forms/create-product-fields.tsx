@@ -1,7 +1,6 @@
 "use client";
 
 import { UnitSystem, DueDateType, PurchasePriceType } from "@/generated/prisma/enums";
-import { dateToISODate } from "@/lib/date";
 import {
   inputCommonStyles,
   unitSystemOptions,
@@ -38,6 +37,7 @@ import {
   purchasePriceTypeToPlaceholder,
   QuantityUnit,
 } from "@/interfaces/grocy";
+import { dateToISODate } from "@/lib/utils";
 
 const unitClass = "text-green-200!";
 

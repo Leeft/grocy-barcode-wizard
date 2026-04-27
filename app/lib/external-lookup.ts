@@ -1,6 +1,6 @@
 import Barcode from "@/lib/barcode";
 
-export default class ProductLookup {
+export default class ExternalLookup {
   async lookupOpenFoodFacts(barcode: Barcode) {
     const uriBarcode = encodeURIComponent(barcode.barcode);
     return fetch(`${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${uriBarcode}?product_type=all`, {

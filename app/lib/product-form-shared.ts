@@ -1,8 +1,4 @@
-import {
-  DueDateType,
-  PurchasePriceType,
-  UnitSystem,
-} from "@/generated/prisma/enums";
+import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
 import clsx from "clsx";
 
 export const inputCommonStyles: string = clsx(
@@ -31,13 +27,9 @@ export const inputCommonStyles: string = clsx(
   "text-md",
 );
 
-export const dueDaysInputCommonStyles: string = clsx(
-  inputCommonStyles,
-);
+export const dueDaysInputCommonStyles: string = clsx(inputCommonStyles);
 
-export const dateInputCommonStyles: string = clsx(
-  inputCommonStyles,
-);
+export const dateInputCommonStyles: string = clsx(inputCommonStyles);
 
 export const dueDateTypeOptions = [
   { value: DueDateType.BEST_BEFORE, label: "Best before" },

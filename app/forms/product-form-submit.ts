@@ -5,8 +5,7 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
-import { dataURLtoFile } from "@/lib/utils";
-import { dateToISODate } from "@/lib/date";
+import { dataURLtoFile, dateToISODate } from "@/lib/utils";
 import { CreateProductFormSchema, EditProductFormSchema } from "@/forms/product-form-schema";
 import { apiKey, baseUrl, grocyClient } from "@/lib/grocy";
 import {

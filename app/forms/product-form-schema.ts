@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
-import { addYears, dateToISODate } from "@/lib/date";
+import { addYears, dateToISODate } from "@/lib/utils";
 
 export const CreateProductFormSchema = z
   .object({

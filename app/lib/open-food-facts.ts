@@ -5,7 +5,7 @@ import {
 } from "@/interfaces/json-objects";
 import Barcode from "./barcode";
 import * as JsonDecoder from "ts.data.json";
-import ProductLookup from "@/lib/lookup";
+import ExternalLookup from "@/lib/external-lookup";
 import { globalEvents } from "./events";
 
 const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
@@ -36,7 +36,7 @@ const openFoodFactsNotFoundDecoder = JsonDecoder.object<OpenFoodFactsNotFoundRes
 
 export async function findProductInOpenFoodFacts(barcode: Barcode) {
   const startTime = performance.now();
-  const i_promise = await (await new ProductLookup().lookupOpenFoodFacts(barcode)).json();
+  const i_promise = await (await new ExternalLookup().lookupOpenFoodFacts(barcode)).json();
 
   openFoodFactsNotFoundDecoder.decodePromise(i_promise).then((result) => {
     if (result.status !== 0) {
