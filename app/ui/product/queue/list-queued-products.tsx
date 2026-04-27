@@ -1,14 +1,14 @@
 import { getPendingProducts, PendingProducts } from "@/lib/product-db";
-import { ProductInfo } from "@/ui/product/queue/ProductInfo";
+import { QueuedProductInfoButton } from "@/ui/product/queue/queued-product-info-button";
 
-export default async function QueuedProducts() {
+export default async function ListQueuedProducts() {
   const products: PendingProducts = await getPendingProducts();
 
   return (
     <ul className="py-2">
       {products.map((product) => (
         <li key={`product-row-${product.id}`} suppressHydrationWarning>
-          <ProductInfo product={product} />
+          <QueuedProductInfoButton product={product} />
         </li>
       ))}
     </ul>

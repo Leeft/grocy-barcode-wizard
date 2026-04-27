@@ -54,7 +54,10 @@ export type Product = components["schemas"]["Product"] & {
 // , qu_id_consume INTEGER, auto_reprint_stock_label TINYINT NOT NULL DEFAULT 0 CHECK(auto_reprint_stock_label IN (0, 1)), quick_open_amount REAL NOT NULL DEFAULT 1, qu_id_price INTEGER, disable_open TINYINT NOT NULL DEFAULT 0 CHECK(disable_open IN (0, 1)), default_purchase_price_type TINYINT NOT NULL DEFAULT 1 CHECK(default_purchase_price_type IN (1, 2, 3)));
 
 export type QuantityUnit = components["schemas"]["QuantityUnit"];
-export type ProductLocation = components["schemas"]["Location"];
+export type ProductLocation = components["schemas"]["Location"] & {
+  is_freezer?: 0 | 1,
+};
+
 export type ShoppingLocation = components["schemas"]["ShoppingLocation"];
 export type StockEntry = components["schemas"]["StockEntry"];
 export type ProductDetailsResponse = components["schemas"]["ProductDetailsResponse"];

@@ -11,34 +11,26 @@ import {
   TriangleAlert,
   Weight,
 } from "lucide-react";
-import DueDate from "../../due-date";
-import PackagingDate from "../../packaging-date";
+import DueDate from "@/ui/due-date";
+import PackagingDate from "@/ui/packaging-date";
 import Link from "next/link";
-import { getProductPhoto } from "@/lib/product-db";
+import { GetProduct, getProductPhoto } from "@/lib/product-db";
 import { Suspense } from "react";
+import { toLookup } from "@/lib/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function ProductInfo({ product }: { product: any }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const units = (await fetchQuantityUnits()).reduce((map: any, obj: any) => {
-    map[obj.id] = obj;
-    return map;
-  }, {});
+export async function QueuedProductInfoButton({ product }: { product: GetProduct }) {
+  if (product === undefined) return <></>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const locations = (await fetchLocations()).reduce((map: any, obj: any) => {
-    map[obj.id] = obj;
-    return map;
-  }, {});
+  const units = toLookup(await fetchQuantityUnits());
+  const locations = toLookup(await fetchLocations());
 
   const unitSystem = new String(product.unitSystem.toString()).toLowerCase();
   const unitAmount = product.unitAmount.toString();
   const unitChosen =
-    units[product.unitChosen.toString()][
-      product.unitAmount > 1 ? "name_plural" : "name"
-    ];
+    units[product.unitChosen.toString()]![Number(product.unitAmount) > 1 ? "name_plural" : "name"];
 
-  const storageLocation = locations[product.defaultLocation].name;
+  const defaultLocation = locations[product.defaultLocation];
+  const storageLocation = defaultLocation !== undefined ? defaultLocation.name : "???";
 
   let unitIcon;
   switch (product.unitSystem) {
@@ -60,7 +52,7 @@ export async function ProductInfo({ product }: { product: any }) {
 
   return (
     <Link
-      href={`/queue/${product.barcodes[0].barcode}`}
+      href={`/queue/${product.barcodes[0]!.barcode}`}
       className="my-3 block w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600"
       title={`Process queued product “${product.name}”`}
     >
@@ -68,46 +60,35 @@ export async function ProductInfo({ product }: { product: any }) {
         <div className="flex flex-col md:flex-row">
           <div className="w-full flex-3 flex-row">
             <div className="flex-1 pl-5 -indent-5 text-slate-50">
-              <code className="text-green-500">
-                {product.barcodes[0]?.barcode}
-              </code>{" "}
-              : <strong>{product.name}</strong>
+              <code className="text-green-500">{product.barcodes[0]?.barcode}</code> :{" "}
+              <strong>{product.name}</strong>
             </div>
 
             <div className="flex-1">
-              {unitIcon} Using <span className="lowercase">{unitSystem}</span>{" "}
-              units:{" "}
+              {unitIcon} Using <span className="lowercase">{unitSystem}</span> units:{" "}
               <em>
-                <span>{unitAmount}</span>{" "}
-                <span className="lowercase">{unitChosen}</span>
+                <span>{unitAmount}</span> <span className="lowercase">{unitChosen}</span>
               </em>
             </div>
 
-            <div
-              className={`flex-1 ${locations[product.defaultLocation].is_freezer ? "text-blue-300" : ""}`}
-            >
-              <ShelvingUnit size="15" className="relative top-[-2] inline" />{" "}
-              Stored by default in <em>{storageLocation}</em>
+            <div className={`flex-1 ${defaultLocation!.is_freezer ? "text-blue-300" : ""}`}>
+              <ShelvingUnit size="15" className="relative top-[-2] inline" /> Stored by default in{" "}
+              <em>{storageLocation}</em>
             </div>
 
-            {product.dueDateType !== DueDateType.NO_EXPIRY &&
-              product.canBeFrozen && (
-                <div className="flex-1 text-blue-300">
-                  <Snowflake size="15" className="relative top-[-2] inline" />{" "}
-                  Product can be frozen
-                </div>
-              )}
+            {product.dueDateType !== DueDateType.NO_EXPIRY && product.canBeFrozen && (
+              <div className="flex-1 text-blue-300">
+                <Snowflake size="15" className="relative top-[-2] inline" /> Product can be frozen
+              </div>
+            )}
 
             {product.dueDateType !== DueDateType.NO_EXPIRY &&
               product.canBeFrozen &&
-              !locations[product.defaultLocation].is_freezer && (
+              !defaultLocation!.is_freezer && (
                 <div className="flex-1 text-amber-500">
                   <>
-                    <TriangleAlert
-                      size="15"
-                      className="relative top-[-2] inline"
-                    />{" "}
-                    Default storage location is not a freezer
+                    <TriangleAlert size="15" className="relative top-[-2] inline" /> Default storage location
+                    is not a freezer
                   </>
                 </div>
               )}
@@ -122,19 +103,15 @@ export async function ProductInfo({ product }: { product: any }) {
                   <Smile size="15" className="relative top-[-2] inline" />{" "}
                 </>
               )}
-              <DueDate type={product.dueDateType} date={product.expiresAt} />
+              <DueDate type={product.dueDateType} date={product.expiresAt!} />
             </div>
 
-            {product.dueDateType !== DueDateType.NO_EXPIRY &&
-              product.packagingDate && (
-                <div className="flex-1">
-                  <Package size="15" className="relative top-[-2] inline" />{" "}
-                  <PackagingDate
-                    type={product.dueDateType}
-                    date={product.packagingDate}
-                  />
-                </div>
-              )}
+            {product.dueDateType !== DueDateType.NO_EXPIRY && product.packagingDate && (
+              <div className="flex-1">
+                <Package size="15" className="relative top-[-2] inline" />{" "}
+                <PackagingDate type={product.dueDateType} date={product.packagingDate} />
+              </div>
+            )}
           </div>
           <Suspense>
             {photo && (

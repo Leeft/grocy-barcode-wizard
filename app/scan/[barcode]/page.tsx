@@ -2,7 +2,7 @@ import Barcode from "@/lib/barcode";
 import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
-import BarcodeActions from "@/ui/product/actions";
+import BarcodeActions from "@/ui/product/product-actions";
 import QueuedProduct from "@/ui/product/queued-product";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
