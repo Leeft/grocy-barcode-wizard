@@ -21,6 +21,15 @@
   --font-mono: var(--font-geist-mono);
 } */
 
+@theme {
+  --color-add: #61c68a;
+  --color-consume: #e78840;
+  --color-spoiled: #ff7676;
+  --color-open: #57bcf1;
+  --color-inventory: #f4b7ff;
+  --color-shopping-list: #f2e078;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
