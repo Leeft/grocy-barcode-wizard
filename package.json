@@ -21,12 +21,12 @@
     "@conform-to/react": "^1.19.0",
     "@conform-to/zod": "^1.19.0",
     "@heroicons/react": "^2.2.0",
-    "@prisma/adapter-better-sqlite3": "^7.7.0",
-    "@prisma/client": "^7.7.0",
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@shivantra/react-web-camera": "^1.1.0",
     "clsx": "^2.1.1",
     "file64": "^1.0.5",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.11.0",
     "next": "16.1.6",
     "openapi-fetch": "^0.17.0",
     "openapi-typescript": "^7.13.0",
@@ -40,7 +40,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "^20.19.39",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -48,9 +48,9 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.6",
     "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "^0.7.3",
     "prisma": "^7.8.0",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5.9.3"
   }
 }
