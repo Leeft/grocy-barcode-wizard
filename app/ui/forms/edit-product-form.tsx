@@ -31,7 +31,7 @@ import {
 import { ProductGroupDropdown } from "../product/product-group-dropdown";
 import { ProductGroupContext } from "@/providers/product-group-context";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
-import { toMap } from "@/lib/utils";
+import { toLookup } from "@/lib/utils";
 import UnitConversions from "@/lib/conversions";
 import UnitConversionsEditor from "./unit-conversions-editor";
 import CreateProductFields from "./create-product-fields";
@@ -146,7 +146,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
   const productGroups = use(useContext(ProductGroupContext) as Promise<ProductGroup[]>);
 
-  const locationsMap = locations.reduce(toMap, {}) as Record<string, PrLocation>;
+  const locationsMap = toLookup(locations);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;

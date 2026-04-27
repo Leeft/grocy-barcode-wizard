@@ -9,7 +9,7 @@ import {
   fetchShoppingLocations,
   grocyClient,
 } from "@/lib/grocy";
-import { toLookup } from "@/lib/utils";
+import { pluralUnit, toLookup } from "@/lib/utils";
 import { Suspense } from "react";
 import {
   ConsumeSpoiledStockEntryButton,
@@ -110,6 +110,16 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
 
   const product = data.product as Product;
 
+  const parentProductName =
+    product.parent_product_id !== undefined && products[product.parent_product_id] !== undefined
+      ? products[product.parent_product_id]!.name
+      : "-";
+
+  const productGroupName =
+    product.product_group_id !== undefined && productGroups[product.product_group_id] !== undefined
+      ? productGroups[product.product_group_id]!.name
+      : "-";
+
   return (
     <>
       {product.picture_file_name !== null && product.picture_file_name && (
@@ -125,14 +135,9 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
         <dt>Name</dt>
         <dd>{product.name}</dd>
         <dt>Product group</dt>
-        <dd>{product.product_group_id && productGroups[product.product_group_id]!.name}</dd>
+        <dd>{productGroupName}</dd>
         <dt>Parent product</dt>
-        <dd>
-          {product.parent_product_id
-            ? /* @ts-expect-error not in API specification yet */
-              products[product.parent_product_id].name
-            : "-"}
-        </dd>
+        <dd>{parentProductName}</dd>
         <dt>Active</dt>
         <dd>{product.active ? "✓" : "✗"}</dd>
         <dt>May be frozen</dt>
@@ -147,7 +152,7 @@ export async function ExistingProductInfo({ barcode }: { barcode: Barcode }) {
               {bc.qu_id
                 ? (bc.amount ? bc.amount : "__") +
                   ` ` +
-                  (bc.amount === 1 ? units[bc.qu_id]!.name : units[bc.qu_id]!.name_plural) +
+                  pluralUnit(units[bc.qu_id], bc.amount) +
                   (bc.shopping_location_id
                     ? ", purchased at " + shopLocations[bc.shopping_location_id]!.name
                     : "") +

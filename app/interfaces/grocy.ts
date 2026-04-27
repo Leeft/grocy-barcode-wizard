@@ -17,6 +17,7 @@ export type Product = components["schemas"]["Product"] & {
   disable_open?: 0 | 1;
   quick_consume_amount?: number;
   active?: 0 | 1;
+  stock_amount_aggregated?: number;
 };
 
 // CREATE TABLE products (

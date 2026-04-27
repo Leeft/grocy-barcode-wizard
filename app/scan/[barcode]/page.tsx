@@ -3,7 +3,7 @@ import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import BarcodeActions from "@/ui/product/product-actions";
-import QueuedProduct from "@/ui/product/queued-product";
+import QueuedProductInfoTile from "@/ui/product/queued-product-info-tile";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
@@ -53,7 +53,7 @@ export default async function BarcodePage({ params }: { params: Promise<{ barcod
       return (
         <>
           <BarcodeScannerApp slug={barcode} />
-          <QueuedProduct barcode={barcodeObject} />
+          <QueuedProductInfoTile barcode={barcodeObject} />
         </>
       );
     }

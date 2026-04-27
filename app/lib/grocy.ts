@@ -162,11 +162,13 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
       params: { path: { productId: productNumber } },
     });
 
+    const product = data!.product as Product;
+
     // Might get an inactive code, which isn't "wrong" for us (still
     // need to use it) but it needs special handling. Just return the
     // barcode we have already and use that, pretend all is well.
     if (
-      data === undefined &&
+      product === undefined &&
       error !== undefined &&
       error?.error_message !== undefined &&
       /does not exist or is inactive/.test(error.error_message)
@@ -174,14 +176,13 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
       return Promise.reject(barcode);
     }
 
-    if (data !== undefined) {
+    if (product !== undefined) {
       return Promise.resolve(
         new Barcode({
           barcode: barcode.barcode,
-          name: data.product?.name,
-          product: data.product,
-          // @ts-expect-error : not in OpenAPI spec, no typescript here
-          quantity: data.stock_amount_aggregated,
+          name: product.name,
+          product: product,
+          quantity: product.stock_amount_aggregated,
         }),
       );
     }
@@ -201,14 +202,15 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
     return Promise.reject(barcode);
   }
 
+  const product = data.product as Product;
+
   return Promise.resolve(
     new Barcode({
       barcode: barcode.code,
-      name: data.product.name,
-      product: data.product,
+      name: product.name,
+      product: product,
       queuedProductId: barcode.queuedProductId,
-      // @ts-expect-error : not in OpenAPI spec, no typescript here
-      quantity: data.stock_amount_aggregated,
+      quantity: product.stock_amount_aggregated,
     }),
   );
 }

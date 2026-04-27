@@ -1,5 +1,5 @@
 import { QuantityUnit } from "@/interfaces/grocy";
-import { toMap } from "@/lib/utils";
+import { toLookup } from "@/lib/utils";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import clsx from "clsx";
 import { RefObject, use, useContext } from "react";
@@ -15,7 +15,7 @@ export function UnitForAmount({
 }) {
   "use client";
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
-  const unitsMap = units.reduce(toMap, {}) as Record<string, QuantityUnit>;
+  const unitsMap = toLookup(units);
   return (
     <>
       {Number(unit) > 0 ? (

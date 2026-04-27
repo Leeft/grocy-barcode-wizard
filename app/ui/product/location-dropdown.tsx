@@ -29,7 +29,7 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
   const freezers: Freezers = {};
 
   units.map((unit) => {
-    // @ts-expect-error : is_freezer does not exist in the generated type
+    // @ts-expect-error : freezers is not correctly typed yet
     if (unit.id !== undefined && unit.is_freezer) freezers[unit.id] = unit;
   });
 

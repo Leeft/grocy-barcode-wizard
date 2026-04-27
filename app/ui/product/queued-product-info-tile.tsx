@@ -3,7 +3,7 @@ import { QueuedProductInfoButton } from "@/ui/product/queue/queued-product-info-
 import { GetProduct, getProduct } from "@/lib/product-db";
 import { Suspense } from "react";
 
-export default async function QueuedProduct({ barcode }: { barcode: Barcode }) {
+export default async function QueuedProductInfoTile({ barcode }: { barcode: Barcode }) {
   const product: GetProduct = await getProduct(barcode.queuedProductId!);
 
   return (
