@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import Link, { LinkProps } from "next/link";
-import { ShoppingBasket, X, Trash2, PackageOpen, ShelvingUnit, MoveRight } from "lucide-react";
-import { Product, StockEntry } from "@/interfaces/grocy";
+import { ShoppingBasket, X, Trash2, PackageOpen, ShelvingUnit, MoveRight, List } from "lucide-react";
+import { Product } from "@/interfaces/grocy";
 import React from "react";
 import { UrlObject } from "url";
 import { RouteType } from "next/dist/lib/load-custom-routes";
@@ -75,7 +75,7 @@ export default function ActionShortCuts({
         href={`/scan/${barcode}`}
         className={"text-shopping-list border-shopping-list bg-shopping-list/10"}
       >
-        <ShoppingBasket className={iconClasses} />
+        <List className={iconClasses} />
         Add to shopping list ...
       </ActionLink>
     </div>
