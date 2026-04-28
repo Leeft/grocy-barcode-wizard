@@ -15,7 +15,7 @@ export async function settingsSubmit(prevstate: unknown, formData: FormData) {
 
   const data = submission.value;
 
-  const settings = await prisma.settings.upsert({
+  await prisma.settings.upsert({
     where: { userId: 1 }, // TODO: Actual users
     update: {
       openCameraByDefault: data.openCameraByDefault,

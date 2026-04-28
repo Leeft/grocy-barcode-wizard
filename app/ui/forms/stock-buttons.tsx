@@ -8,7 +8,7 @@ import {
   transferSpecificStockEntry,
 } from "@/lib/grocy-update";
 import clsx from "clsx";
-import React, { useState } from "react";
+import React from "react";
 
 const stockButtonCommon = clsx(
   "mt-2",
@@ -16,11 +16,10 @@ const stockButtonCommon = clsx(
   "cursor-pointer",
   "rounded-md",
   "border",
-  "bg-slate-700",
   "p-1",
   "px-2",
+  "pr-3",
   "cursor-pointer",
-  "disabled:bg-slate-800",
   "disabled:cursor-not-allowed",
   "disabled:text-slate-500",
   "h-9.5",
@@ -30,7 +29,11 @@ const stockButtonCommon = clsx(
 
 export function ConsumeStockEntryButton({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <button title={title} className={stockButtonCommon} formAction={consumeSpecificStockEntry}>
+    <button
+      title={title}
+      className={clsx(stockButtonCommon, "text-consume")}
+      formAction={consumeSpecificStockEntry}
+    >
       {children}
     </button>
   );
@@ -44,7 +47,11 @@ export function ConsumeOneOfStockEntryButton({
   children: React.ReactNode;
 }) {
   return (
-    <button title={title} className={stockButtonCommon} formAction={consumeOneOfSpecificStockEntry}>
+    <button
+      title={title}
+      className={clsx(stockButtonCommon, "text-consume-one")}
+      formAction={consumeOneOfSpecificStockEntry}
+    >
       {children}
     </button>
   );
@@ -58,7 +65,11 @@ export function ConsumeSpoiledStockEntryButton({
   children: React.ReactNode;
 }) {
   return (
-    <button title={title} className={stockButtonCommon} formAction={consumeSpoiledSpecificStockEntry}>
+    <button
+      title={title}
+      className={clsx(stockButtonCommon, "text-spoiled")}
+      formAction={consumeSpoiledSpecificStockEntry}
+    >
       {children}
     </button>
   );
@@ -68,25 +79,16 @@ export function TransferStockEntryButton({
   title,
   disabled,
   children,
-  //   showOptions,
-  //   setShowOptions,
 }: {
   title: string;
   disabled: boolean;
   children: React.ReactNode;
-  //   showOptions: boolean;
-  //   setShowOptions: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [opened, setOpened] = useState<boolean>(false);
   return (
     <button
       title={title}
       className={clsx(stockButtonCommon)}
       disabled={disabled}
-      // onClick={(event) => {
-      //   // setShowOptions(!showOptions);
-      //   event?.preventDefault();
-      // }}
       formAction={transferSpecificStockEntry}
     >
       {children}
@@ -106,7 +108,7 @@ export function OpenStockEntryButton({
   return (
     <button
       title={title}
-      className={stockButtonCommon}
+      className={clsx(stockButtonCommon, "text-open")}
       disabled={disabled}
       formAction={openSpecificStockEntry}
     >

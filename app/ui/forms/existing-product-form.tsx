@@ -1,8 +1,8 @@
 import { Product, StockEntry } from "@/interfaces/grocy";
-import Barcode from "@/lib/barcode";
 import {
   baseUrl,
   fetchLocations,
+  fetchProductDetails,
   fetchProductGroups,
   fetchProducts,
   fetchQuantityUnits,
@@ -23,40 +23,35 @@ import { MoveRight, PackageOpen, Tally1, Trash2, X } from "lucide-react";
 import ActionShortcuts from "../barcode/action-shortcuts";
 
 export async function ExistingProductForm({
+  product,
   barcode,
   showShortcuts = false,
   showStock = false,
 }: {
-  barcode: Barcode;
+  product: Product;
+  barcode: string;
   showShortcuts?: boolean;
   showStock?: boolean;
 }) {
-  let quantity: string = "0";
-
-  if (barcode.quantity !== undefined && barcode.quantity >= 0) {
-    quantity = barcode.quantity.toString();
-  }
-
-  if (barcode.id !== undefined && barcode.id > 0 && quantity === "0") {
-    quantity = "-- not in stock --";
-  }
-
   return (
     <div className="text-left">
-      <Suspense fallback={<ExistingProductInfoPlaceholder stock={showStock} shortcuts={showShortcuts} />}>
-        <ExistingProductInfo barcode={barcode} showShortcuts={showShortcuts} showStock={showStock} />
+      <Suspense fallback={<ExistingProductInfoPlaceholder />}>
+        <ExistingProductInfo product={product} />
+
+        {showShortcuts && product.active === 1 && (
+          <div className="pt-5">
+            <h1 className="text-1xl my-4 font-bold uppercase">Product actions</h1>
+            <ActionShortcuts barcode={barcode} />
+          </div>
+        )}
+
+        {showStock && product.active === 1 && <ShowStock barcode={barcode} product={product} />}
       </Suspense>
     </div>
   );
 }
 
-export function ExistingProductInfoPlaceholder({
-  shortcuts = false,
-  stock = false,
-}: {
-  shortcuts?: boolean;
-  stock?: boolean;
-}) {
+export function ExistingProductInfoPlaceholder() {
   return (
     <>
       <dl className="product-info">
@@ -74,18 +69,6 @@ export function ExistingProductInfoPlaceholder({
         <dd>...</dd>
         <dt>Last shop</dt>
         <dd>...</dd>
-        {shortcuts && (
-          <>
-            <dt>Action shortcuts</dt>
-            <dd>...</dd>
-          </>
-        )}
-        {stock && (
-          <>
-            <dt>Stock</dt>
-            <dd>...</dd>
-          </>
-        )}
       </dl>
     </>
   );
@@ -103,44 +86,18 @@ function dueTypeToString(dueType: number, bestBeforeDays: number): string {
 }
 
 export async function ExistingProductInfo({
-  barcode,
-  showShortcuts = false,
-  showStock = false,
+  product,
 }: {
-  barcode: Barcode;
-  showShortcuts?: boolean;
-  showStock?: boolean;
+  product: Product;
 }) {
+  if (product === undefined || product.id === undefined) return <></>;
+
   const units = toLookup(await fetchQuantityUnits());
   const shopLocations = toLookup(await fetchShoppingLocations());
   const productGroups = toLookup(await fetchProductGroups());
   const products = toLookup(await fetchProducts());
 
-  const { data, error } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
-    params: { path: { barcode: barcode.code } },
-  });
-
-  if (
-    data === null ||
-    data === undefined ||
-    data.product === null ||
-    data.product === undefined ||
-    !data.product.id
-  ) {
-    return <>Could not get product information: {error}</>;
-  }
-
-  const { data: stock /* error: stockError  */ } = await grocyClient.GET(
-    "/stock/products/{productId}/entries",
-    {
-      params: {
-        path: { productId: data.product.id },
-        query: { include_sub_products: true },
-      },
-    },
-  );
-
-  const product = data.product as Product;
+  const productDetails = await fetchProductDetails(product.id);
 
   const parentProductName =
     product.parent_product_id !== undefined && products[product.parent_product_id] !== undefined
@@ -152,6 +109,8 @@ export async function ExistingProductInfo({
       ? productGroups[product.product_group_id]!.name
       : "-";
 
+  const check = (val: boolean) => val ? (<span className="text-green-300">✓</span>) : (<span className="text-red-300">✗</span>);
+
   return (
     <>
       {product.picture_file_name !== null && product.picture_file_name && (
@@ -162,7 +121,6 @@ export async function ExistingProductInfo({
           src={baseUrl + "/files/productpictures/" + btoa(product.picture_file_name)}
         />
       )}
-
       <dl className="product-info">
         <dt>Name</dt>
         <dd>{product.name}</dd>
@@ -171,12 +129,12 @@ export async function ExistingProductInfo({
         <dt>Parent product</dt>
         <dd>{parentProductName}</dd>
         <dt>Active</dt>
-        <dd>{product.active ? "✓" : "✗"}</dd>
+        <dd>{check(product.active === 1)}</dd>
         <dt>May be frozen</dt>
-        <dd>{product.should_not_be_frozen ? "✗" : "✓"}</dd>
+        <dd>{check(product.should_not_be_frozen === 0)}</dd>
         <dt>Barcodes</dt>
         <dd>
-          {data.product_barcodes?.map((bc) => (
+          {productDetails.product_barcodes?.map((bc) => (
             <div key={bc.barcode} className="w-full">
               <code>{bc.barcode}</code> :{" "}
               {bc.qu_id
@@ -192,34 +150,43 @@ export async function ExistingProductInfo({
           ))}
         </dd>
         <dt>Last shop</dt>
-        <dd>{data.last_shopping_location_id ? shopLocations[data.last_shopping_location_id]!.name : "-"}</dd>
-        {showShortcuts && (
-          <>
-            <dt>Action shortcuts</dt>
-            <dd>
-              <ActionShortcuts barcode={barcode} />
-            </dd>
-          </>
-        )}
-        {stock && showStock && (
-          <>
-            <dt>Stock</dt>
-            <dd className="pb-5">
-              <div className="flex flex-col gap-y-3">
-                {stock.map((se: StockEntry) => (
-                  <StockEntryRow
-                    key={`stock-entry-row-${se.id}`}
-                    barcode={barcode.code}
-                    se={se}
-                    product={product}
-                  />
-                ))}
-                {stock.length === 0 && <>No stock</>}
-              </div>
-            </dd>
-          </>
-        )}
+        <dd>
+          {productDetails.last_shopping_location_id
+            ? shopLocations[productDetails.last_shopping_location_id]!.name
+            : "-"}
+        </dd>
       </dl>
+    </>
+  );
+}
+
+async function ShowStock({ barcode, product }: { barcode: string; product: Product }) {
+  const { data: stock /* error: stockError  */ } = await grocyClient.GET(
+    "/stock/products/{productId}/entries",
+    {
+      params: {
+        path: { productId: product.id! },
+        query: { include_sub_products: true },
+      },
+    },
+  );
+
+  if (stock === undefined) return <></>;
+
+  <ActionShortcuts barcode={barcode} />;
+  return (
+    <>
+      <div className="flex flex-col gap-y-3">
+        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase">Stock overview</h1>
+        {stock.map((se: StockEntry) => (
+          <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={barcode} se={se} product={product} />
+        ))}
+        {stock.length === 0 && (
+          <h2 className="text-amber-500">
+            This product is currently out of stock. Purchase some more.
+          </h2>
+        )}
+      </div>
     </>
   );
 }
@@ -241,13 +208,13 @@ async function StockEntryRow({
     <form>
       <fieldset
         key={`stock_${se.id}`}
-        className="mb-2 rounded-2xl border border-dashed border-yellow-300 tracking-[0.9] p-2"
+        className="mb-2 rounded-2xl border border-dashed border-yellow-300 p-2 tracking-[0.9]"
       >
         <legend className="ml-3 px-3 text-slate-300">
           <DisplayStockActionButtons product={product} se={se} />
         </legend>
         <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-slate-600">
-          <div className="mx-3 flex flex-row flex-wrap gap-x-3 py-3 text-slate-300">
+          <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />
             <input type="hidden" name="stockAmount" value={se.amount} />
@@ -263,13 +230,12 @@ async function StockEntryRow({
             </OpenStockEntryButton>
 
             <ConsumeOneOfStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
-              <Tally1 className="ml-1 mr-0 size-5" /> Consume one
+              <Tally1 className="mr-0 ml-1 size-5" /> Consume one
             </ConsumeOneOfStockEntryButton>
 
             <ConsumeStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
               <X className="mr-2 size-5" /> Consume all
             </ConsumeStockEntryButton>
-
 
             <ConsumeSpoiledStockEntryButton
               title={`Consume all of this stock entry ${se.stock_id} as spoiled`}
@@ -284,13 +250,12 @@ async function StockEntryRow({
                       >
                         Inventory <ChevronUp size={24} />
                       </button> */}
-
           </div>
-          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 pb-3 text-slate-300">
+          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 gap-y-1 pb-3 text-slate-300">
             <LocationDropdown
               name="toLocationId"
               units={locations}
-              className="h-6! w-68 border-slate-300! bg-slate-700 text-sm/4 tracking-[0.8]"
+              className="h-6! w-50 border-slate-300! bg-slate-700 text-sm/4 tracking-[0.8] md:w-68"
               noFreezers={product.should_not_be_frozen ? true : false}
               firstOptionTitle="Transfer to ..."
               disableOption={se.location_id?.toString()}

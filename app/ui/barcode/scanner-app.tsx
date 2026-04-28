@@ -86,7 +86,7 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
       console.log("Closing product barcode stream connection");
       es.close();
     };
-  }, [debug, retryCount, router]);
+  }, [debug, retryCount, router, user.settings?.playSoundOnScan]);
 
   useEffect(() => {
     if (redirect && barcode) {

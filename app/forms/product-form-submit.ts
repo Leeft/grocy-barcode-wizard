@@ -259,7 +259,7 @@ async function syncProductToGrocy(productId: number, dueDate: Date) {
   let response = await fetch(createProductRequest);
 
   if (response.status === 200) {
-    let body = JSON.parse(await response.text());
+    const body = JSON.parse(await response.text());
     const createdObjectId = body.created_object_id;
     console.log("created_object_id:", createdObjectId);
 
@@ -289,7 +289,7 @@ async function syncProductToGrocy(productId: number, dueDate: Date) {
     });
     response = await fetch(addBarcodeRequest);
     if (response.status === 200) {
-      let body = JSON.parse(await response.text());
+      const body = JSON.parse(await response.text());
       console.log("created barcode:", body);
       // => { created_object_id: '139' }
     } else {

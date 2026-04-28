@@ -51,6 +51,8 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
   const [data, setData] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [name, setName] = useState<string>("");
+
+  // eslint-disable-next-line react-hooks/purity
   const [lastSaved, setLastSaved] = useState<number>(photo?.lastChanged ?? Math.floor(Date.now() / 1000));
 
   return (
@@ -60,7 +62,7 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
       <input type="hidden" name="imageName" value={name} />
 
       <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
-      <div className="flex flex-wrap gap-5" ref={cameraAppRef as any}>
+      <div className="flex flex-wrap gap-5" ref={cameraAppRef as RefObject<HTMLDivElement | null>}>
         <Toolbar>
           <ButtonEnableCamera
             enabled={cameraIsEnabled || data || photoId ? true : false}
@@ -82,6 +84,7 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
             cameraHandler={cameraHandler}
             shutterHandler={shutterHandler}
             ref={cameraAppRef}
+            setLastSaved={setLastSaved}
           />
           <ButtonSwitch
             ref={cameraAppRef}
@@ -286,6 +289,7 @@ function ButtonSnapshot({
   cameraHandler,
   shutterHandler,
   ref,
+  setLastSaved,
 }: {
   enabled: boolean;
   setData: Dispatch<SetStateAction<string>>;
@@ -294,6 +298,7 @@ function ButtonSnapshot({
   cameraHandler: React.RefObject<WebCameraHandler | null>;
   shutterHandler: RefObject<OneOffSoundHandler | null>;
   ref: React.RefObject<unknown>;
+  setLastSaved: Dispatch<SetStateAction<number>>;
 }) {
   if (cameraHandler === null || enabled === false) return <></>;
 
@@ -302,6 +307,7 @@ function ButtonSnapshot({
     const file = await cameraHandler.current?.capture();
     if (file) {
       shutterHandler.current?.play();
+      setLastSaved( Math.floor( Date.now() / 1000 ) );
       const base64 = await fileToBase64(file);
       setData(base64);
       setName(file.name);
