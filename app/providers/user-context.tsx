@@ -5,7 +5,7 @@ import { GetUser } from "@/lib/user-db";
 
 export const UserContext = createContext<Promise<GetUser> | null>(null);
 
-export default function LocationProvider({
+export default function UserProvider({
   children,
   promise,
 }: {
