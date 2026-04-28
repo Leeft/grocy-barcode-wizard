@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useActionState, useContext, useState } from "react";
+import { KeyboardEvent, use, useActionState, useContext } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productAddSubmit } from "./product-add-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
@@ -8,39 +8,34 @@ import { ProductAddSchema } from "./product-add-schema";
 import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import {
-  dateInputCommonStyles,
-  inputCommonStyles,
-  purchasePriceOptions,
-  stockLabelOptions,
-} from "@/lib/product-form-shared";
+import { dateInputCommonStyles, inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
 import { UnitForAmount } from "@/components/unit-for-amount";
-import { Product, QuantityUnit, ProductLocation as PrLocation, ShoppingLocation } from "@/interfaces/grocy";
-import { QuantityUnitContext } from "@/providers/quantity-unit-context";
+import { Product, ProductLocation as PrLocation, ShoppingLocation } from "@/interfaces/grocy";
 import CustomisableSelect from "@/ui/customisable-select";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
-import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
 import Link from "next/link";
+import { GrocyConfigContext } from "@/providers/grocy-config-context";
 
 const unitTaggedLabelClass = clsx(); //"w-60 flex grow");
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
   const [lastResult, action, submitPending] = useActionState(productAddSubmit, undefined);
+  const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
 
   let purchasePriceType;
   switch (product.default_purchase_price_type) {
     default:
     case 1:
-      purchasePriceType = "Unspecified";
+      purchasePriceType = PurchasePriceType.UNSPECIFIED;
       break;
     case 2:
-      purchasePriceType = "per unit";
+      purchasePriceType = PurchasePriceType.UNIT_PRICE;
       break;
     case 3:
-      purchasePriceType = "Total price";
+      purchasePriceType = PurchasePriceType.TOTAL_PRICE;
       break;
   }
 
@@ -85,6 +80,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
       stockLabelType: stockLabelType,
       note: undefined,
       dueDateType: dueDateType,
+      purchasePriceType: purchasePriceType,
     },
 
     // Reuse the validation logic on the client
@@ -100,7 +96,6 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
     shouldRevalidate: "onInput",
   });
 
-  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
   const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);
 
@@ -167,6 +162,67 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
             </FormColumn>
           </FormRow>
           {/* */}
+          <FormRow comment="price">
+            <FormColumn className="inline w-full">
+              <div className="w-72">
+                <div className={`${unitTaggedLabelClass} flex`}>
+                  <div>
+                    <FormLabel
+                      htmlFor={fields.price.name}
+                      title="Price"
+                      className="relative top-[-8] mb-0!"
+                    />
+                  </div>
+                  <div className="flex grow flex-row text-right">
+                    <div className="inline grow pr-1">
+                      {fields.purchasePriceType.value === PurchasePriceType.TOTAL_PRICE ? (
+                        <div className="inline-flex text-right">
+                          {grocyConfig.CURRENCY}{" "}
+                          {(Number(fields.price.value) / Number(fields.amount.value)).toFixed(2)}
+                          {" per "}
+                          <UnitForAmount
+                            unit={product.qu_id_stock!}
+                            title=""
+                            className="flex h-5 pl-1.5 text-right text-sm"
+                            plural={false}
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          {grocyConfig.CURRENCY}{" "}
+                          {(Number(fields.price.value) * Number(fields.amount.value)).toFixed(2)} total price
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <FormField className="flex flex-row gap-x-2">
+                  <input
+                    {...getInputProps(fields.price, {
+                      type: "number",
+                    })}
+                    min={0}
+                    step={0.01}
+                    className={clsx(inputCommonStyles, "w-full")}
+                    placeholder="Price"
+                    required
+                  />
+                  <CustomisableSelect
+                    {...getInputProps(fields.purchasePriceType, {
+                      type: "hidden",
+                    })}
+                    options={[
+                      { value: PurchasePriceType.UNIT_PRICE, label: "per unit" },
+                      { value: PurchasePriceType.TOTAL_PRICE, label: "total price" },
+                    ]}
+                    className="w-60"
+                  />
+                </FormField>
+              </div>
+              <FormErrors id={fields.price.errorId} errors={fields.price.errors} />
+            </FormColumn>
+          </FormRow>
+          {/* */}
           {product.default_best_before_days > -1 && (
             <FormRow comment="best_before_date">
               <FormColumn className="w-full flex-none">
@@ -189,36 +245,6 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               </FormColumn>
             </FormRow>
           )}
-          {/* */}
-          <FormRow comment="price">
-            <FormColumn className="w-60">
-              <div className="w-60">
-                <div className={`${unitTaggedLabelClass} flex`}>
-                  <div>
-                    <FormLabel
-                      htmlFor={fields.price.name}
-                      title="Price"
-                      className="relative top-[-8] mb-0!"
-                    />
-                  </div>
-                  <div className="grow text-right text-amber-200">{purchasePriceType}</div>
-                </div>
-                <FormField>
-                  <input
-                    {...getInputProps(fields.price, {
-                      type: "number",
-                    })}
-                    min={0}
-                    step={0.01}
-                    className={clsx(inputCommonStyles, "w-full")}
-                    placeholder="Price"
-                    required
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.price.errorId} errors={fields.price.errors} />
-            </FormColumn>
-          </FormRow>
           {/* */}
           <FormRow comment="shoppingLocationId">
             <FormColumn className="w-full">

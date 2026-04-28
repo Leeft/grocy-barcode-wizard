@@ -1,5 +1,3 @@
-import { Product as GrocyProduct } from "@/interfaces/grocy";
-
 export interface Option {
   value: string;
   label: string;
@@ -19,7 +17,7 @@ export interface SerialisedBarcode {
   type: string;
   name?: string;
   quantity?: number;
-  product?: GrocyProduct;
+  grocyProductId?: number;
   queuedProductId?: number;
 }
 

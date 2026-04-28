@@ -33,6 +33,15 @@ export async function ExistingProductForm({
   showShortcuts?: boolean;
   showStock?: boolean;
 }) {
+  const { data /*, error: stockError  */ } = await grocyClient.GET("/stock/products/{productId}/entries", {
+    params: {
+      path: { productId: product.id! },
+      query: { include_sub_products: true },
+    },
+  });
+
+  const stock = data as StockEntry[];
+
   return (
     <div className="text-left">
       <Suspense fallback={<ExistingProductInfoPlaceholder />}>
@@ -41,11 +50,11 @@ export async function ExistingProductForm({
         {showShortcuts && product.active === 1 && (
           <div className="pt-5">
             <h1 className="text-1xl my-4 font-bold uppercase">Product actions</h1>
-            <ActionShortcuts barcode={barcode} />
+            <ActionShortcuts barcode={barcode} product={product} hasStock={stock.length > 0} />
           </div>
         )}
 
-        {showStock && product.active === 1 && <ShowStock barcode={barcode} product={product} />}
+        {showStock && product.active === 1 && <ShowStock barcode={barcode} product={product} stock={stock} />}
       </Suspense>
     </div>
   );
@@ -85,11 +94,7 @@ function dueTypeToString(dueType: number, bestBeforeDays: number): string {
   return dueTypeString;
 }
 
-export async function ExistingProductInfo({
-  product,
-}: {
-  product: Product;
-}) {
+export async function ExistingProductInfo({ product }: { product: Product }) {
   if (product === undefined || product.id === undefined) return <></>;
 
   const units = toLookup(await fetchQuantityUnits());
@@ -109,7 +114,8 @@ export async function ExistingProductInfo({
       ? productGroups[product.product_group_id]!.name
       : "-";
 
-  const check = (val: boolean) => val ? (<span className="text-green-300">✓</span>) : (<span className="text-red-300">✗</span>);
+  const check = (val: boolean) =>
+    val ? <span className="text-green-300">✓</span> : <span className="text-red-300">✗</span>;
 
   return (
     <>
@@ -160,31 +166,27 @@ export async function ExistingProductInfo({
   );
 }
 
-async function ShowStock({ barcode, product }: { barcode: string; product: Product }) {
-  const { data: stock /* error: stockError  */ } = await grocyClient.GET(
-    "/stock/products/{productId}/entries",
-    {
-      params: {
-        path: { productId: product.id! },
-        query: { include_sub_products: true },
-      },
-    },
-  );
-
+async function ShowStock({
+  barcode,
+  product,
+  stock,
+}: {
+  barcode: string;
+  product: Product;
+  stock: StockEntry[];
+}) {
   if (stock === undefined) return <></>;
 
-  <ActionShortcuts barcode={barcode} />;
+  //<ActionShortcuts barcode={barcode} product={product} />;
   return (
     <>
-      <div className="flex flex-col gap-y-3">
-        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase">Stock overview</h1>
+      <div className="flex flex-col gap-y-3 pb-10">
+        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase">Stock management</h1>
         {stock.map((se: StockEntry) => (
           <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={barcode} se={se} product={product} />
         ))}
         {stock.length === 0 && (
-          <h2 className="text-amber-500">
-            This product is currently out of stock. Purchase some more.
-          </h2>
+          <h2 className="text-amber-500">This product is currently out of stock. Purchase some more.</h2>
         )}
       </div>
     </>
@@ -213,8 +215,8 @@ async function StockEntryRow({
         <legend className="ml-3 px-3 text-slate-300">
           <DisplayStockActionButtons product={product} se={se} />
         </legend>
-        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-slate-600">
-          <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 text-slate-300">
+        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/80">
+          <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />
             <input type="hidden" name="stockAmount" value={se.amount} />
@@ -251,11 +253,11 @@ async function StockEntryRow({
                         Inventory <ChevronUp size={24} />
                       </button> */}
           </div>
-          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 gap-y-1 pb-3 text-slate-300">
+          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 gap-y-1 pb-3 pt-2 text-slate-300">
             <LocationDropdown
               name="toLocationId"
               units={locations}
-              className="h-6! w-50 border-slate-300! bg-slate-700 text-sm/4 tracking-[0.8] md:w-68"
+              className="border-transfer! bg-transfer/10 text-transfer h-6! w-50 text-sm/4 tracking-[0.8] md:w-68 border-1.5!"
               noFreezers={product.should_not_be_frozen ? true : false}
               firstOptionTitle="Transfer to ..."
               disableOption={se.location_id?.toString()}

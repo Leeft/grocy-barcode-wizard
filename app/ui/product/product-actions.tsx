@@ -1,4 +1,3 @@
-import Barcode from "@/lib/barcode";
 import QRCode from "@/components/qrcode";
 import clsx from "clsx";
 import React from "react";
@@ -8,24 +7,19 @@ export default function BarcodeActions({
   className,
   editing = false,
 }: {
-  barcode: Barcode;
+  barcode: string;
   className?: string;
   editing: boolean;
 }) {
   const logoWidth: number = 135 * 0.75;
   const logoHeight: number = 135 * 0.45;
 
-  if (barcode.product === undefined || editing) {
+  if (barcode === undefined || editing) {
     return <></>;
   }
 
   return (
-    <div className={clsx("flex", "flex-col", "gap-y-5", "tracking-normal", "pb-20", className)}>
-      <BarcodeAction>
-        <legend className="text-add ml-3 px-2 font-bold tracking-wide uppercase">Add / purchase</legend>
-        amount; best_before_date; transaction_type = 'purchase'; price; location_id; shopping_location_id;
-        stock_label_type; note
-      </BarcodeAction>
+    <div className={clsx("flex", "flex-col", "gap-y-5", "tracking-normal", "py-20", className)}>
       <BarcodeAction>
         <legend className="text-consume ml-3 px-2 font-bold tracking-wide uppercase">Consume</legend>
         amount; transaction_type = 'consume'; spoiled = 'false'; recipe_id; location_id; exact_amount;

@@ -58,7 +58,7 @@ export type PendingProducts = Awaited<ReturnType<typeof getPendingProducts>>;
 
 //
 
-export async function getProductsByBarcode(barcode: string) {
+export async function getCapturedProductsByBarcode(barcode: string) {
   "use server";
 
   if (barcode === undefined || barcode.trim() === "")
@@ -82,8 +82,8 @@ export async function getProductsByBarcode(barcode: string) {
   });
 }
 
-export type ProductsByBarcode = Awaited<
-  ReturnType<typeof getProductsByBarcode>
+export type CapturedProductsByBarcode = Awaited<
+  ReturnType<typeof getCapturedProductsByBarcode>
 >;
 
 //

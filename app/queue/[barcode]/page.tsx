@@ -1,8 +1,8 @@
 import Barcode from "@/lib/barcode";
 import {
   getProduct,
-  getProductsByBarcode,
-  ProductsByBarcode,
+  getCapturedProductsByBarcode,
+  CapturedProductsByBarcode,
 } from "@/lib/product-db";
 import { EditProductForm } from "@/ui/forms/edit-product-form";
 import { redirect } from "next/navigation";
@@ -15,7 +15,7 @@ export default async function QueuedEntryPage({
 }) {
   const { barcode } = await params;
 
-  const products: ProductsByBarcode = await getProductsByBarcode(barcode);
+  const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcode);
 
   // Check if the product exists in the database
   if (products[0]) {

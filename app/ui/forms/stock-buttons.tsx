@@ -31,7 +31,7 @@ export function ConsumeStockEntryButton({ title, children }: { title: string; ch
   return (
     <button
       title={title}
-      className={clsx(stockButtonCommon, "text-consume")}
+      className={clsx(stockButtonCommon, "text-consume", "bg-consume/10")}
       formAction={consumeSpecificStockEntry}
     >
       {children}
@@ -49,7 +49,7 @@ export function ConsumeOneOfStockEntryButton({
   return (
     <button
       title={title}
-      className={clsx(stockButtonCommon, "text-consume-one")}
+      className={clsx(stockButtonCommon, "text-consume-one", "bg-consume-one/10")}
       formAction={consumeOneOfSpecificStockEntry}
     >
       {children}
@@ -67,7 +67,7 @@ export function ConsumeSpoiledStockEntryButton({
   return (
     <button
       title={title}
-      className={clsx(stockButtonCommon, "text-spoiled")}
+      className={clsx(stockButtonCommon, "text-spoiled", "bg-spoiled/10")}
       formAction={consumeSpoiledSpecificStockEntry}
     >
       {children}
@@ -87,7 +87,7 @@ export function TransferStockEntryButton({
   return (
     <button
       title={title}
-      className={clsx(stockButtonCommon)}
+      className={clsx(stockButtonCommon, "text-transfer", "bg-transfer/10")}
       disabled={disabled}
       formAction={transferSpecificStockEntry}
     >
@@ -108,7 +108,7 @@ export function OpenStockEntryButton({
   return (
     <button
       title={title}
-      className={clsx(stockButtonCommon, "text-open")}
+      className={clsx(stockButtonCommon, "text-open", "bg-open/10")}
       disabled={disabled}
       formAction={openSpecificStockEntry}
     >

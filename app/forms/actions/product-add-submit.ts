@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { ProductAddSchema } from "@/forms/actions/product-add-schema";
 import { grocyClient } from "@/lib/grocy";
-import { DueDateType, StockLabelType } from "@/generated/prisma/enums";
+import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
 import { labelTypeToGrocy } from "@/interfaces/grocy";
 
 function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
@@ -24,17 +24,6 @@ export async function productAddSubmit(prevstate: unknown, formData: FormData) {
 
   const data = submission.value;
 
-  // submit data is {
-  //   barcode: '5701018050906',
-  //   amount: 1,
-  //   bestBeforeDate: 2026-05-08T00:00:00.000Z,
-  //   price: undefined,
-  //   locationId: undefined,
-  //   shoppingLocationId: undefined,
-  //   stockLabelType: 'NO_LABEL',
-  //   note: undefined
-  // }
-
   await grocyClient.POST("/stock/products/{productId}/add", {
     params: { path: { productId: data.productId } },
     body: {
@@ -43,7 +32,8 @@ export async function productAddSubmit(prevstate: unknown, formData: FormData) {
         data.dueDateType! as DueDateType,
         data.bestBeforeDate!,
       ).toISOString(),
-      price: data.price,
+      price:
+        data.purchasePriceType === PurchasePriceType.TOTAL_PRICE ? data.price! / data.amount : data.price,
       shopping_location_id: data.shoppingLocationId,
       location_id: data.locationId,
       stock_label_type: labelTypeToGrocy(data.stockLabelType! as StockLabelType),

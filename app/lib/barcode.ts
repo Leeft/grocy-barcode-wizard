@@ -1,4 +1,3 @@
-import { Product as GrocyProduct } from "@/interfaces/grocy";
 import { SerialisedBarcode } from "@/interfaces";
 import {
   BarcodeAnyType,
@@ -16,22 +15,22 @@ export default class Barcode {
   #type: BarcodeAnyType; // immutable
   name?: string;
   quantity?: number;
-  product?: GrocyProduct;
+  grocyProductId?: number; // If a product is found in grocy, this is its id
   scannedAt?: Date;
-  queuedProductId?: number;
+  queuedProductId?: number; // If a product has been captured here, this is its id
 
   constructor({
     barcode,
     name,
     quantity,
-    product,
+    grocyProductId,
     queuedProductId,
     scannedAt,
   }: {
     barcode: string;
     name?: string;
     quantity?: number;
-    product?: GrocyProduct;
+    grocyProductId?: number;
     queuedProductId?: number;
     scannedAt?: Date;
   }) {
@@ -39,7 +38,7 @@ export default class Barcode {
     this.#barcode = barcode.trim();
 
     if (name !== undefined) this.name = name.trim();
-    if (product !== undefined) this.product = product;
+    if (grocyProductId !== undefined) this.grocyProductId = grocyProductId;
     if (queuedProductId !== undefined) this.queuedProductId = queuedProductId;
     if (scannedAt !== undefined) this.scannedAt = scannedAt;
 
@@ -52,7 +51,7 @@ export default class Barcode {
       barcode: json.barcode,
       name: json.name,
       quantity: json.quantity,
-      product: json.product,
+      grocyProductId: json.grocyProductId,
     });
 
     barcode.scannedAt = new Date();
@@ -70,7 +69,7 @@ export default class Barcode {
       type: this.type,
       name: this.name,
       quantity: this.quantity,
-      product: this.product,
+      grocyProductId: this.grocyProductId,
       queuedProductId: this.queuedProductId,
     };
   }

@@ -2,6 +2,8 @@ import createClient, { Middleware } from "openapi-fetch";
 import type { paths } from "@/interfaces/grocy.d";
 import {
   Product,
+  ProductBarcode,
+  ProductDetailsResponse,
   ProductGroup,
   ProductLocation,
   QuantityUnit,
@@ -145,72 +147,69 @@ export const fetchProducts = cache(async () => {
   }
 });
 
-export async function findProductInGrocy(barcode: Barcode): Promise<Barcode> {
+export const fetchProductDetails = cache(async (productId: number) => {
+  try {
+    const res = await grocyClient.GET("/stock/products/{productId}", {
+      params: {
+        path: { productId: productId },
+      },
+    });
+    return res.data as ProductDetailsResponse;
+  } catch (error) {
+    console.error("Error loading product details:", error);
+    throw new Error("Could not fetch product details.");
+  }
+});
+
+export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
   // GRCY:P:* codes contain a product number and potentially other data
   // but for most purposes they'll be treated as a "regular" product
   // barcode, sent to the products data stream. They just need a
   // different API call for the lookup.
-  const productNumber: number | null = barcode.grocyProductNumber();
+  let grocyProductId: number | null = barcode.grocyProductId ?? barcode.grocyProductNumber();
 
-  if (productNumber !== null && productNumber > 0) {
-    console.log(`Looking up by GRCY ID in grocy at ${process.env.GROCY_API_URL}`);
+  if (grocyProductId === undefined || grocyProductId === null || !grocyProductId) {
+    // There is no productnumber, but there may be a barcode for it
+    const { data, error } = await grocyClient.GET("/objects/{entity}", {
+      params: {
+        path: { entity: "product_barcodes" },
+        query: { order: "product_id:desc", "query[]": [`barcode=${barcode.code}`] },
+      },
+    });
+    if (error !== undefined) {
+      console.error("Could not fetch barcoes from grocy:", error);
+    }
 
+    const barcodes = data as ProductBarcode[];
+    if (barcodes.length > 0 && barcodes[0]?.product_id !== undefined) {
+      grocyProductId = barcodes[0]?.product_id;
+    }
+
+    //console.log( "found by barcode for grocyProductId", barcode.code, data, error)
+  }
+
+  if (grocyProductId !== null && grocyProductId > 0) {
     const {
       data, // only present if 2XX response
       error, // only present if 4XX or 5XX response
-    } = await grocyClient.GET("/stock/products/{productId}", {
-      params: { path: { productId: productNumber } },
+    } = await grocyClient.GET("/objects/{entity}/{objectId}", {
+      params: { path: { entity: "products", objectId: grocyProductId } },
     });
 
-    const product = data!.product as Product;
+    const product = data as Product;
 
-    // Might get an inactive code, which isn't "wrong" for us (still
-    // need to use it) but it needs special handling. Just return the
-    // barcode we have already and use that, pretend all is well.
-    if (
-      product === undefined &&
-      error !== undefined &&
-      error?.error_message !== undefined &&
-      /does not exist or is inactive/.test(error.error_message)
-    ) {
-      return Promise.reject(barcode);
+    if (product !== undefined && product.id !== undefined) {
+      return Promise.resolve(product);
     }
 
-    if (product !== undefined) {
-      return Promise.resolve(
-        new Barcode({
-          barcode: barcode.barcode,
-          name: product.name,
-          product: product,
-          quantity: product.stock_amount_aggregated,
-        }),
-      );
-    }
+    console.log(
+      "Grocy returned no product data for productId, rejecting promise for",
+      grocyProductId,
+      product,
+      error,
+    );
+    return Promise.reject(error);
   }
 
-  // There is no productnumber, but there may be a barcode for it
-
-  const { data, error } = await grocyClient.GET("/stock/products/by-barcode/{barcode}", {
-    params: { path: { barcode: barcode.code } },
-  });
-
-  if (error) {
-    console.error("Could not retrieve by barcode from grocy:", error);
-  }
-
-  if (data === undefined || !data.product) {
-    return Promise.reject(barcode);
-  }
-
-  const product = data.product as Product;
-
-  return Promise.resolve(
-    new Barcode({
-      barcode: barcode.code,
-      name: product.name,
-      product: product,
-      queuedProductId: barcode.queuedProductId,
-      quantity: product.stock_amount_aggregated,
-    }),
-  );
+  return Promise.reject({ error_message: "Could not find product in grocy by id or barcode" });
 }

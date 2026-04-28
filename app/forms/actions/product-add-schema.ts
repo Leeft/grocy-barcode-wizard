@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { DueDateType, StockLabelType } from "@/generated/prisma/enums";
+import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
 import { addYears } from "@/lib/utils";
 
 export const ProductAddSchema = z
@@ -39,6 +39,12 @@ export const ProductAddSchema = z
       StockLabelType.NO_LABEL,
       StockLabelType.SINGLE_LABEL,
       StockLabelType.LABEL_PER_UNIT,
+    ]),
+
+    purchasePriceType: z.enum([
+      PurchasePriceType.UNSPECIFIED,
+      PurchasePriceType.UNIT_PRICE,
+      PurchasePriceType.TOTAL_PRICE,
     ]),
 
     note: z

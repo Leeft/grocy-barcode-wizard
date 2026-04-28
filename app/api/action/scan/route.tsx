@@ -7,6 +7,7 @@ import { ReceivedBarcode } from "@/interfaces/json-objects";
 import { findProductInOpenFoodFacts } from "@/lib/open-food-facts";
 import { NotFoundError } from "@/lib/errors";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
+import { Product } from "@/interfaces/grocy";
 
 // TODO FIXME: Access control
 
@@ -16,8 +17,7 @@ export async function POST(req: Request) {
   if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
     const formData = await req.formData();
     const code = formData.get("barcode")?.toString();
-    if (code !== undefined && code !== null)
-      return processReceivedBarcode(code);
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   if (req.headers.get("content-type") === "application/json") {
@@ -40,20 +40,17 @@ export async function POST(req: Request) {
 export async function GET(req: NextRequest) {
   if (req.nextUrl.searchParams.get("barcode")) {
     const code = req.nextUrl.searchParams.get("barcode");
-    if (code !== undefined && code !== null)
-      return processReceivedBarcode(code);
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("add")) {
     const code = req.nextUrl.searchParams.get("add");
-    if (code !== undefined && code !== null)
-      return processReceivedBarcode(code);
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("text")) {
     const code = req.nextUrl.searchParams.get("text");
-    if (code !== undefined && code !== null)
-      return processReceivedBarcode(code);
+    if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   return processReceivedBarcode("");
@@ -82,9 +79,7 @@ async function processReceivedBarcode(code: string) {
     }
 
     globalEvents.emit("special-barcode-stream", barcode);
-    return bbuddySuccessResponse(
-      `Special barcode processed. Barcode: ${barcode.code}`,
-    );
+    return bbuddySuccessResponse(`Special barcode processed. Barcode: ${barcode.code}`);
   }
 
   // It might already exist in the database as a queued product, find that.
@@ -106,27 +101,35 @@ async function processReceivedBarcode(code: string) {
 
   try {
     findProductInGrocy(barcode)
-      .then((productBarcode) => {
-        globalEvents.emit("product-barcode-stream", productBarcode);
+      .then((product: Product) => {
+        globalEvents.emit(
+          "product-barcode-stream",
+          new Barcode({
+            barcode: barcode.code,
+            name: product.name,
+            quantity: barcode.quantity,
+            grocyProductId: product.id,
+            queuedProductId: barcode.queuedProductId,
+            scannedAt: new Date(),
+          }),
+        );
       })
-      .catch((notFoundBarcode) => {
+      .catch((/*notFoundInfo*/) => {
         // Not found, but might end up sending another emit if found in OpenFoodFacts
         globalEvents.emit(
           "product-barcode-stream",
           new Barcode({
-            barcode: notFoundBarcode.barcode,
-            name: `Unkown product with barcode ${notFoundBarcode.barcode}`,
-            queuedProductId: notFoundBarcode.queuedProductId,
+            barcode: barcode.code,
+            name: `Unkown product with barcode ${barcode.code}`,
             scannedAt: new Date(),
           }),
         );
+
         // See if it can be identified after the fact (async)
         findProductInOpenFoodFacts(barcode);
       });
 
-    return bbuddySuccessResponse(
-      `Product barcode processed. Barcode: ${barcode.barcode}`,
-    );
+    return bbuddySuccessResponse(`Product barcode processed. Barcode: ${barcode.code}`);
   } catch (err) {
     console.error("Couldn't fetch information from grocy:", err);
   }

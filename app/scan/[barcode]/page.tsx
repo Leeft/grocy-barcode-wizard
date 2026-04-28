@@ -1,5 +1,5 @@
 import Barcode from "@/lib/barcode";
-import { getProductsByBarcode, ProductsByBarcode } from "@/lib/product-db";
+import { getCapturedProductsByBarcode, CapturedProductsByBarcode } from "@/lib/product-db";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import BarcodeActions from "@/ui/product/product-actions";
@@ -8,6 +8,7 @@ import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { prisma } from "@/lib/prisma";
+import { Product } from "@/interfaces/grocy";
 
 export default async function BarcodeScannedPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
@@ -23,7 +24,7 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     console.error("Couldn't update barcode status:", err);
   }
 
-  const products: ProductsByBarcode = await getProductsByBarcode(barcode);
+  const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcode);
 
   // Check if the product exists in the database
   if (products[0]) {
@@ -32,17 +33,20 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
       name: products[0].name,
       queuedProductId: products[0].id,
       scannedAt: new Date(),
+      grocyProductId: products[0].grocyProductId ?? undefined,
     });
 
     // Does it also exist in grocy? If so, can jump straight to things
     // that can be done with the barcode.
     if (products[0].grocyProductId) {
-      const grocyBarcode = await findProductInGrocy(barcodeObject);
+      const grocyProduct = await findProductInGrocy(barcodeObject);
       return (
         <>
           <BarcodeScannerApp slug={barcode} />
-          <ExistingProductForm barcode={grocyBarcode} showShortcuts={true} showStock={true} />
-          <BarcodeActions barcode={grocyBarcode} className="w-auto" editing={false} />
+          <ExistingProductForm barcode={barcode} product={grocyProduct} showShortcuts={true} showStock={true} />
+          {grocyProduct.active === 1 && (
+            <BarcodeActions barcode={barcode} className="w-auto" editing={false} />
+          )}
         </>
       );
     }
@@ -59,19 +63,19 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     }
   }
 
-  let grocyBarcode: Barcode | null = null;
+  let grocyProduct: Product | undefined = undefined;
   try {
-    if (barcode !== "installHook.js.map") grocyBarcode = await processReceivedBarcode(barcode);
+    if (barcode !== "installHook.js.map") grocyProduct = await processReceivedBarcode(barcode);
   } catch {
     console.log(`Couldn't get product from grocy by barcode: ${barcode}`);
   }
 
-  if (grocyBarcode !== null) {
+  if (grocyProduct !== undefined) {
     return (
       <>
-        <BarcodeScannerApp slug={grocyBarcode.code} />
-        <ExistingProductForm barcode={grocyBarcode} />
-        <BarcodeActions barcode={grocyBarcode} className="w-auto" editing={false} />
+        <BarcodeScannerApp slug={barcode} />
+        <ExistingProductForm barcode={barcode} product={grocyProduct} showShortcuts={true} showStock={true} />
+        {/* <BarcodeActions barcode={barcode} className="w-auto" editing={false} /> */}
       </>
     );
   }
@@ -84,7 +88,7 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
   );
 }
 
-async function processReceivedBarcode(code: string): Promise<Barcode> {
+async function processReceivedBarcode(code: string): Promise<Product> {
   let barcode: Barcode;
 
   try {
