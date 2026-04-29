@@ -9,6 +9,7 @@ import {
   QuantityUnit,
   QuantityUnitConversion,
   ShoppingLocation,
+  StockEntry,
 } from "@/interfaces/grocy";
 import { cache } from "react";
 import Barcode from "@/lib/barcode";
@@ -161,6 +162,20 @@ export const fetchProductDetails = cache(async (productId: number) => {
   }
 });
 
+export const fetchProductStock = cache(async (productId: number) => {
+  try {
+    const res = await grocyClient.GET("/stock/products/{productId}/entries", {
+      params: {
+        path: { productId: productId },
+      },
+    });
+    return res.data as StockEntry[];
+  } catch (error) {
+    console.error("Error loading product stock entries:", error);
+    throw new Error("Could not fetch product stock entries.");
+  }
+});
+
 export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
   // GRCY:P:* codes contain a product number and potentially other data
   // but for most purposes they'll be treated as a "regular" product
@@ -168,7 +183,7 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
   // different API call for the lookup.
   let grocyProductId: number | null = barcode.grocyProductId ?? barcode.grocyProductNumber();
 
-  if (grocyProductId === undefined || grocyProductId === null || !grocyProductId) {
+  if (grocyProductId === undefined || grocyProductId === null || grocyProductId < 1) {
     // There is no productnumber, but there may be a barcode for it
     const { data, error } = await grocyClient.GET("/objects/{entity}", {
       params: {
@@ -177,9 +192,11 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
       },
     });
     if (error !== undefined) {
-      console.error("Could not fetch barcoes from grocy:", error);
+      console.error("Could not fetch barcodes from grocy:", error);
     }
 
+    // Technically it's a list of barcodes, but it should always be just a
+    // single barcode. The search goes for newest products first either way.
     const barcodes = data as ProductBarcode[];
     if (barcodes.length > 0 && barcodes[0]?.product_id !== undefined) {
       grocyProductId = barcodes[0]?.product_id;
