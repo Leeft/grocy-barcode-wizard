@@ -3,28 +3,23 @@ import clsx from "clsx";
 import React from "react";
 
 export default function BarcodeActions({
-  barcode,
+  code,
   className,
   editing = false,
 }: {
-  barcode: string;
+  code: string;
   className?: string;
   editing: boolean;
 }) {
   const logoWidth: number = 135 * 0.75;
   const logoHeight: number = 135 * 0.45;
 
-  if (barcode === undefined || editing) {
+  if (code === undefined || editing) {
     return <></>;
   }
 
   return (
     <div className={clsx("flex", "flex-col", "gap-y-5", "tracking-normal", "py-20", className)}>
-      <BarcodeAction>
-        <legend className="text-consume ml-3 px-2 font-bold tracking-wide uppercase">Consume</legend>
-        amount; transaction_type = 'consume'; spoiled = 'false'; recipe_id; location_id; exact_amount;
-        allow_subproduct_substitution;
-      </BarcodeAction>
       <BarcodeAction>
         <legend className="text-spoiled ml-3 px-2 font-bold tracking-wide uppercase">Consume spoiled</legend>
         amount; transaction_type = 'consume'; spoiled = 'true'; recipe_id; location_id; exact_amount;

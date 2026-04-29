@@ -1,0 +1,162 @@
+"use client";
+
+import { Product, ProductLocation, QuantityUnit, StockEntry } from "@/interfaces/grocy";
+import { LocationDropdown } from "../product/location-dropdown";
+import { MoveRight, PackageOpen, Tally1, Trash2, X } from "lucide-react";
+import {
+  ConsumeOneOfStockEntryButton,
+  ConsumeSpoiledStockEntryButton,
+  ConsumeStockEntryButton,
+  OpenStockEntryButton,
+  TransferStockEntryButton,
+} from "@/ui/forms/stock-buttons";
+import { use, useContext } from "react";
+import { GrocyProductContext } from "@/providers/grocy-product-context";
+import { LocationContext } from "@/providers/location-context";
+import { QuantityUnitContext } from "@/providers/quantity-unit-context";
+import { ProductStockContext } from "@/providers/product-stock-context";
+
+export function StockOverview({ code }: { code: string }) {
+  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
+  const product = use(useContext(GrocyProductContext) as Promise<Product>);
+
+  if (stock === undefined || product.active === 0) return <></>;
+
+  return (
+    <>
+      <div className="flex flex-col gap-y-3 pb-10">
+        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase">Stock management</h1>
+        {stock.map((se: StockEntry) => (
+          <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={code} se={se} product={product} />
+        ))}
+        {stock.length === 0 && (
+          <h2 className="text-amber-500">This product is currently out of stock. Purchase some more.</h2>
+        )}
+      </div>
+    </>
+  );
+}
+
+function StockEntryRow({
+  barcode,
+  se,
+  product,
+}: {
+  barcode: string;
+  se: StockEntry;
+  product: Product;
+}) {
+  const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
+
+  //const [showTransferOptions, setShowTransferOptions] = useState<boolean>(false);
+
+  return (
+    <form>
+      <fieldset
+        key={`stock_${se.id}`}
+        className="mb-2 rounded-2xl border border-dashed border-yellow-300 p-2 tracking-[0.9]"
+      >
+        <legend className="ml-3 px-3 text-slate-300">
+          <DisplayStockActionButtons product={product} se={se} />
+        </legend>
+        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/80">
+          <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
+            <input type="hidden" name="productId" value={se.product_id} />
+            <input type="hidden" name="stockId" value={se.stock_id} />
+            <input type="hidden" name="stockAmount" value={se.amount} />
+            <input type="hidden" name="barcode" value={barcode} />
+            <input type="hidden" name="fromLocationId" value={se.location_id} />
+            <input type="hidden" name="transferAmount" value={se.amount} />
+
+            <OpenStockEntryButton
+              disabled={se.open || product.disable_open ? true : false}
+              title={`Open stock entry ${se.stock_id}`}
+            >
+              <PackageOpen className="mr-2 size-5" /> Open
+            </OpenStockEntryButton>
+
+            <ConsumeOneOfStockEntryButton title={`Consume 1 unit of this stock entry ${se.stock_id}`}>
+              <Tally1 className="mr-0 ml-1 size-5" /> Consume one
+            </ConsumeOneOfStockEntryButton>
+
+            <ConsumeStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
+              <X className="mr-2 size-5" /> Consume all
+            </ConsumeStockEntryButton>
+
+            <ConsumeSpoiledStockEntryButton
+              title={`Consume all of this stock entry ${se.stock_id} as spoiled`}
+            >
+              <Trash2 className="mr-2 size-5" /> Spoiled
+            </ConsumeSpoiledStockEntryButton>
+
+            {/* <button
+                        type="button"
+                        title={`Inventory (add or remove) stock entry ${se.stock_id}`}
+                        className="mt-2 inline-flex cursor-pointer rounded-md border bg-slate-700 p-1 px-2"
+                      >
+                        Inventory <ChevronUp size={24} />
+                      </button> */}
+          </div>
+          <div className="mx-3 mt-2 flex flex-row flex-wrap gap-x-2 gap-y-1 pt-2 pb-3 text-slate-300">
+            <LocationDropdown
+              name="toLocationId"
+              units={locations}
+              className="border-transfer! bg-transfer/10 text-transfer border-1.5! h-6! w-50 text-sm/4 tracking-[0.8] md:w-68"
+              noFreezers={product.should_not_be_frozen ? true : false}
+              firstOptionTitle="Transfer to ..."
+              disableOption={se.location_id?.toString()}
+            />
+            <TransferStockEntryButton
+              disabled={product.enable_tare_weight_handling ? true : false}
+              title={`Transfer stock entry ${se.stock_id}`}
+            >
+              <MoveRight className="mr-2 size-5" /> Transfer
+            </TransferStockEntryButton>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  );
+}
+
+function dueTypeToString(dueType: number, bestBeforeDays: number): string {
+  let dueTypeString = "Best before";
+  if (dueType === 2) {
+    dueTypeString = "Expiration";
+  }
+  if (bestBeforeDays === -1) {
+    dueTypeString = "No expiry";
+  }
+  return dueTypeString;
+}
+
+function DisplayStockActionButtons({ se, product }: { se: StockEntry; product: Product }) {
+  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
+  const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
+  const dueType = dueTypeToString(product.due_type!, product.default_best_before_days);
+
+  if (product === undefined) {
+    return <></>;
+  }
+
+  return (
+    <div className="w-full">
+      <code className="text-xs">{se.stock_id}</code> : {(se.amount !== null && se.amount) || "??"}&nbsp;
+      {se.amount !== null && se.amount !== undefined && se.amount != 1 && product?.qu_id_stock
+        ? units[product.qu_id_stock!]!.name_plural
+        : units[product.qu_id_stock!]!.name}{" "}
+      {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
+      {dueType !== "No expiry" && (
+        <>
+          ; {dueType} date is <code>{se.best_before_date}</code>{" "}
+        </>
+      )}
+      {se.note && (
+        <>
+          {" "}
+          -- note: <em>{se.note}</em>
+        </>
+      )}
+    </div>
+  );
+}

@@ -163,6 +163,7 @@ export const fetchProductDetails = cache(async (productId: number) => {
 });
 
 export const fetchProductStock = cache(async (productId: number) => {
+  if ( productId === undefined || productId <= 0 ) return [];
   try {
     const res = await grocyClient.GET("/stock/products/{productId}/entries", {
       params: {
