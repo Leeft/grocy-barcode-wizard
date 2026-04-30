@@ -46,3 +46,9 @@ export function dateToISODate(_date: Date): string {
   }
   return str;
 }
+
+export const getNodeText = (node: any): any => {
+  if (["string", "number"].includes(typeof node)) return node;
+  if (node instanceof Array) return node.map(getNodeText).join("");
+  if (typeof node === "object" && node) return getNodeText(node.props.children);
+};

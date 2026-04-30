@@ -15,6 +15,7 @@ import { GrocyProductContext } from "@/providers/grocy-product-context";
 import { LocationContext } from "@/providers/location-context";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
+import { StockEntrySummary } from "../stock-entry-summary";
 
 export function StockOverview({ code }: { code: string }) {
   const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
@@ -57,7 +58,7 @@ function StockEntryRow({
         className="mb-2 rounded-2xl border border-dashed border-yellow-300 p-2 tracking-[0.9]"
       >
         <legend className="ml-3 px-3 text-slate-300">
-          <DisplayStockActionButtons product={product} se={se} />
+          <StockEntrySummary product={product} se={se} />
         </legend>
         <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/80">
           <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
@@ -116,47 +117,5 @@ function StockEntryRow({
         </div>
       </fieldset>
     </form>
-  );
-}
-
-function dueTypeToString(dueType: number, bestBeforeDays: number): string {
-  let dueTypeString = "Best before";
-  if (dueType === 2) {
-    dueTypeString = "Expiration";
-  }
-  if (bestBeforeDays === -1) {
-    dueTypeString = "No expiry";
-  }
-  return dueTypeString;
-}
-
-function DisplayStockActionButtons({ se, product }: { se: StockEntry; product: Product }) {
-  const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
-  const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
-  const dueType = dueTypeToString(product.due_type!, product.default_best_before_days);
-
-  if (product === undefined) {
-    return <></>;
-  }
-
-  return (
-    <div className="w-full">
-      <code className="text-xs">{se.stock_id}</code> : {(se.amount !== null && se.amount) || "??"}&nbsp;
-      {se.amount !== null && se.amount !== undefined && se.amount != 1 && product?.qu_id_stock
-        ? units[product.qu_id_stock!]!.name_plural
-        : units[product.qu_id_stock!]!.name}{" "}
-      {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
-      {dueType !== "No expiry" && (
-        <>
-          ; {dueType} date is <code>{se.best_before_date}</code>{" "}
-        </>
-      )}
-      {se.note && (
-        <>
-          {" "}
-          -- note: <em>{se.note}</em>
-        </>
-      )}
-    </div>
   );
 }
