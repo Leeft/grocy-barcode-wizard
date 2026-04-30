@@ -73,6 +73,22 @@ export const fetchQuantityUnits = cache(async () => {
   }
 });
 
+export const fetchQuantityUnitConversionsResolved = cache(async (productId: number) => {
+  try {
+    const res = await grocyClient.GET("/objects/{entity}", {
+      params: {
+        path: { entity: "quantity_unit_conversions_resolved" },
+        query: { "query[]": [`product_id=${productId}`] },
+      },
+    });
+    return res.data as QuantityUnitConversion[];
+  } catch (error) {
+    console.error("Error loading resolved quantity units:", error);
+    throw new Error("Could not fetch resolved quantity units.");
+  }
+});
+
+
 export const fetchQuantityUnitConversions = cache(async () => {
   try {
     const res = await grocyClient.GET("/objects/{entity}", {

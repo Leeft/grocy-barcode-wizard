@@ -1,13 +1,13 @@
 import Barcode from "@/lib/barcode";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
-import { fetchProductStock, findProductInGrocy } from "@/lib/grocy";
+import { fetchProductStock, fetchQuantityUnitConversionsResolved, findProductInGrocy } from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import GrocyProductProvider from "@/providers/grocy-product-context";
 import ProductStockProvider from "@/providers/product-stock-context";
 import { Product } from "@/interfaces/grocy";
+import QuantityUnitConversionResolvedProvider from "@/providers/quantity-unit-conversion-resolved-context";
 
 export default async function ScanLayout({
   params,
@@ -58,9 +58,11 @@ export default async function ScanLayout({
     <>
       <GrocyProductProvider promise={grocyProductPromise}>
         <ProductStockProvider promise={fetchProductStock(id)}>
-          <BarcodeScannerApp slug={barcode} />
-          {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}
-          {children}
+          <QuantityUnitConversionResolvedProvider promise={fetchQuantityUnitConversionsResolved(id)}>
+            <BarcodeScannerApp slug={barcode} />
+            {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}
+            {children}
+          </QuantityUnitConversionResolvedProvider>
         </ProductStockProvider>
       </GrocyProductProvider>
     </>
