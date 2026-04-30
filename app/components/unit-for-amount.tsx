@@ -24,7 +24,7 @@ export function UnitForAmount({
     <>
       {Number(unit) > 0 ? (
         <div
-          className={clsx("cursor-pointer", "text-green-200", className)}
+          className={clsx("text-green-200", className)}
           onClick={() => ref?.current?.focus({ preventScroll: false })}
           title={title}
         >
@@ -32,7 +32,7 @@ export function UnitForAmount({
         </div>
       ) : (
         <div
-          className={clsx("cursor-pointer", "text-amber-700", className)}
+          className={clsx("text-amber-700", className)}
           onClick={() => ref?.current?.focus({ preventScroll: false })}
           title={title}
         >

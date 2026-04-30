@@ -47,7 +47,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
         </ActionLink>
 
         <ActionLink
-          href={`/scan/${code}`}
+          href={`/scan/${code}/open`}
           className={"text-open border-open bg-open/10"}
           disabled={product.disable_open || !hasStock ? true : false}
         >
