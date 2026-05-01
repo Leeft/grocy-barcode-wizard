@@ -9,9 +9,9 @@ import {
   fetchQuantityUnitConversionsResolved,
   grocyClient,
 } from "@/lib/grocy";
-import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
+import { createProductConsumeSchema } from "./product-consume-schema";
 
-export async function productTransferSubmit(prevstate: unknown, formData: FormData) {
+export async function productConsumeSubmit(prevstate: unknown, formData: FormData) {
   const productId = Number(formData.get("productId")?.valueOf());
   if (productId === null || productId === undefined || !productId) {
     console.error("no productId from form?", productId, formData);
@@ -20,7 +20,7 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
   const product = await fetchProduct(productId);
   const stock = await fetchProductStock(productId);
   const conversions = await fetchQuantityUnitConversionsResolved(productId);
-  const schema = createProductTransferSchema(product, stock, conversions);
+  const schema = createProductConsumeSchema(product, stock, conversions);
 
   const submission = parseWithZod(formData, { schema: schema });
 
@@ -32,13 +32,17 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
 
   const data = submission.value;
 
-  const res = await grocyClient.POST("/stock/products/{productId}/transfer", {
+  await grocyClient.POST("/stock/products/{productId}/consume", {
     params: { path: { productId: data.productId } },
     body: {
       amount: data.amountShadow,
-      location_id_from: data.locationIdFrom,
-      location_id_to: data.locationIdTo,
-      stock_entry_id: data.stockEntryId,
+      transaction_type: "consume",
+      spoiled: data.spoiled ? true : false,
+      //stock_entry_id: ...,
+      //recipe_id: ...,
+      location_id: data.locationId,
+      exact_amount: true,
+      allow_subproduct_substitution: true,
     },
   });
 

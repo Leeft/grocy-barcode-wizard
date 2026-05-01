@@ -1,5 +1,5 @@
 import Barcode from "@/lib/barcode";
-import { fetchProductStock, findProductInGrocy } from "@/lib/grocy";
+import { findProductInGrocy } from "@/lib/grocy";
 import { redirect } from "next/navigation";
 import { ProductTransferForm } from "@/forms/actions/product-transfer-form";
 
@@ -17,11 +17,9 @@ export default async function TransferPage(props: PageProps<'/scan/[barcode]/tra
     redirect("/scan");
   }
 
-  const stock = await fetchProductStock(grocyProduct.id);
-
   return (
     <>
-      <ProductTransferForm code={barcode} product={grocyProduct} stock={stock} />
+      <ProductTransferForm code={barcode} product={grocyProduct} />
     </>
   );
 }

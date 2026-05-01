@@ -15,6 +15,8 @@ interface LocationDropdownProps extends Omit<CustomisableSelectProps, "options">
   noFreezers: boolean;
   allowEmpty?: boolean;
   firstOptionTitle?: string;
+  noFirstOption?: boolean;
+  firstOption?: CustomisableSelectOption;
   disableOption?: string;
 }
 
@@ -23,6 +25,8 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
   noFreezers,
   allowEmpty = false,
   firstOptionTitle = "Pick ...",
+  noFirstOption = false,
+  firstOption = undefined,
   disableOption,
   ...rest
 }) => {
@@ -36,10 +40,14 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
   const options: CustomisableSelectOptionArray = [];
 
   if (units !== undefined) {
-    options.push({
-      value: allowEmpty ? "0" : "",
-      label: allowEmpty ? "[not set]" : firstOptionTitle,
-    });
+    if ( firstOption !== undefined ) {
+      options.push( firstOption );
+    } else if (!noFirstOption) {
+      options.push({
+        value: allowEmpty ? "0" : "",
+        label: allowEmpty ? "[not set]" : firstOptionTitle,
+      });
+    }
 
     function compareWords(a: Location, b: Location) {
       if (a.name!.toLowerCase() < b.name!.toLowerCase()) {

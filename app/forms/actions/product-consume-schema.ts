@@ -1,8 +1,8 @@
 import { Product, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { amountToStockUnit, sumStock } from "@/lib/utils";
-import z from "zod/v4";
+import { z } from "zod/v4";
 
-export function createProductTransferSchema(
+export function createProductConsumeSchema(
   product: Product,
   stock: StockEntry[],
   conversions: QuantityUnitConversion[],
@@ -22,18 +22,23 @@ export function createProductTransferSchema(
 
       amountQuantityUnitId: z.number().gt(0, "Must be a valid quantity unit"),
 
-      locationIdFrom: z
-        .number(`Location "from" must be selected`)
-        .gt(0, { message: `Location "from" must be selected` }),
+      locationId: z
+        .number("Product location choice is invalid")
+        .gt(0, { message: "Product location choice is invalid" }),
 
-      locationIdTo: z
-        .number(`Location "to" must be selected`)
-        .gt(0, { message: `Location "to" must be selected` }),
+      recipeId: z
+        .number("Product recipe choice is invalid")
+        .gt(0, { message: "Product recipe choice is invalid" })
+        .optional(),
+
+      exactAmount: z.boolean().optional(),
+      allowSubproductSubstitution: z.boolean().optional(),
+      spoiled: z.boolean().optional(),
 
       stockEntryId: z.string().optional(),
     })
-    .superRefine(({ amount, amountQuantityUnitId, locationIdFrom }, ctx) => {
-      const filteredStock = stock.filter((se) => se.location_id === locationIdFrom);
+    .superRefine(({ amount, amountQuantityUnitId, locationId }, ctx) => {
+      const filteredStock = stock.filter((se) => se.location_id === locationId);
       const availableStock = sumStock({ stock: filteredStock });
       const availableStockSelectedUnit = amountToStockUnit({
         conversions: conversions,

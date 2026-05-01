@@ -164,6 +164,20 @@ export const fetchProducts = cache(async () => {
   }
 });
 
+export const fetchProduct = cache(async (productId: number) => {
+  try {
+    const res = await grocyClient.GET("/objects/{entity}/{objectId}", {
+      params: {
+        path: { entity: 'products', objectId: productId },
+      },
+    });
+    return res.data as Product;
+  } catch (error) {
+    console.error("Error loading product details:", error);
+    throw new Error("Could not fetch product details.");
+  }
+});
+
 export const fetchProductDetails = cache(async (productId: number) => {
   try {
     const res = await grocyClient.GET("/stock/products/{productId}", {

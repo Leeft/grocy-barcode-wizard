@@ -6,28 +6,28 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import { Product, ProductLocation, StockEntry } from "@/interfaces/grocy";
+import { Product, ProductLocation, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import Link from "next/link";
 import CustomisableSelect from "@/ui/customisable-select";
-import { StockEntrySummary } from "@/ui/stock-entry-summary";
-import { getNodeText } from "@/lib/utils";
+import { StockEntrySummary, StockEntrySummaryText } from "@/ui/stock-entry-summary";
+import { getNodeText, handleKeyDown, sumStock } from "@/lib/utils";
 import { productTransferSubmit } from "@/forms/actions/product-transfer-submit";
-import { ProductTransferSchema } from "@/forms/actions/product-transfer-schema";
+import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
+import { ProductStockContext } from "@/providers/product-stock-context";
+import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
+import { FieldSet, Legend } from "@/ui/forms/fieldset";
 
-export function ProductTransferForm({
-  code,
-  product,
-  stock,
-  openOnly = false,
-}: {
-  code: string;
-  product: Product;
-  stock: StockEntry[];
-  openOnly?: boolean;
-}) {
+export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
+  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
+  const conversions = use(
+    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
+  );
+
+  const schema = createProductTransferSchema(product, stock, conversions);
+
   const [lastResult, action, submitPending] = useActionState(productTransferSubmit, undefined);
 
   const [locationFrom, setLocationFrom] = useState<number>(product.location_id!);
@@ -43,7 +43,7 @@ export function ProductTransferForm({
     defaultValue: {
       barcode: code,
       productId: product.id,
-      amount: 1,
+      amount: "1",
       locationIdFrom: product.location_id,
       locationIdTo: undefined,
       stockEntryId: undefined,
@@ -51,7 +51,7 @@ export function ProductTransferForm({
 
     // Reuse the validation logic on the client
     onValidate({ formData }) {
-      const foo = parseWithZod(formData, { schema: ProductTransferSchema });
+      const foo = parseWithZod(formData, { schema: schema });
       return foo;
     },
 
@@ -60,19 +60,11 @@ export function ProductTransferForm({
     shouldRevalidate: "onInput",
   });
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
-      e.preventDefault();
-    }
-  };
-
   const stockOptions = stock
-    .filter((se) => !openOnly || !se.open)
     .filter((se) => se.location_id === locationFrom)
     .map((se) => {
-      const node = StockEntrySummary({ product: product, se: se });
-      return { value: se.stock_id!, label: getNodeText(node) };
+      const node = StockEntrySummaryText({ product: product, se: se });
+      return { value: se.stock_id!, label: node };
     });
 
   stockOptions.unshift({
@@ -100,8 +92,8 @@ export function ProductTransferForm({
 
   const targetLocations = locations;
 
-  const [availableStock, setAvailableStock] = useState<number>(
-    recalculateAvailableStock(stockAtLocation, false, fields.stockEntryId.value),
+  const [amountValue, setAmountValue] = useState<string>(
+    sumStock({ stock: stockAtLocation, stockId: fields.stockEntryId.value }).toString(),
   );
 
   return (
@@ -115,12 +107,13 @@ export function ProductTransferForm({
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
+        <div id={form.errorId}>{form.errors}</div>
         <input {...getInputProps(fields.productId, { type: "hidden" })} defaultValue={product.id} />
         <input {...getInputProps(fields.barcode, { type: "hidden" })} defaultValue={code} />
-        <div id={form.errorId}>{form.errors}</div>
-        <fieldset className="my-2 mt-5 flex flex-col gap-y-4 rounded-md border border-slate-500 px-4 pt-2 pb-5 tracking-[0.9]">
-          <legend className="text-transfer mb-2 ml-1 px-2 font-bold uppercase">Transfer</legend>
-          {/* */}
+        
+        <FieldSet>
+          <Legend className="text-transfer">Transfer</Legend>
+
           <FormRow comment="fromLocationId">
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
@@ -144,8 +137,8 @@ export function ProductTransferForm({
                       setLocationFrom(Number(e.currentTarget.value));
                       const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
                       setStockAtLocation(newStock);
-                      setAvailableStock(
-                        recalculateAvailableStock(newStock, false, fields.stockEntryId.value),
+                      setAmountValue(
+                        sumStock({ stock: newStock, stockId: fields.stockEntryId.value }).toString(),
                       );
                     }}
                   />
@@ -154,16 +147,16 @@ export function ProductTransferForm({
               <FormErrors id={fields.locationIdFrom.errorId} errors={fields.locationIdFrom.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="amount">
             <AmountPlusUnitSelection
               product={product}
               stock={stockAtLocation}
-              availableStock={availableStock}
-              setAvailableStock={setAvailableStock}
+              amountValue={amountValue}
+              setAmountValue={setAmountValue}
             />
           </FormRow>
-          {/* */}
+
           <FormRow comment="toLocationId">
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
@@ -191,7 +184,7 @@ export function ProductTransferForm({
               <FormErrors id={fields.locationIdTo.errorId} errors={fields.locationIdTo.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="stock entry">
             <FormColumn className="w-full">
               <FormLabel
@@ -207,14 +200,14 @@ export function ProductTransferForm({
                   options={stockOptions}
                   className="w-full md:w-110"
                   onChange={(e) => {
-                    setAvailableStock(recalculateAvailableStock(stock, false, e.currentTarget.value));
+                    setAmountValue(sumStock({ stock: stock, stockId: e.currentTarget.value }).toString());
                   }}
                 />
               </FormField>
               <FormErrors id={fields.amount.errorId} errors={fields.amount.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="Transfer product button">
             <FormColumn className="pt-3">
               <Button type="submit" className="cursor-pointer" disabled={submitPending}>
@@ -230,25 +223,8 @@ export function ProductTransferForm({
               </Link>
             </FormColumn>
           </FormRow>
-        </fieldset>
+        </FieldSet>
       </form>
     </FormProvider>
   );
-}
-
-function recalculateAvailableStock(stock: StockEntry[], openOnly: boolean, stock_id: string | undefined) {
-  let availableStock = 0;
-  stock.map((se) => {
-    if (stock_id === undefined || stock_id === null || stock_id === "") {
-      // any stock
-      if ((!openOnly || !se.open) && se.amount !== undefined) {
-        availableStock += se.amount;
-      }
-    } else {
-      if ((!openOnly || !se.open) && se.stock_id === stock_id && se.amount !== undefined) {
-        availableStock += se.amount;
-      }
-    }
-  });
-  return availableStock;
 }

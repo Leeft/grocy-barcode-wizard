@@ -1,4 +1,5 @@
-import { QuantityUnit } from "@/interfaces/grocy";
+import { QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
+import { KeyboardEvent } from "react";
 
 export function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(",");
@@ -54,5 +55,52 @@ export const getNodeText = (node: any): any => {
 };
 
 export function roundToFourDecimalPlaces(num: number) {
-    return Math.round(num * 10000) / 10000;
+  return Math.round(num * 10000) / 10000;
 }
+
+export function sumStock({ stock, stockId }: { stock: StockEntry[]; stockId?: string | undefined }) {
+  let availableStock = 0;
+  stock.map((se) => {
+    if (stockId === undefined || stockId === null || stockId === "") {
+      if (se.amount !== undefined) availableStock += se.amount;
+    } else {
+      if (se.amount !== undefined && se.stock_id === stockId) availableStock += se.amount;
+    }
+  });
+  return availableStock;
+}
+
+export function amountToStockUnit({
+  conversions,
+  amount,
+  unit,
+  targetUnit,
+}: {
+  conversions: QuantityUnitConversion[];
+  amount: number;
+  unit: number;
+  targetUnit: number;
+}) {
+  if (isNaN(amount) || isNaN(unit) || isNaN(targetUnit)) {
+    return amount ?? 0;
+  }
+  if (amount === 0) {
+    return 0;
+  }
+  if (unit === targetUnit) {
+    return amount;
+  }
+  const conversion = conversions.find((conv) => conv.to_qu_id === targetUnit && conv.from_qu_id === unit);
+  if (conversion === undefined) {
+    return amount;
+  }
+
+  return roundToFourDecimalPlaces(amount * conversion.factor);
+}
+
+export const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
+  const target = e.target as HTMLElement;
+  if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
+    e.preventDefault();
+  }
+};
