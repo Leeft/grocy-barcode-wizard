@@ -56,9 +56,9 @@ export default function ActionShortCuts({ code }: { code: string }) {
         </ActionLink>
 
         <ActionLink
-          href={`/scan/${code}`}
+          href={`/scan/${code}/transfer`}
           className={"text-transfer border-transfer bg-transfer/10"}
-          disabled={!hasStock ? true : false}
+          disabled={!hasStock || product.enable_tare_weight_handling ? true : false}
         >
           <MoveRight className={iconClasses} />
           Transfer ...

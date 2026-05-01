@@ -164,7 +164,7 @@ export function ProductOpenForm({
                     type: "hidden",
                   })}
                   options={stockOptions}
-                  className="w-100"
+                  className="w-80 md:w-100"
                   onChange={(e) => setUnopenedStock(recalculateAvailableStock(e.currentTarget.value))}
                 />
               </FormField>

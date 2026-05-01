@@ -67,11 +67,16 @@ export type ProductBarcode = components["schemas"]["ProductBarcode"];
 export type QuantityUnitConversion = {
   id: number;
   from_qu_id: number;
+  from_qu_name: string;
+  from_qu_name_plural: string;
   to_qu_id: number;
+  to_qu_name: string;
+  to_qu_name_plural: string;
   factor: number;
   product_id: number;
   row_created_timestamp: string;
 };
+
 export type ProductGroup = {
   id: number;
   name: string;

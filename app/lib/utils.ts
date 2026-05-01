@@ -52,3 +52,7 @@ export const getNodeText = (node: any): any => {
   if (node instanceof Array) return node.map(getNodeText).join("");
   if (typeof node === "object" && node) return getNodeText(node.props.children);
 };
+
+export function roundToFourDecimalPlaces(num: number) {
+    return Math.round(num * 10000) / 10000;
+}
