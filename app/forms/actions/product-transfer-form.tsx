@@ -38,8 +38,6 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
   const [form, fields] = useForm({
     lastResult,
 
-    id: `transfer-${code}`,
-
     defaultValue: {
       barcode: code,
       productId: product.id,
@@ -49,10 +47,8 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
       stockEntryId: undefined,
     },
 
-    // Reuse the validation logic on the client
     onValidate({ formData }) {
-      const foo = parseWithZod(formData, { schema: schema });
-      return foo;
+      return parseWithZod(formData, { schema: schema });
     },
 
     // Validate the form on blur event triggered
@@ -108,9 +104,9 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} defaultValue={product.id} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} defaultValue={code} />
-        
+        <input {...getInputProps(fields.productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.barcode, { type: "hidden" })} />
+
         <FieldSet>
           <Legend className="text-transfer">Transfer</Legend>
 

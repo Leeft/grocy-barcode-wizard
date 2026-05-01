@@ -3,8 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { ProductAddSchema } from "@/forms/actions/product-add-schema";
-import { grocyClient } from "@/lib/grocy";
+import { createProductAddSchema } from "@/forms/actions/product-add-schema";
+import {
+  fetchProduct,
+  fetchProductStock,
+  fetchQuantityUnitConversionsResolved,
+  grocyClient,
+} from "@/lib/grocy";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
 import { labelTypeToGrocy } from "@/interfaces/grocy";
 
@@ -14,7 +19,17 @@ function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
 }
 
 export async function productAddSubmit(prevstate: unknown, formData: FormData) {
-  const submission = parseWithZod(formData, { schema: ProductAddSchema });
+  const productId = Number(formData.get("productId")?.valueOf());
+  if (productId === null || productId === undefined || !productId) {
+    console.error("no productId from form?", productId, formData);
+  }
+
+  const product = await fetchProduct(productId);
+  const stock = await fetchProductStock(productId);
+  const conversions = await fetchQuantityUnitConversionsResolved(productId);
+  const schema = createProductAddSchema(product, stock, conversions);
+
+  const submission = parseWithZod(formData, { schema: schema });
 
   if (submission.status !== "success") {
     const err = submission.error;

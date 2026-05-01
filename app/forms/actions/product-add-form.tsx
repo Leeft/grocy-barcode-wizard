@@ -1,16 +1,22 @@
 "use client";
 
-import { KeyboardEvent, use, useActionState, useContext } from "react";
+import { KeyboardEvent, use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productAddSubmit } from "./product-add-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { ProductAddSchema } from "./product-add-schema";
+import { createProductAddSchema } from "./product-add-schema";
 import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
 import { dateInputCommonStyles, inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
 import { UnitForAmount } from "@/components/unit-for-amount";
-import { Product, ProductLocation as PrLocation, ShoppingLocation } from "@/interfaces/grocy";
+import {
+  Product,
+  ProductLocation as PrLocation,
+  ShoppingLocation,
+  StockEntry,
+  QuantityUnitConversion,
+} from "@/interfaces/grocy";
 import CustomisableSelect from "@/ui/customisable-select";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
@@ -18,11 +24,24 @@ import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
 import Link from "next/link";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
+import { ProductStockContext } from "@/providers/product-stock-context";
+import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
+import { handleKeyDown, sumStock } from "@/lib/utils";
+import { FieldSet, Legend } from "@/ui/forms/fieldset";
+import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 
 const unitTaggedLabelClass = clsx(); //"w-60 flex grow");
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
+  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
+  const conversions = use(
+    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
+  );
+
+  const schema = createProductAddSchema(product, stock, conversions);
+
   const [lastResult, action, submitPending] = useActionState(productAddSubmit, undefined);
+
   const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
 
   let purchasePriceType;
@@ -66,13 +85,14 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
       break;
   }
 
+  const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
+  const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);
+
   const [form, fields] = useForm({
     lastResult,
 
-    id: `add-to-${code}`,
-
     defaultValue: {
-      amount: 1,
+      amount: "1",
       bestBeforeDate: "",
       price: "0",
       locationId: product.location_id,
@@ -83,30 +103,15 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
       purchasePriceType: purchasePriceType,
     },
 
-    // Reuse the validation logic on the client
     onValidate({ formData }) {
-      console.log("doing validation");
-      const foo = parseWithZod(formData, { schema: ProductAddSchema });
-      console.log(foo);
-      return foo;
+      return parseWithZod(formData, { schema: schema });
     },
 
-    // // Validate the form on blur event triggered
-    shouldValidate: "onInput",
+    shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
 
-  const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
-  const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
-      e.preventDefault();
-    }
-  };
-
-  if (form.errors !== undefined) console.log("form errors", form.errors);
+  const [amountValue, setAmountValue] = useState<string>("1");
 
   return (
     <FormProvider context={form.context}>
@@ -119,49 +124,22 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
+        <div id={form.errorId}>{form.errors}</div>
         <input {...getInputProps(fields.productId, { type: "hidden" })} value={product.id} />
         <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
         <input {...getInputProps(fields.dueDateType, { type: "hidden" })} />
-        <div id={form.errorId}>{form.errors}</div>
-        <fieldset className="my-2 mt-5 flex flex-col gap-y-4 rounded-md border border-slate-500 px-4 pt-2 pb-5 tracking-[0.9]">
-          <legend className="text-add mb-2 ml-1 px-2 font-bold uppercase">Add / purchase</legend>
-          {/* */}
+
+        <FieldSet>
+          <Legend className="text-add">Add / purchase</Legend>
+
           <FormRow comment="amount">
-            <FormColumn className="w-full">
-              <div className="w-60">
-                <div className={`${unitTaggedLabelClass} flex`}>
-                  <div>
-                    <FormLabel
-                      htmlFor={fields.amount.name}
-                      title="Add amount *"
-                      className="relative top-[-8] mb-0!"
-                    />
-                  </div>
-                  <UnitForAmount
-                    unit={product.qu_id_stock!}
-                    title="You may enter a fractional value, but this is the stock unit used for this product and this unit can't be easily changed."
-                    className="h-5 grow text-right text-sm"
-                    plural={true}
-                  />
-                </div>
-                <FormField>
-                  <input
-                    {...getInputProps(fields.amount, {
-                      type: "number",
-                    })}
-                    min={1}
-                    step={1}
-                    max={10000}
-                    className={clsx(inputCommonStyles, "w-full")}
-                    placeholder="Amount to add"
-                    required
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.amount.errorId} errors={fields.amount.errors} />
-            </FormColumn>
+            <AmountPlusUnitSelectionAdd
+              product={product}
+              amountValue={amountValue}
+              setAmountValue={setAmountValue}
+            />
           </FormRow>
-          {/* */}
+
           <FormRow comment="price">
             <FormColumn className="inline w-full">
               <div className="w-72">
@@ -222,11 +200,11 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormErrors id={fields.price.errorId} errors={fields.price.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           {product.default_best_before_days > -1 && (
             <FormRow comment="best_before_date">
               <FormColumn className="w-full flex-none">
-                <div className="w-60">
+                <div className="w-64">
                   <FormLabel
                     htmlFor={fields.bestBeforeDate.name}
                     title={product.due_type === 1 ? "Best before *" : "Expires at *"}
@@ -245,10 +223,10 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               </FormColumn>
             </FormRow>
           )}
-          {/* */}
+
           <FormRow comment="shoppingLocationId">
             <FormColumn className="w-full">
-              <div className="w-80">
+              <div className="w-full md:w-110">
                 <FormLabel
                   htmlFor={fields.shoppingLocationId.name}
                   title={`Shop`}
@@ -269,10 +247,10 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormErrors id={fields.shoppingLocationId.errorId} errors={fields.shoppingLocationId.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="locationId">
             <FormColumn className="w-full">
-              <div className="w-80">
+              <div className="w-full md:w-110">
                 <FormLabel
                   htmlFor={fields.locationId.name}
                   title={`Location`}
@@ -293,10 +271,10 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormErrors id={fields.locationId.errorId} errors={fields.locationId.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="stockLabelType">
             <FormColumn className="w-full">
-              <div className="w-60">
+              <div className="w-full md:w-110">
                 <FormLabel
                   htmlFor={fields.stockLabelType.name}
                   title={`Stock entry label`}
@@ -315,9 +293,9 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormErrors id={fields.stockLabelType.errorId} errors={fields.stockLabelType.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="note">
-            <FormColumn className="w-full">
+            <FormColumn className="w-full md:w-110">
               <div className={`${unitTaggedLabelClass} flex`}>
                 <FormLabel htmlFor={fields.note.name} title="Note" className="relative top-[-8] mb-0!" />
               </div>
@@ -332,7 +310,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormErrors id={fields.note.errorId} errors={fields.note.errors} />
             </FormColumn>
           </FormRow>
-          {/* */}
+
           <FormRow comment="Add product button">
             <FormColumn className="pt-3">
               <Button type="submit" className="cursor-pointer" disabled={submitPending}>
@@ -348,7 +326,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               </Link>
             </FormColumn>
           </FormRow>
-        </fieldset>
+        </FieldSet>
       </form>
     </FormProvider>
   );
