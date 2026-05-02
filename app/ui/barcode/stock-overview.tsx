@@ -71,9 +71,9 @@ function StockEntryRow({
 
             <OpenStockEntryButton
               disabled={se.open || product.disable_open ? true : false}
-              title={`Open stock entry ${se.stock_id}`}
+              title={`Open one unit of stock entry ${se.stock_id}`}
             >
-              <PackageOpen className="mr-2 size-5" /> Open
+              <PackageOpen className="mr-2 size-5" /> Open one
             </OpenStockEntryButton>
 
             <ConsumeOneOfStockEntryButton title={`Consume 1 unit of this stock entry ${se.stock_id}`}>

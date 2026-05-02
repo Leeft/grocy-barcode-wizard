@@ -259,3 +259,8 @@ label[for="file"] {
   border: none;
   background: none;
 }
+
+.hide-input {
+  display: none;
+  text-overflow: clip;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useActionState, useContext, useState } from "react";
+import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { Button } from "@/ui/button";
@@ -9,8 +9,8 @@ import clsx from "clsx";
 import { Product, ProductLocation, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import Link from "next/link";
 import CustomisableSelect from "@/ui/customisable-select";
-import { StockEntrySummary, StockEntrySummaryText } from "@/ui/stock-entry-summary";
-import { getNodeText, handleKeyDown, sumStock } from "@/lib/utils";
+import { StockEntrySummaryText } from "@/ui/stock-entry-summary";
+import { sumStock } from "@/lib/utils";
 import { productTransferSubmit } from "@/forms/actions/product-transfer-submit";
 import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
 import { LocationContext } from "@/providers/location-context";
@@ -19,6 +19,7 @@ import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
+import { CaptureSubmitOnEnter } from "../capture-submit";
 
 export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
   const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
@@ -94,12 +95,12 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
@@ -129,6 +130,7 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
                     className="w-full flex-2"
                     noFreezers={product.should_not_be_frozen ? true : false}
                     allowEmpty={false}
+                    autoFocus={true}
                     onChange={(e) => {
                       setLocationFrom(Number(e.currentTarget.value));
                       const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));

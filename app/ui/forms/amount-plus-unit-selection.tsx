@@ -18,6 +18,7 @@ export function AmountPlusUnitSelection({
   title = "Amount *",
   className = "",
   disabled = false,
+  autoFocus = false,
   amountValue,
   setAmountValue,
 }: {
@@ -26,6 +27,7 @@ export function AmountPlusUnitSelection({
   title?: string;
   className?: string;
   disabled?: boolean;
+  autoFocus?: boolean;
   amountValue: string;
   setAmountValue: Dispatch<SetStateAction<string>>;
 }) {
@@ -113,6 +115,8 @@ export function AmountPlusUnitSelection({
               placeholder="Amount"
               value={amountValue}
               disabled={disabled}
+              autoFocus={autoFocus}
+              onFocus={(e) => e.currentTarget.select()}
               onChange={(e) => {
                 setAmountValue(e.currentTarget.value);
                 setAvailableStockSelectedUnit(

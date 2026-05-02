@@ -18,12 +18,12 @@ import { LocationContext } from "@/providers/location-context";
 import { createProductConsumeSchema } from "./product-consume-schema";
 import { productConsumeSubmit } from "./product-consume-submit";
 import { ProductStockContext } from "@/providers/product-stock-context";
-import { handleKeyDown } from "@/lib/utils";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
 import { Trash2 } from "lucide-react";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
+import { CaptureSubmitOnEnter } from "../capture-submit";
 
 export function ProductConsumeForm({
   code,
@@ -102,12 +102,12 @@ export function ProductConsumeForm({
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
@@ -139,7 +139,8 @@ export function ProductConsumeForm({
                     value={fromLocation}
                     className="w-full flex-2"
                     noFreezers={product.should_not_be_frozen ? true : false}
-                    allowEmpty={false}
+                    autoFocus={true}
+                    allowEmpty={true}
                     onChange={(e) => {
                       const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
                       setFromLocation(e.currentTarget.value);
@@ -153,7 +154,7 @@ export function ProductConsumeForm({
           </FormRow>
 
           <FormRow comment="amount">
-            {stockFromLocation.length > 0 && fromLocation !== '0' && (
+            {stockFromLocation.length > 0 && fromLocation !== "0" && (
               <AmountPlusUnitSelection
                 product={product}
                 stock={stockFromLocation}

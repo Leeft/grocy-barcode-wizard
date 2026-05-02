@@ -10,12 +10,13 @@ import { Product, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy"
 import Link from "next/link";
 import CustomisableSelect from "@/ui/customisable-select";
 import { StockEntrySummaryText } from "@/ui/stock-entry-summary";
-import { handleKeyDown, sumStock } from "@/lib/utils";
+import { sumStock } from "@/lib/utils";
 import { productOpenSubmit } from "@/forms/actions/product-open-submit";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { createProductOpenSchema } from "./product-open-schema";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
+import { CaptureSubmitOnEnter } from "../capture-submit";
 
 export function ProductOpenForm({
   code,
@@ -80,12 +81,12 @@ export function ProductOpenForm({
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
@@ -102,6 +103,7 @@ export function ProductOpenForm({
               stock={filteredStock}
               amountValue={amountValue}
               setAmountValue={setAmountValue}
+              autoFocus={true}
             />
           </FormRow>
 

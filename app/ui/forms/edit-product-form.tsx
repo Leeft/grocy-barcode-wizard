@@ -1,17 +1,15 @@
 "use client";
 
-import { use, useContext, KeyboardEvent, useActionState, useState } from "react";
+import { use, useContext, useActionState, useState } from "react";
 import { QuantityUnitsDropdown } from "@/ui/product/quantity-units-dropdown";
 import { ProductLocation as PrLocation, Product, ProductGroup, QuantityUnit } from "@/interfaces/grocy";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { productUpdateSubmit } from "@/forms/product-form-submit";
-import { ProductFormSchema } from "@/forms/product-form-schema";
 import { Button } from "@/ui/button";
 import { LocationContext } from "@/providers/location-context";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { CameraApp } from "@/ui/camera-app";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
-import { parseWithZod } from "@conform-to/zod/v4";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { GetProduct } from "@/lib/product-db";
 import clsx from "clsx";
@@ -31,7 +29,7 @@ import {
 import { ProductGroupDropdown } from "../product/product-group-dropdown";
 import { ProductGroupContext } from "@/providers/product-group-context";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
-import { handleKeyDown, toLookup } from "@/lib/utils";
+import { toLookup } from "@/lib/utils";
 import UnitConversions from "@/lib/conversions";
 import UnitConversionsEditor from "./unit-conversions-editor";
 import CreateProductFields from "./create-product-fields";
@@ -40,6 +38,7 @@ import { ProductContext } from "@/providers/product-context";
 import Grocy from "@/components/icons/grocy";
 import { ArrowLeftFromLine } from "lucide-react";
 import { UnitForAmount } from "@/components/unit-for-amount";
+import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
@@ -153,19 +152,23 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         className="pb-25"
         aria-describedby={form.errors ? form.errorId : undefined}
       >
         <input {...getInputProps(fields.id, { type: "hidden" })} />
         <input {...getInputProps(fields.barcode, { type: "hidden" })} />
         <input {...getInputProps(fields.intent, { type: "hidden" })} defaultValue="update" />
-        <input {...getInputProps(fields.submitMode, { type: "hidden" })} defaultValue={undefined} value={submitMode} />
+        <input
+          {...getInputProps(fields.submitMode, { type: "hidden" })}
+          defaultValue={undefined}
+          value={submitMode}
+        />
 
         <div id={form.errorId}>{form.errors}</div>
         <div className="mr-2 flex flex-col gap-y-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, useActionState, useState } from "react";
+import { useActionState, useState } from "react";
 import { productCreateSubmit } from "@/forms/product-form-submit";
 import { Button } from "@/ui/button";
 import { CameraApp } from "@/ui/camera-app";
@@ -10,7 +10,7 @@ import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { FormColumn, FormRow } from "@/ui/forms/form-utils";
 import CreateProductFields from "@/ui/forms/create-product-fields";
 import { ProductFormSchema } from "@/forms/product-form-schema";
-import { handleKeyDown } from "@/lib/utils";
+import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 
 export function CreateProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(productCreateSubmit, undefined);
@@ -41,12 +41,12 @@ export function CreateProductForm({ code }: { code: string }) {
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         className="pb-25"
         aria-describedby={form.errors ? form.errorId : undefined}
       >

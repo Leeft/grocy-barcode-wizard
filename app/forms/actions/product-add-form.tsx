@@ -26,9 +26,9 @@ import Link from "next/link";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
-import { handleKeyDown } from "@/lib/utils";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
+import { CaptureSubmitOnEnter } from "../capture-submit";
 
 const unitTaggedLabelClass = clsx(); //"w-60 flex grow");
 
@@ -115,12 +115,12 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         aria-describedby={form.errors ? form.errorId : undefined}
         className="pt-2p pb-25"
       >
@@ -183,6 +183,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                     step={0.01}
                     className={clsx(inputCommonStyles, "w-full")}
                     placeholder="Price"
+                    onFocus={(e) => e.currentTarget.select()}
                     required
                   />
                   <CustomisableSelect
@@ -215,6 +216,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                         type: "date",
                       })}
                       required
+                      onFocus={(e) => e.currentTarget.select()}
                       className={dateInputCommonStyles}
                     />
                   </FormField>

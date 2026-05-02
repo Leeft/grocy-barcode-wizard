@@ -103,6 +103,8 @@ export function AmountPlusUnitSelectionAdd({
               className={clsx(inputCommonStyles, "w-full")}
               placeholder="Amount"
               value={amountValue}
+              autoFocus={true}
+              onFocus={(e) => e.currentTarget.select()}
               onChange={(e) => {
                 setAmountValue(e.currentTarget.value);
                 setAvailableStockSelectedUnit(

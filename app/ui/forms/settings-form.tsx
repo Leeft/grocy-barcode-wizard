@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useActionState, useState } from "react";
+import { use, useActionState, useState } from "react";
 import { Button } from "@/ui/button";
 import { FormProvider, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
@@ -8,7 +8,7 @@ import { FormCheckbox, FormColumn, FormErrors, FormField, FormRow } from "@/ui/f
 import { settingsSubmit } from "@/forms/settings-form-submit";
 import { SettingsFormSchema } from "@/forms/settings-form-schema";
 import { GetSettings } from "@/lib/settings-db";
-import { handleKeyDown } from "@/lib/utils";
+import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 
 export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
   const [lastResult, action, submitPending] = useActionState(settingsSubmit, undefined);
@@ -16,8 +16,8 @@ export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
 
   const data = use(settings);
   const defaultValue = {
-    openCameraByDefault: data.openCameraByDefault ? 'on' : null,
-    playSoundOnScan: data.playSoundOnScan ? 'on' : null,
+    openCameraByDefault: data.openCameraByDefault ? "on" : null,
+    playSoundOnScan: data.playSoundOnScan ? "on" : null,
   };
 
   const [form, fields] = useForm({
@@ -32,12 +32,12 @@ export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
 
   return (
     <FormProvider context={form.context}>
+      <CaptureSubmitOnEnter formId={form.id} />
       <form
         id={form.id}
         onSubmit={form.onSubmit}
         action={action}
         noValidate
-        onKeyDown={handleKeyDown}
         className="pb-25"
         aria-describedby={form.errors ? form.errorId : undefined}
       >
@@ -74,17 +74,18 @@ export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
                     Play a sound when a barcode is scanned
                   </FormCheckbox>
                 </FormField>
-                <FormErrors
-                  id={fields.playSoundOnScan.errorId}
-                  errors={fields.playSoundOnScan.errors}
-                />
+                <FormErrors id={fields.playSoundOnScan.errorId} errors={fields.playSoundOnScan.errors} />
               </div>
             </FormColumn>
           </FormRow>
 
           <FormRow comment="Save settings button">
             <FormColumn>
-              <Button type="submit" className={`cursor-pointer ${!dirty ? 'opacity-40' : 'opacity-100'}`} disabled={submitPending}>
+              <Button
+                type="submit"
+                className={`cursor-pointer ${!dirty ? "opacity-40" : "opacity-100"}`}
+                disabled={submitPending}
+              >
                 Save settings
               </Button>
             </FormColumn>
