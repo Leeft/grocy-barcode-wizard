@@ -31,7 +31,7 @@ import {
 import { ProductGroupDropdown } from "../product/product-group-dropdown";
 import { ProductGroupContext } from "@/providers/product-group-context";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
-import { toLookup } from "@/lib/utils";
+import { handleKeyDown, toLookup } from "@/lib/utils";
 import UnitConversions from "@/lib/conversions";
 import UnitConversionsEditor from "./unit-conversions-editor";
 import CreateProductFields from "./create-product-fields";
@@ -147,13 +147,6 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   const productGroups = use(useContext(ProductGroupContext) as Promise<ProductGroup[]>);
 
   const locationsMap = toLookup(locations);
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
-      e.preventDefault();
-    }
-  };
 
   const awaitedProduct = use(product);
   const photo = awaitedProduct.productPhoto;

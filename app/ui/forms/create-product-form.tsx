@@ -10,6 +10,7 @@ import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { FormColumn, FormRow } from "@/ui/forms/form-utils";
 import CreateProductFields from "@/ui/forms/create-product-fields";
 import { ProductFormSchema } from "@/forms/product-form-schema";
+import { handleKeyDown } from "@/lib/utils";
 
 export function CreateProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(productCreateSubmit, undefined);
@@ -37,13 +38,6 @@ export function CreateProductForm({ code }: { code: string }) {
   });
 
   const [selectedUnit, setSelectedUnit] = useState<string>(fields.unitId.value!);
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
-      e.preventDefault();
-    }
-  };
 
   return (
     <FormProvider context={form.context}>

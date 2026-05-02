@@ -8,6 +8,7 @@ import { FormCheckbox, FormColumn, FormErrors, FormField, FormRow } from "@/ui/f
 import { settingsSubmit } from "@/forms/settings-form-submit";
 import { SettingsFormSchema } from "@/forms/settings-form-schema";
 import { GetSettings } from "@/lib/settings-db";
+import { handleKeyDown } from "@/lib/utils";
 
 export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
   const [lastResult, action, submitPending] = useActionState(settingsSubmit, undefined);
@@ -28,13 +29,6 @@ export function SettingsForm({ settings }: { settings: Promise<GetSettings> }) {
       return parseWithZod(formData, { schema: SettingsFormSchema });
     },
   });
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
-      e.preventDefault();
-    }
-  };
 
   return (
     <FormProvider context={form.context}>

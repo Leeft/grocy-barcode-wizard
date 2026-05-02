@@ -1,5 +1,6 @@
 import { QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { KeyboardEvent } from "react";
+import { is } from "zod/v4/locales/index.js";
 
 export function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(",");
@@ -100,7 +101,16 @@ export function amountToStockUnit({
 
 export const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
   const target = e.target as HTMLElement;
-  if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
+  if (
+    e.key === "Enter" &&
+    target.tagName !== "TEXTAREA" &&
+    target.tagName !== "BUTTON" &&
+    target.tagName !== "A" &&
+    target.tagName !== "SELECT" &&
+    target.getAttribute("type") !== "date" &&
+    target.getAttribute("type") !== "number" &&
+    target.getAttribute("type") !== "select"
+  ) {
     e.preventDefault();
   }
 };
