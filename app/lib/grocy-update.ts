@@ -2,6 +2,7 @@
 
 import { refresh, revalidatePath } from "next/cache";
 import { grocyClient } from "./grocy";
+import { StockEntry } from "@/interfaces/grocy";
 
 export const consumeSpecificStockEntry = async (formData: FormData) => {
   const productId = formData.get("productId");
@@ -46,7 +47,6 @@ export const consumeOneOfSpecificStockEntry = async (formData: FormData) => {
     });
 };
 
-
 export const consumeSpoiledSpecificStockEntry = async (formData: FormData) => {
   const productId = formData.get("productId");
   const stockId = formData.get("stockId");
@@ -77,14 +77,26 @@ export const transferSpecificStockEntry = async (formData: FormData) => {
   const toLocationId = formData.get("toLocationId");
   if (!fromLocationId || !toLocationId) return;
   //const transferAmount = formData.get("transferAmount");
+
+  const res = await grocyClient.GET("/stock/products/{productId}/entries", {
+    params: {
+      path: { productId: Number(productId?.toString()) },
+      query: { "query[]": [`stock_id=${stockId?.toString()}`] },
+    },
+  });
+
+  const stock = res.data as StockEntry[];
+  const amount = stock[0]?.amount;
+
   console.log(
-    `Transfering all of stock entry ${stockId} from location ${fromLocationId} to location ${toLocationId}`,
+    `Transfering all of stock entry ${stockId} with amount ${amount} from location ${fromLocationId} to location ${toLocationId}`,
   );
-  await grocyClient
+
+  return grocyClient
     .POST("/stock/products/{productId}/transfer", {
       params: { path: { productId: Number(productId?.toString()) } },
       body: {
-        amount: 1.0,
+        amount: amount,
         stock_entry_id: stockId?.toString(),
         location_id_from: Number(fromLocationId?.toString()),
         location_id_to: Number(toLocationId?.toString()),
