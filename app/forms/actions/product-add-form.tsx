@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useActionState, useContext, useState } from "react";
+import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productAddSubmit } from "./product-add-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
@@ -26,7 +26,7 @@ import Link from "next/link";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
-import { handleKeyDown, sumStock } from "@/lib/utils";
+import { handleKeyDown } from "@/lib/utils";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 
