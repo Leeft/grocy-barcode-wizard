@@ -411,7 +411,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
                     type: "number",
                   })}
                   units={locations}
-                  className="w-full md:w-110 flex-2"
+                  className="w-full flex-2 md:w-110"
                   noFreezers={fields.shouldNotBeFrozen.value ? true : false}
                   allowEmpty={true}
                 />
@@ -672,13 +672,31 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
 
           <FormRow comment="Create product submit button">
             <FormColumn className="shrink">
-              <Button type="submit" onClick={() => setSubmitMode("createInGrocy")} disabled={submitPending}>
+              <Button
+                type="submit"
+                className={clsx(
+                  "border-create-product-button/70",
+                  "bg-create-product-button/20",
+                  "text-create-product-button",
+                )}
+                onClick={() => setSubmitMode("createInGrocy")}
+                disabled={submitPending}
+              >
                 <Grocy className="ml-[-3] w-8 fill-[#e99629] stroke-[#191902] pr-2 pl-0" />
                 Create product in Grocy
               </Button>
             </FormColumn>
             <FormColumn className="shrink">
-              <Button type="submit" onClick={() => setSubmitMode("updateOnly")} disabled={submitPending}>
+              <Button
+                type="submit"
+                className={clsx(
+                  "border-update-queue-button/70!",
+                  "bg-update-queue-button/20",
+                  "text-update-queue-button",
+                )}
+                onClick={() => setSubmitMode("updateOnly")}
+                disabled={submitPending}
+              >
                 Update local only
               </Button>
             </FormColumn>

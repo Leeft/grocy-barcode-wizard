@@ -2,6 +2,7 @@ import clsx from "clsx";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
+  className?: string;
 }
 
 export function Button({ children, className, ...rest }: ButtonProps) {
@@ -11,22 +12,25 @@ export function Button({ children, className, ...rest }: ButtonProps) {
       className={clsx(
         "flex",
         "h-10",
+        "px-4",
         "items-center",
         "rounded-lg",
-        "bg-blue-500",
-        "px-4",
         "text-sm",
-        "font-medium",
-        "text-white",
-        "transition-colors",
-        "hover:bg-blue-400",
-        "focus-visible:outline",
-        "focus-visible:outline-2",
-        "focus-visible:outline-offset-2",
-        "focus-visible:outline-blue-500",
-        "active:bg-blue-600",
-        "aria-disabled:cursor-not-allowed",
+
+        "bg-form-input-background",
+        "cursor-pointer",
+
+        "border",
+        "border-form-input-border",
+        "focus:border-form-focused",
+
+        "focus:border-2",
+        "focus-visible:form-focused",
+
+        "aria-disabled:cursor-default",
         "aria-disabled:opacity-50",
+
+        "outline-none",
         className,
       )}
     >

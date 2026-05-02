@@ -36,7 +36,7 @@
   --color-form-input-text-focused-invalid: var(--color-yellow-300);
   --color-form-input-border: #a0a7c3;
   --color-form-input-background: #30384f;
-  --color-form-input-invalid-border: #fb2c36;
+  --color-form-input-invalid-border: var(--color-form-input-border); /* Hide errors until edits */
   --color-form-input-invalid-bg: #68352c;
   --color-form-focused-input-invalid-border: #e75f5f;
 
@@ -84,6 +84,12 @@
   --color-inventory: #f4b7ff;
   --color-shopping-list: #f2e078;
   --color-transfer: #f4e7ff;
+
+  /* capture forms buttons */
+  --color-queue-product-button: var(--color-teal-200);
+  --color-update-queue-button: var(--color-teal-200);
+  --color-create-product-button: var(--color-orange-300);
+  --color-queue-product-button-text: var(--color-white);
 }
 
 @media (prefers-color-scheme: dark) {

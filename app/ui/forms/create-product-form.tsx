@@ -11,6 +11,7 @@ import { FormColumn, FormRow } from "@/ui/forms/form-utils";
 import CreateProductFields from "@/ui/forms/create-product-fields";
 import { ProductFormSchema } from "@/forms/product-form-schema";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
+import { clsx } from "clsx";
 
 export function CreateProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(productCreateSubmit, undefined);
@@ -78,7 +79,15 @@ export function CreateProductForm({ code }: { code: string }) {
 
           <FormRow comment="Create add to queue button">
             <FormColumn>
-              <Button type="submit" disabled={submitPending}>
+              <Button
+                className={clsx(
+                  "border-queue-product-button/70!",
+                  "bg-queue-product-button/20",
+                  "text-queue-product-button",
+                )}
+                type="submit"
+                disabled={submitPending}
+              >
                 Add to queue
               </Button>
             </FormColumn>
