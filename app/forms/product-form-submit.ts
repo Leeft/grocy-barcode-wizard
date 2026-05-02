@@ -92,8 +92,8 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
   });
 
   // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath("/scan");
-  redirect("/scan");
+  revalidatePath(`/scan/[barcode]`, "page");
+  redirect(`/scan/${data.barcode}`);
 }
 
 export async function productUpdateSubmit(prevstate: unknown, formData: FormData) {
@@ -106,7 +106,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
 
   const data = submission.value;
 
-  console.log("submit success:", data);
+  // console.log("submit success:", data);
 
   function expiresOrNull<Type>(value: Type) {
     return data.dueDateType !== DueDateType.NO_EXPIRY ? value : null;
@@ -162,7 +162,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
     },
   });
 
-  console.log("updated product is", queuedProduct);
+  // console.log("updated product is", queuedProduct);
 
   if (data.imageData != "" && data.imageData !== undefined) {
     const file = dataURLtoFile(data.imageData, "filename-not-used-yet");

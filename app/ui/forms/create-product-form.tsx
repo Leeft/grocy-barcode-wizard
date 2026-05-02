@@ -34,8 +34,8 @@ export function CreateProductForm({ code }: { code: string }) {
     },
 
     // Validate the form on blur event triggered
-    //shouldValidate: "onBlur",
-    //shouldRevalidate: "onInput",
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
   });
 
   const [selectedUnit, setSelectedUnit] = useState<string>(fields.unitId.value!);

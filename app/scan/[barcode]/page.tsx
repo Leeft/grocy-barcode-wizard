@@ -5,7 +5,7 @@ import { Product } from "@/interfaces/grocy";
 import ActionShortcuts from "@/ui/barcode/action-shortcuts";
 import { StockOverview } from "@/ui/barcode/stock-overview";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
-import { EditProductForm } from "@/ui/forms/edit-product-form";
+import SingleQueuedProduct from "@/ui/product/queue/single-queued-product";
 
 export default async function BarcodeScannedPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
@@ -24,16 +24,33 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     }
   }
 
+  if (barcodeObject.grocyProductId === undefined && !products[0]) {
+    return <CreateProductForm code={barcode} />;
+  }
+
+  if (products[0]) {
+    const product = getProduct(products[0].id);
+    if ((await product).grocyProductId === null) {
+      return <SingleQueuedProduct product={await product} />
+    }
+  }
+
   let grocyProduct: Product | undefined = undefined;
 
   try {
     grocyProduct = await findProductInGrocy(barcodeObject);
-  } catch (err) {
+  } catch (err: any) {
     if (barcodeObject.queuedProductId !== null && barcodeObject.queuedProductId !== undefined) {
-      const product = getProduct(barcodeObject.queuedProductId);
-      return <EditProductForm code={barcode} product={product} />;
+      const product = await getProduct(barcodeObject.queuedProductId);
+      return <SingleQueuedProduct product={product} />
     }
-    console.log("Product promise did not resolve:", err);
+
+    if (
+      err.error_message !== undefined &&
+      err.error_message !== "Could not find product in grocy by id or barcode"
+    ) {
+      console.log("Product promise did not resolve:", err);
+    }
   }
 
   if (grocyProduct === undefined) {
