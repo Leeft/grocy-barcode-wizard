@@ -56,7 +56,7 @@ export type Product = components["schemas"]["Product"] & {
 
 export type QuantityUnit = components["schemas"]["QuantityUnit"];
 export type ProductLocation = components["schemas"]["Location"] & {
-  is_freezer?: 0 | 1,
+  is_freezer?: 0 | 1;
 };
 
 export type ShoppingLocation = components["schemas"]["ShoppingLocation"];
@@ -74,6 +74,13 @@ export type QuantityUnitConversion = {
   to_qu_name_plural: string;
   factor: number;
   product_id: number;
+  row_created_timestamp: string;
+};
+
+export type ShoppingList = {
+  id: number;
+  name: string;
+  description: string;
   row_created_timestamp: string;
 };
 
@@ -109,14 +116,13 @@ export const purchasePriceTypeToGrocy = (purchasePriceType: PurchasePriceType): 
 export const purchasePriceTypeToPlaceholder = (purchasePriceType: PurchasePriceType): string => {
   switch (purchasePriceType) {
     case "UNSPECIFIED":
-      return 'Price';
+      return "Price";
     case "UNIT_PRICE":
-      return 'Price per unit';
+      return "Price per unit";
     case "TOTAL_PRICE":
-      return 'Total price';
+      return "Total price";
   }
 };
-
 
 export const dueDateTypeToGrocy = (dueDateType: DueDateType): 1 | 2 => {
   switch (dueDateType) {
@@ -129,7 +135,7 @@ export const dueDateTypeToGrocy = (dueDateType: DueDateType): 1 | 2 => {
 };
 
 export const labelTypeToGrocy = (labelType: StockLabelType): 0 | 1 | 2 => {
-  if ( labelType === null ) return 0;
+  if (labelType === null) return 0;
   switch (labelType) {
     case "NO_LABEL":
     default:

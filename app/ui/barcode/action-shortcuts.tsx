@@ -76,7 +76,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
         </ActionLink>
 
         <ActionLink
-          href={`/scan/${code}`}
+          href={`/scan/${code}/shop`}
           className={"text-shopping-list border-shopping-list! bg-shopping-list/10"}
         >
           <List className={iconClasses} />

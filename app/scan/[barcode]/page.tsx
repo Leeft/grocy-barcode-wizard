@@ -24,14 +24,10 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     }
   }
 
-  if (barcodeObject.grocyProductId === undefined && !products[0]) {
-    return <CreateProductForm code={barcode} />;
-  }
-
   if (products[0]) {
     const product = getProduct(products[0].id);
     if ((await product).grocyProductId === null) {
-      return <SingleQueuedProduct product={await product} />
+      return <SingleQueuedProduct product={await product} />;
     }
   }
 
@@ -42,7 +38,7 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
   } catch (err: any) {
     if (barcodeObject.queuedProductId !== null && barcodeObject.queuedProductId !== undefined) {
       const product = await getProduct(barcodeObject.queuedProductId);
-      return <SingleQueuedProduct product={product} />
+      return <SingleQueuedProduct product={product} />;
     }
 
     if (

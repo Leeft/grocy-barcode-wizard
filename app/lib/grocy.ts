@@ -8,6 +8,7 @@ import {
   ProductLocation,
   QuantityUnit,
   QuantityUnitConversion,
+  ShoppingList,
   ShoppingLocation,
   StockEntry,
 } from "@/interfaces/grocy";
@@ -167,6 +168,21 @@ export const fetchProducts = cache(async () => {
   } catch (error) {
     console.error("Error loading products:", error);
     throw new Error("Could not fetch products.");
+  }
+});
+
+export const fetchShoppingLists = cache(async () => {
+  try {
+    const res = await grocyClient.GET("/objects/{entity}", {
+      params: {
+        path: { entity: "shopping_lists" },
+        query: { order: "name:asc", "query[]": [] },
+      },
+    });
+    return res.data as ShoppingList[];
+  } catch (error) {
+    console.error("Error loading shopping lists:", error);
+    throw new Error("Could not fetch shopping lists.");
   }
 });
 
