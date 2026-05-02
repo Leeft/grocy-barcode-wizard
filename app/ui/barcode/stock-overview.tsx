@@ -26,7 +26,7 @@ export function StockOverview({ code }: { code: string }) {
   return (
     <>
       <div className="flex flex-col gap-y-3 pb-10">
-        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase text-slate-200">Quick inventory management</h1>
+        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase text-slate-200 pl-4">Quick inventory management</h1>
         {stock.map((se: StockEntry) => (
           <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={code} se={se} product={product} />
         ))}

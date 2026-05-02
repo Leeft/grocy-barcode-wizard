@@ -171,7 +171,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
         />
 
         <div id={form.errorId}>{form.errors}</div>
-        <div className="mr-2 flex flex-col gap-y-5">
+        <div className="flex flex-col gap-y-5">
           <FormRow comment="Page header">
             <FormColumn className="flex-auto">
               <h1 className="inline-block text-lg font-bold text-slate-400 uppercase">
@@ -361,7 +361,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <FormLabel
                 htmlFor={fields.productGroup.name}
                 title="Product group"
-                className="w-full"
+                className="w-full md:w-110"
               ></FormLabel>
               <FormField>
                 <ProductGroupDropdown
@@ -385,7 +385,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
               <FormField>
                 <ProductDropdown
                   {...getInputProps(fields.parentProductId, { type: "number" })}
-                  className="w-100"
+                  className="w-full md:w-110"
                   insert={{ value: "0", label: "[no parent]" }}
                   units={products}
                 />
@@ -395,7 +395,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
           </FormRow>
 
           <FormRow comment='Default "Consume" location'>
-            <FormColumn className="w-90">
+            <FormColumn className="w-full">
               <FormLabel
                 htmlFor={fields.defaultConsumeLocationId.name}
                 title={`Default “consume” location`}
@@ -411,7 +411,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
                     type: "number",
                   })}
                   units={locations}
-                  className="w-full flex-2"
+                  className="w-full md:w-110 flex-2"
                   noFreezers={fields.shouldNotBeFrozen.value ? true : false}
                   allowEmpty={true}
                 />
