@@ -670,7 +670,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
 
           <CameraApp photo={photo} />
 
-          <FormRow comment="Create product submit button">
+          <FormRow comment="Create product submit button" className="gap-y-5">
             <FormColumn className="shrink">
               <Button
                 type="submit"
