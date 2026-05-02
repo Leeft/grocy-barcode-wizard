@@ -163,9 +163,9 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
       >
         <input {...getInputProps(fields.id, { type: "hidden" })} />
         <input {...getInputProps(fields.barcode, { type: "hidden" })} />
-        <input {...getInputProps(fields.intent, { type: "hidden" })} defaultValue="update" />
+        <input {...getInputProps(fields.intent, { type: "hidden", value: false })} defaultValue="update" />
         <input
-          {...getInputProps(fields.submitMode, { type: "hidden" })}
+          {...getInputProps(fields.submitMode, { type: "hidden", value: false })}
           defaultValue={undefined}
           value={submitMode}
         />
