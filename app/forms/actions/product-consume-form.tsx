@@ -87,7 +87,7 @@ export function ProductConsumeForm({
       return parseWithZod(formData, { schema: schema });
     },
 
-    shouldValidate: "onBlur",
+    shouldValidate: "onInput",
     shouldRevalidate: "onInput",
   });
 
@@ -239,6 +239,7 @@ export function ProductConsumeForm({
             <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
+                onClick={(e) => form.reset()}
                 className={clsx(
                   inputCommonStyles,
                   "cursor-pointer",

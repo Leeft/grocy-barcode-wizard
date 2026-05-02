@@ -211,7 +211,12 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
             <FormColumn className="pt-3">
               <Button
                 type="submit"
-                className={clsx(inputCommonStyles, "cursor-pointer", "bg-transfer/50!", "border-transfer/90!")}
+                className={clsx(
+                  inputCommonStyles,
+                  "cursor-pointer",
+                  "bg-transfer/50!",
+                  "border-transfer/90!",
+                )}
                 disabled={submitPending}
               >
                 Transfer
@@ -220,6 +225,7 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
             <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
+                onClick={(e) => form.reset()}
                 className={clsx(
                   inputCommonStyles,
                   "cursor-pointer",
