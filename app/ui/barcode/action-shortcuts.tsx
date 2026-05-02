@@ -115,10 +115,18 @@ export const ActionLink: React.FC<ActionLinkProps> = ({
     disabled ? clsx("cursor-default", "disabled", "opacity-40") : "",
   );
 
+  if (disabled) {
+    return (
+      <div className={clsx(classes)}>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <Link
       {...rest}
-      href={href as UrlObject | __next_route_internal_types__.RouteImpl<RouteType>}
+      href={(disabled ? "#" : href) as UrlObject | __next_route_internal_types__.RouteImpl<RouteType>}
       className={classes}
       onClick={(e) => {
         if (disabled) e.preventDefault();
