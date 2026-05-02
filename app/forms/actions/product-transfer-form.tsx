@@ -225,7 +225,7 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
             <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
-                onClick={(e) => form.reset()}
+                onClick={() => form.reset()}
                 className={clsx(
                   inputCommonStyles,
                   "cursor-pointer",

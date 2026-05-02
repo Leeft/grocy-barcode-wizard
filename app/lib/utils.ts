@@ -1,6 +1,5 @@
 import { QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { KeyboardEvent } from "react";
-import { is } from "zod/v4/locales/index.js";
 
 export function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(",");
@@ -48,12 +47,6 @@ export function dateToISODate(_date: Date): string {
   }
   return str;
 }
-
-export const getNodeText = (node: any): any => {
-  if (["string", "number"].includes(typeof node)) return node;
-  if (node instanceof Array) return node.map(getNodeText).join("");
-  if (typeof node === "object" && node) return getNodeText(node.props.children);
-};
 
 export function roundToFourDecimalPlaces(num: number) {
   return Math.round(num * 10000) / 10000;

@@ -1,5 +1,5 @@
-import { Product, QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
-import { amountToStockUnit, sumStock, toLookup } from "@/lib/utils";
+import { Product, QuantityUnit, QuantityUnitConversion } from "@/interfaces/grocy";
+import { amountToStockUnit, toLookup } from "@/lib/utils";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { getInputProps, useField } from "@conform-to/react";
@@ -85,7 +85,7 @@ export function AmountPlusUnitSelectionAdd({
                   setTimeout(() => form.validate(), 40);
                 }}
               >
-                <CornerDownLeft className="radius-md mb-2 size-5 cursor-pointer border border-dashed border-form-input-border p-0.5" />
+                <CornerDownLeft className="radius-md border-form-input-border mb-2 size-5 cursor-pointer border border-dashed p-0.5" />
               </Button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Product, ProductLocation, QuantityUnit, StockEntry } from "@/interfaces/grocy";
+import { Product, ProductLocation, StockEntry } from "@/interfaces/grocy";
 import { LocationDropdown } from "../product/location-dropdown";
 import { MoveRight, PackageOpen, Tally1, Trash2, X } from "lucide-react";
 import {
@@ -13,7 +13,6 @@ import {
 import { use, useContext } from "react";
 import { GrocyProductContext } from "@/providers/grocy-product-context";
 import { LocationContext } from "@/providers/location-context";
-import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { StockEntrySummary } from "../stock-entry-summary";
 
@@ -26,7 +25,9 @@ export function StockOverview({ code }: { code: string }) {
   return (
     <>
       <div className="flex flex-col gap-y-3 pb-10">
-        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase text-slate-200 pl-4">Quick inventory management</h1>
+        <h1 className="text-1xl mt-4 mb-1 pl-4 font-bold text-slate-200 uppercase">
+          Quick inventory management
+        </h1>
         {stock.map((se: StockEntry) => (
           <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={code} se={se} product={product} />
         ))}
@@ -38,15 +39,7 @@ export function StockOverview({ code }: { code: string }) {
   );
 }
 
-function StockEntryRow({
-  barcode,
-  se,
-  product,
-}: {
-  barcode: string;
-  se: StockEntry;
-  product: Product;
-}) {
+function StockEntryRow({ barcode, se, product }: { barcode: string; se: StockEntry; product: Product }) {
   const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
 
   //const [showTransferOptions, setShowTransferOptions] = useState<boolean>(false);
@@ -55,12 +48,12 @@ function StockEntryRow({
     <form>
       <fieldset
         key={`stock_${se.id}`}
-        className="mb-2 rounded-2xl border border-dashed border-stock-buttons-border p-2 tracking-[0.9]"
+        className="border-stock-buttons-border mb-2 rounded-2xl border border-dashed p-2 tracking-[0.9]"
       >
         <legend className="ml-3 px-3 text-slate-300">
           <StockEntrySummary product={product} se={se} />
         </legend>
-        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-stock-buttons-border/60">
+        <div className="divide-stock-buttons-border/60 flex flex-col gap-y-2 divide-y-2 divide-dotted">
           <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />

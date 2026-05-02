@@ -36,7 +36,7 @@ export default async function ScanLayout({
 
   const grocyProductPromise = findProductInGrocy(barcodeObject);
 
-  type ProductOrError = Product | { error_message: string } | {};
+  type ProductOrError = Product | { error_message: string } | object;
 
   async function tryFindProductInGrocy() {
     try {

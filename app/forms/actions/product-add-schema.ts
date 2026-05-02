@@ -1,7 +1,7 @@
 import { Product, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { z } from "zod/v4";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
-import { amountToStockUnit, sumStock } from "@/lib/utils";
+import { amountToStockUnit } from "@/lib/utils";
 import { addYears } from "@/lib/utils";
 
 export function createProductAddSchema(

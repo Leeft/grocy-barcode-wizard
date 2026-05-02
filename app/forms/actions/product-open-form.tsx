@@ -74,10 +74,8 @@ export function ProductOpenForm({
     label: "",
   });
 
-  const [selectedStock, setSelectedStock] = useState<StockEntry[]>(filteredStock);
-
   const [amountValue, setAmountValue] = useState<string>(
-    sumStock({ stock: selectedStock, stockId: fields.stockEntryId.value }).toString(),
+    sumStock({ stock: filteredStock, stockId: fields.stockEntryId.value }).toString(),
   );
 
   return (
@@ -155,7 +153,7 @@ export function ProductOpenForm({
             <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
-                onClick={(e) => form.reset()}
+                onClick={() => form.reset()}
                 className={clsx(
                   inputCommonStyles,
                   "cursor-pointer",

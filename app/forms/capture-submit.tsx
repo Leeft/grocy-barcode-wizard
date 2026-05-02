@@ -1,5 +1,3 @@
-import { FormMetadata } from "@conform-to/react";
-
 export function CaptureSubmitOnEnter({ formId }: { formId: string }) {
   return (
     <button

@@ -1,6 +1,5 @@
 import Barcode from "@/lib/barcode";
 import { getCapturedProductsByBarcode, CapturedProductsByBarcode, getProduct } from "@/lib/product-db";
-import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { findProductInGrocy } from "@/lib/grocy";
 import { Product } from "@/interfaces/grocy";
 import ActionShortcuts from "@/ui/barcode/action-shortcuts";
@@ -47,36 +46,8 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
         <>
           <ActionShortcuts code={barcode} />
           <StockOverview code={barcode} />
-          {/* <BarcodeActions code={barcode} className="w-auto" editing={false} /> */}
         </>
       )}
     </>
   );
-}
-
-async function processReceivedBarcode(code: string): Promise<Product> {
-  let barcode: Barcode;
-
-  try {
-    barcode = new Barcode({ barcode: code, scannedAt: new Date() });
-  } catch {
-    throw new Error("Not a valid barcode");
-  }
-
-  if (barcode.isSpecialBarcode()) {
-    throw new Error("Can not handle special barcodes here");
-  }
-
-  // Make sure the barcode is known in the database, so state can
-  // be stored for it.
-  try {
-    const model = await ensureBarcodeExists(code);
-    if (model.productId !== undefined && model.productId !== null) {
-      barcode.queuedProductId = model.productId;
-    }
-  } catch (e) {
-    console.error("Could not store/update barcode in database:", e);
-  }
-
-  return findProductInGrocy(barcode);
 }

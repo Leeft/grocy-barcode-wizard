@@ -326,7 +326,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
             <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
-                onClick={(e) => form.reset()}
+                onClick={() => form.reset()}
                 className={clsx(
                   inputCommonStyles,
                   "cursor-pointer",

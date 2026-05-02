@@ -32,7 +32,7 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
 
   const data = submission.value;
 
-  const res = await grocyClient.POST("/stock/products/{productId}/transfer", {
+  await grocyClient.POST("/stock/products/{productId}/transfer", {
     params: { path: { productId: data.productId } },
     body: {
       amount: data.amountShadow,
