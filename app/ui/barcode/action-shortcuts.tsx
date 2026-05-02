@@ -22,9 +22,10 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
   return (
     <fieldset className="my-2 mt-5 flex flex-col gap-y-4 rounded-md border border-slate-500 px-4 pt-2 pb-5 tracking-[0.9]">
-      <legend className="mb-1 ml-1 px-2 font-bold text-gray-200 uppercase">Product actions</legend>
+      <legend className="mb-1 ml-1 px-2 font-bold text-form-fieldset-legend uppercase">Product actions</legend>
       <div className="mb-1 flex flex-row flex-wrap gap-3">
-        <ActionLink autoFocus={true} href={`/scan/${code}/add`} className={"text-add border-add! bg-add/10"}>
+        <ActionLink autoFocus={true} href={`/scan/${code}/add`}
+         className={"text-add! border-add! bg-add/10!"}>
           <ShoppingBasket className={iconClasses} />
           Purchase ...
         </ActionLink>

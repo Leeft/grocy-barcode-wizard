@@ -22,6 +22,60 @@
 } */
 
 @theme {
+  --color-status-connecting: var(--color-orange-300);
+  --color-status-connected: var(--color-green-300);
+  --color-status-error: var(--color-red-500);
+
+  --color-form-error: var(--color-red-500);
+  --color-form-label: var(--color-blue-200);
+  --color-form-placeholder: var(--color-gray-600);
+
+  /* These names are admittedly not very clear ... todo: clean up
+   * Mostly used in app/lib/product-form-shared.ts */
+  --color-form-focused: #c7c92c;
+  --color-form-input-text-focused-invalid: var(--color-yellow-300);
+  --color-form-input-border: #a0a7c3;
+  --color-form-input-background: #30384f;
+  --color-form-input-invalid-border: #fb2c36;
+  --color-form-input-invalid-bg: #68352c;
+  --color-form-focused-input-invalid-border: #e75f5f;
+
+  --color-form-fieldset-legend: var(--color-gray-200);
+  --color-form-cancel-button: var(--color-teal-500);
+
+  /* Camera app */
+  --color-disable-camera: var(--color-green-800);
+  --color-enable-camera: var(--color-red-500);
+  --color-upload-file: var(--color-cyan-500);
+  --color-take-snapshot: var(--color-yellow-600);
+  --color-switch-camera: var(--color-blue-600);
+  --color-rotate-image: var(--color-amber-600);
+  --color-discard-image: var(--color-red-600);
+
+  /* Others ... */
+
+  --color-stock-unit: var(--color-green-200);
+  --color-inactive: var(--color-amber-400);
+  --color-missing: var(--color-amber-700);
+
+  --color-alert: var(--color-amber-500);
+
+  --color-out-of-stock: var(--color-amber-500);
+  --color-stock-buttons-border: var(--color-yellow-300);
+ 
+  --color-menu-active: var(--color-amber-200);
+
+  --color-laser-line: var(--color-red-700);
+
+  --color-location: var(--color-teal-300);
+  --color-is-freezer: var(--color-blue-200);
+
+  --color-check-active: var(--color-green-600);
+  --color-check-inactive: var(--color-red-300);
+
+  --color-queue-tile-barcode: var(--color-green-500);
+
+  /* action button colours */
   --color-add: #61c68a;
   --color-consume-one: #e59f69;
   --color-consume: #e78840;
@@ -115,8 +169,6 @@ input[type="number"].hide-arrows::-webkit-inner-spin-button {
 /* For Firefox */
 input[type="number"].hide-arrows {
   appearance: textfield;
-  border: 3px solid #ccc;
-  border-radius: 3px;
 }
 
 .info-tooltip {

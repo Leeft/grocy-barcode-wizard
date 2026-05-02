@@ -44,7 +44,7 @@ function NavigationElement({
       href={href}
       className={
         `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 ` +
-        (active ? "text-amber-200" : "")
+        (active ? "text-menu-active" : "")
       }
     >
       {children}

@@ -185,7 +185,7 @@ function ButtonEnableCamera({
 
   return (
     <button
-      className={clsx(buttonClassCommon, "bg-red-800")}
+      className={clsx(buttonClassCommon, "bg-enable-camera")}
       onClick={() => {
         setEnabled(true);
         scrollIntoView(ref);
@@ -213,7 +213,7 @@ function ButtonDisableCamera({
 
   return (
     <button
-      className={clsx(buttonClassCommon, "bg-green-800")}
+      className={clsx(buttonClassCommon, "bg-disable-camera")}
       onClick={() => {
         setEnabled(false);
         scrollIntoView(ref);
@@ -246,7 +246,7 @@ function ButtonUpload({
       <label
         htmlFor={name}
         title="Click to select file for upload"
-        className={clsx("block", buttonClassCommon, "bg-cyan-500!", "hover:bg-cyan-500!")}
+        className={clsx("block", buttonClassCommon, "bg-upload-file!", "hover:bg-upload-file!")}
       >
         <ImageUp size="28" className="relative top-2.5" />
       </label>
@@ -307,7 +307,7 @@ function ButtonSnapshot({
     const file = await cameraHandler.current?.capture();
     if (file) {
       shutterHandler.current?.play();
-      setLastSaved( Math.floor( Date.now() / 1000 ) );
+      setLastSaved(Math.floor(Date.now() / 1000));
       const base64 = await fileToBase64(file);
       setData(base64);
       setName(file.name);
@@ -317,7 +317,7 @@ function ButtonSnapshot({
 
   return (
     <button
-      className={clsx(buttonClassCommon, "bg-yellow-600")}
+      className={clsx(buttonClassCommon, "bg-take-snapshot")}
       onClick={handleCapture}
       title="Take snapshot"
       type="button"
@@ -345,7 +345,7 @@ function ButtonSwitch({
 
   return (
     <button
-      className={clsx(buttonClassCommon, "bg-blue-600")}
+      className={clsx(buttonClassCommon, "bg-switch-camera")}
       onClick={handleSwitch}
       title="Switch camera"
       type="button"
@@ -395,7 +395,7 @@ function ButtonRotateImageCounterclockwise({
     <div>
       <button
         onClick={() => handleRotateLeft(data)}
-        className={clsx(buttonClassCommon, "bg-amber-600")}
+        className={clsx(buttonClassCommon, "bg-rotate-image")}
         title="Rotate 90 degrees counterclockwise"
         type="button"
       >
@@ -447,7 +447,7 @@ function ButtonRotateImageClockwise({
     <div>
       <button
         onClick={() => handleRotateLeft(data)}
-        className={clsx(buttonClassCommon, "bg-amber-600")}
+        className={clsx(buttonClassCommon, "bg-rotate-image")}
         title="Rotate 90 degrees clockwise"
         type="button"
       >
@@ -521,7 +521,7 @@ function ButtonDeleteImage({
 
   return (
     <button
-      className={clsx(buttonClassCommon, "bg-red-600")}
+      className={clsx(buttonClassCommon, "bg-discard-image")}
       onClick={() => handleDelete(photoId)}
       title={`${photoId !== undefined ? "Delete" : "Discard"} this image`}
       type="button"

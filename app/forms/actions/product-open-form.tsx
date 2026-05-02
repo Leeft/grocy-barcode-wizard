@@ -161,8 +161,8 @@ export function ProductOpenForm({
                   "cursor-pointer",
                   "p-2.5!",
                   "rounded-lg",
-                  "bg-red-500/50",
-                  "border-red-500/70!",
+                  "bg-form-cancel-button/30!",
+                  "border-form-cancel-button/70!",
                 )}
               >
                 Cancel

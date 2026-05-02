@@ -18,7 +18,7 @@ export default function BarcodeScanStatus({
       <div className="text-center">
         <div className="mt-2 p-1 pt-4 sm:p-2 sm:pt-5 md:p-3 md:pt-5 lg:p-4 lg:pt-6">
           <div>
-            {!barcode || ( connectionStatus !== "connected" && retries > 0 ) ? (
+            {!barcode || (connectionStatus !== "connected" && retries > 0) ? (
               <ScannerStreamStatus status={connectionStatus} />
             ) : (
               <VisualBarcode barcode={barcode} />
@@ -51,13 +51,11 @@ function VisualBarcode({ barcode }: { barcode: Barcode }) {
         )}
 
         {/* The red scan line */}
-        <div className="animate-laser pointer-events-none absolute top-1/2 left-0 h-0.5 w-full bg-red-600" />
+        <div className="animate-laser bg-laser-line pointer-events-none absolute top-1/2 left-0 h-0.5 w-full" />
       </div>
 
       {/* The human readable barcode */}
-      <div className="mt-1 font-mono text-xl text-slate-500">
-        {barcode.barcode}
-      </div>
+      <div className="mt-1 font-mono text-xl text-slate-500">{barcode.barcode}</div>
 
       {barcode.scannedAt !== null && barcode.scannedAt !== undefined && (
         <p className="mt-4 font-mono text-xs font-bold tracking-widest text-emerald-600">
@@ -72,7 +70,7 @@ function ScannerStreamStatus({ status }: { status: ConnectionStatus }) {
   return (
     <div
       className={
-        "md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-2xl text-gray-100 italic decoration-solid " +
+        "md:text-3x1 lg:text-3x1 xl:text-1x1 animate-pulse py-6 font-mono text-2xl italic decoration-solid " +
         statusColour(status)
       }
     >
@@ -98,13 +96,13 @@ function statusInfo(status: string): string {
 function statusColour(status: string): string {
   switch (status) {
     case "connecting": {
-      return "text-orange-300";
+      return "text-status-connecting";
     }
     case "connected": {
-      return "text-green-300";
+      return "text-status-connected";
     }
     default: {
-      return "text-red-500";
+      return "text-status-error";
     }
   }
 }

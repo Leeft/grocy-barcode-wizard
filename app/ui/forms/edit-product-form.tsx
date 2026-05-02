@@ -444,7 +444,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
                       <FormField>
                         <FormCheckbox fieldInfo={fields.moveOnOpen}>
                           Move to “consume” location{" "}
-                          <span className="text-amber-200">
+                          <span className="text-location">
                             {locationsMap[fields.defaultConsumeLocationId.value]!.name}
                           </span>{" "}
                           on “open”
@@ -574,7 +574,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
                       "text-nowrap",
                       "inline-block",
                       "cursor-help",
-                      !grocyConfig && "text-amber-700",
+                      !grocyConfig && "text-form-error",
                     )}
                   >
                     {grocyConfig && grocyConfig.ENERGY_UNIT ? grocyConfig.ENERGY_UNIT : "??"}

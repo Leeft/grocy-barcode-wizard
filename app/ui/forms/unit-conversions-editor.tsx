@@ -71,7 +71,7 @@ export default function UnitConversionsEditor({
   return (
     <div key={`conversion-${conv.key}-outer`} className="min-h-10 pt-3">
       Add conversion:{" "}
-      <span className="text-green-200">
+      <span className="text-stock-unit">
         {toValue ? toValue : "???"} {Number(toValue) !== 1.0 ? unitFrom.name_plural : unitFrom.name}
       </span>{" "}
       to{" "}
@@ -104,7 +104,7 @@ export default function UnitConversionsEditor({
       {!unitTo.userfields!.indivisible && convFactor !== 1 ? unitTo.name_plural : unitTo.name}{" "}
       <span className="text-slate-400">«=»</span> {convFactor}{" "}
       {convFactor !== 1 ? unitTo.name_plural : unitTo.name} in{" "}
-      <span className="text-green-200">
+      <span className="text-stock-unit">
         {toValue ? toValue : "???"} {Number(toValue) !== 1.0 ? unitFrom.name_plural : unitFrom.name}
       </span>
       <br />

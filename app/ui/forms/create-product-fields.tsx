@@ -39,8 +39,6 @@ import {
 } from "@/interfaces/grocy";
 import { dateToISODate } from "@/lib/utils";
 
-const unitClass = "text-green-200!";
-
 export default function CreateProductFields({
   formId,
   fields,
@@ -145,7 +143,7 @@ export default function CreateProductFields({
             <FormLabel
               htmlFor={fields.unitAmount.name}
               title={ModeToQuantityTitle(fields.unitSystem?.value)}
-              className="inline-block"
+              className="text-stock-unit inline-block"
             >
               <WeightModeAmountTooltip />
             </FormLabel>
@@ -155,7 +153,7 @@ export default function CreateProductFields({
                 ref={unitAmountRef}
                 step={0.001}
                 placeholder="Number"
-                className={clsx("hide-arrows", inputCommonStyles, "w-full", unitClass)}
+                className={clsx("hide-arrows", inputCommonStyles, "w-full", "text-stock-unit")}
               />
             </FormField>
             <FormErrors id={fields.unitAmount.errorId} errors={fields.unitAmount.errors} />
@@ -176,18 +174,18 @@ export default function CreateProductFields({
           <FormLabel
             htmlFor={fields.unitId.name}
             title={ModeToUnitTitle(fields.unitSystem?.value)}
-            className={`text-sm! ${unitClass}!`}
+            className={`text-stock-unit! text-sm!`}
           ></FormLabel>
           <FormField className="w-min-30 flex grow">
             {fields.unitSystem.value === "ABSTRACT" && (
-              <div className="text-md shrink p-2 pl-0 font-bold text-green-200">1</div>
+              <div className="text-md text-stock-unit shrink p-2 pl-0 font-bold">1</div>
             )}
             <QuantityUnitsDropdown
               ref={unitIdRef as RefObject<HTMLSelectElement>}
               field={fields.unitId}
               units={units}
               unitSystem={fields.unitSystem.value as UnitSystem}
-              className={clsx("w-full", unitClass)}
+              className={clsx("w-full", "text-stock-unit")}
               selectedOption={selectedUnit!}
               setSelectedOption={setSelectedUnit}
               onChange={(e) => {

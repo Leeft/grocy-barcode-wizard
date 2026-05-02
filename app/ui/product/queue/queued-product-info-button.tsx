@@ -60,7 +60,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
         <div className="flex flex-col md:flex-row">
           <div className="w-full flex-3 flex-row">
             <div className="flex-1 pl-5 -indent-5 text-slate-50">
-              <code className="text-green-500">{product.barcodes[0]?.barcode}</code> :{" "}
+              <code className="text-queue-tile-barcode">{product.barcodes[0]?.barcode}</code> :{" "}
               <strong>{product.name}</strong>
             </div>
 
@@ -71,13 +71,13 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
               </em>
             </div>
 
-            <div className={`flex-1 ${defaultLocation!.is_freezer ? "text-blue-300" : ""}`}>
+            <div className={`flex-1 ${defaultLocation!.is_freezer ? "text-is-freezer" : ""}`}>
               <ShelvingUnit size="15" className="relative top-[-2] inline" /> Stored by default in{" "}
               <em>{storageLocation}</em>
             </div>
 
             {product.dueDateType !== DueDateType.NO_EXPIRY && product.canBeFrozen && (
-              <div className="flex-1 text-blue-300">
+              <div className="flex-1 text-is-freezer">
                 <Snowflake size="15" className="relative top-[-2] inline" /> Product can be frozen
               </div>
             )}
@@ -85,7 +85,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
             {product.dueDateType !== DueDateType.NO_EXPIRY &&
               product.canBeFrozen &&
               !defaultLocation!.is_freezer && (
-                <div className="flex-1 text-amber-500">
+                <div className="flex-1 text-alert">
                   <>
                     <TriangleAlert size="15" className="relative top-[-2] inline" /> Default storage location
                     is not a freezer

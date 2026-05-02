@@ -31,7 +31,7 @@ export function StockOverview({ code }: { code: string }) {
           <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={code} se={se} product={product} />
         ))}
         {stock.length === 0 && (
-          <h2 className="text-amber-500">This product is currently out of stock. Purchase some more.</h2>
+          <h2 className="text-out-of-stock">This product is currently out of stock. Purchase some more.</h2>
         )}
       </div>
     </>
@@ -55,12 +55,12 @@ function StockEntryRow({
     <form>
       <fieldset
         key={`stock_${se.id}`}
-        className="mb-2 rounded-2xl border border-dashed border-yellow-300 p-2 tracking-[0.9]"
+        className="mb-2 rounded-2xl border border-dashed border-stock-buttons-border p-2 tracking-[0.9]"
       >
         <legend className="ml-3 px-3 text-slate-300">
           <StockEntrySummary product={product} se={se} />
         </legend>
-        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/60">
+        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-stock-buttons-border/60">
           <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />

@@ -71,7 +71,7 @@ export function FormLabel({
     <>
       <label
         htmlFor={htmlFor}
-        className={clsx("text-sm", "font-light", "text-blue-200", "block", "mt-2", "mb-2", className)}
+        className={clsx("text-sm", "font-light", "text-form-label", "block", "mt-2", "mb-2", className)}
       >
         {title}
       </label>
@@ -101,7 +101,7 @@ export function FormErrors({
     <div id={id} aria-live="polite" aria-atomic="true" className={clsx("w-full", "pt-2", className)}>
       {errors &&
         errors?.map((error: string) => (
-          <p className={clsx("text-sm", "text-red-500")} key={error}>
+          <p className={clsx("text-sm", "text-form-error")} key={error}>
             {error}
           </p>
         ))}

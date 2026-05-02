@@ -22,10 +22,12 @@ export function StockEntrySummary({ se, product }: { se: StockEntry; product: Pr
         ? units[product.qu_id_stock!]!.name_plural
         : units[product.qu_id_stock!]!.name}{" "}
       {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
-      {dueType !== "No expiry" && (
+      {dueType !== "No expiry" && se.best_before_date !== "2999-12-31" ? (
         <>
           ; {dueType} date is <code>{se.best_before_date}</code>{" "}
         </>
+      ) : (
+        <>; Does not expire</>
       )}
       {se.note && (
         <>
