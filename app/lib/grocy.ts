@@ -26,6 +26,12 @@ if (apiKey === undefined) {
   throw new Error("GROCY_API_KEY is not configured");
 }
 
+export const grocyUrl = process.env.GROCY_URL ?? process.env.NEXT_PUBLIC_GROCY_URL;
+
+if (grocyUrl === undefined) {
+  throw new Error("GROCY_URL is not configured");
+}
+
 const myMiddleware: Middleware = {
   async onRequest({ request /*options*/ }) {
     request.headers.set("GROCY-API-KEY", apiKey);
