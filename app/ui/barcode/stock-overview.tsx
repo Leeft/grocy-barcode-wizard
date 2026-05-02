@@ -26,7 +26,7 @@ export function StockOverview({ code }: { code: string }) {
   return (
     <>
       <div className="flex flex-col gap-y-3 pb-10">
-        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase">Stock management</h1>
+        <h1 className="text-1xl mt-4 mb-1 font-bold uppercase text-slate-200">Quick inventory management</h1>
         {stock.map((se: StockEntry) => (
           <StockEntryRow key={`stock-entry-row-${se.id}`} barcode={code} se={se} product={product} />
         ))}
@@ -60,7 +60,7 @@ function StockEntryRow({
         <legend className="ml-3 px-3 text-slate-300">
           <StockEntrySummary product={product} se={se} />
         </legend>
-        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/80">
+        <div className="flex flex-col gap-y-2 divide-y-2 divide-dotted divide-yellow-300/60">
           <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
             <input type="hidden" name="productId" value={se.product_id} />
             <input type="hidden" name="stockId" value={se.stock_id} />
@@ -73,21 +73,21 @@ function StockEntryRow({
               disabled={se.open || product.disable_open ? true : false}
               title={`Open one unit of stock entry ${se.stock_id}`}
             >
-              <PackageOpen className="mr-2 size-5" /> Open one
+              <PackageOpen className="mt-0.5 mr-2 size-5" /> Open one
             </OpenStockEntryButton>
 
             <ConsumeOneOfStockEntryButton title={`Consume 1 unit of this stock entry ${se.stock_id}`}>
-              <Tally1 className="mr-0 ml-1 size-5" /> Consume one
+              <Tally1 className="mt-0.5 mr-0 ml-1 size-5" /> Consume one
             </ConsumeOneOfStockEntryButton>
 
             <ConsumeStockEntryButton title={`Consume all of this stock entry ${se.stock_id}`}>
-              <X className="mr-2 size-5" /> Consume all
+              <X className="mt-0.5 mr-2 size-5" /> Consume all
             </ConsumeStockEntryButton>
 
             <ConsumeSpoiledStockEntryButton
               title={`Consume all of this stock entry ${se.stock_id} as spoiled`}
             >
-              <Trash2 className="mr-2 size-5" /> Spoiled
+              <Trash2 className="mt-0.5 mr-2 size-5" /> Spoiled
             </ConsumeSpoiledStockEntryButton>
 
             {/* <button
@@ -111,7 +111,7 @@ function StockEntryRow({
               disabled={product.enable_tare_weight_handling ? true : false}
               title={`Transfer stock entry ${se.stock_id}`}
             >
-              <MoveRight className="mr-2 size-5" /> Transfer
+              <MoveRight className="mt-0.5 mr-2 size-5" /> Transfer
             </TransferStockEntryButton>
           </div>
         </div>

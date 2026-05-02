@@ -315,14 +315,25 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
 
           <FormRow comment="Add product button">
             <FormColumn className="pt-3">
-              <Button type="submit" className="cursor-pointer" disabled={submitPending}>
-                Purchase stock
+              <Button
+                type="submit"
+                className={clsx(inputCommonStyles, "cursor-pointer", "bg-add/50!", "border-add/90!")}
+                disabled={submitPending}
+              >
+                Purchase
               </Button>
             </FormColumn>
-            <FormColumn className="pt-5.75">
+            <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
-                className={clsx("cursor-pointer", "p-2.75", "rounded-lg", "bg-amber-800")}
+                className={clsx(
+                  inputCommonStyles,
+                  "cursor-pointer",
+                  "p-2.5!",
+                  "rounded-lg",
+                  "bg-red-500/50",
+                  "border-red-500/70!",
+                )}
               >
                 Cancel
               </Link>

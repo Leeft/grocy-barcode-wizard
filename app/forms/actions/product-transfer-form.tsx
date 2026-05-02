@@ -20,6 +20,7 @@ import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { CaptureSubmitOnEnter } from "../capture-submit";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 
 export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
   const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
@@ -208,14 +209,25 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
 
           <FormRow comment="Transfer product button">
             <FormColumn className="pt-3">
-              <Button type="submit" className="cursor-pointer" disabled={submitPending}>
+              <Button
+                type="submit"
+                className={clsx(inputCommonStyles, "cursor-pointer", "bg-transfer/50!", "border-transfer/90!")}
+                disabled={submitPending}
+              >
                 Transfer
               </Button>
             </FormColumn>
-            <FormColumn className="pt-5.75">
+            <FormColumn className="pt-5.5">
               <Link
                 href={`/scan/${code}`}
-                className={clsx("cursor-pointer", "p-2.75", "rounded-lg", "bg-amber-800")}
+                className={clsx(
+                  inputCommonStyles,
+                  "cursor-pointer",
+                  "p-2.5!",
+                  "rounded-lg",
+                  "bg-red-500/50",
+                  "border-red-500/70!",
+                )}
               >
                 Cancel
               </Link>

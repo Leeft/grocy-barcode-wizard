@@ -9,6 +9,7 @@ import { UrlObject } from "url";
 import { RouteType } from "next/dist/lib/load-custom-routes";
 import { GrocyProductContext } from "@/providers/grocy-product-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 
 export default function ActionShortCuts({ code }: { code: string }) {
   const product = use(useContext(GrocyProductContext) as Promise<Product>);
@@ -21,16 +22,16 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
   return (
     <fieldset className="my-2 mt-5 flex flex-col gap-y-4 rounded-md border border-slate-500 px-4 pt-2 pb-5 tracking-[0.9]">
-      <legend className="text-gray-200 mb-1 ml-1 px-2 font-bold uppercase">Product actions</legend>
+      <legend className="mb-1 ml-1 px-2 font-bold text-gray-200 uppercase">Product actions</legend>
       <div className="mb-1 flex flex-row flex-wrap gap-3">
-        <ActionLink href={`/scan/${code}/add`} className={"text-add border-add bg-add/10"}>
+        <ActionLink autoFocus={true} href={`/scan/${code}/add`} className={"text-add border-add! bg-add/10"}>
           <ShoppingBasket className={iconClasses} />
           Purchase ...
         </ActionLink>
 
         <ActionLink
-        href={`/scan/${barcode}`}
-          className={"text-consume border-consume bg-consume/10"}
+          href={`/scan/${code}/consume`}
+          className={"text-consume border-consume! bg-consume/10"}
           disabled={!hasStock ? true : false}
         >
           <X className={iconClasses} />
@@ -38,8 +39,8 @@ export default function ActionShortCuts({ code }: { code: string }) {
         </ActionLink>
 
         <ActionLink
-        href={`/scan/${barcode}`}
-          className={"text-spoiled border-spoiled bg-spoiled/10"}
+          href={`/scan/${code}/consume?spoiled=true`}
+          className={"text-spoiled border-spoiled! bg-spoiled/10"}
           disabled={!hasStock ? true : false}
         >
           <Trash2 className={iconClasses} />
@@ -48,7 +49,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
         <ActionLink
           href={`/scan/${code}/open`}
-          className={"text-open border-open bg-open/10"}
+          className={"text-open border-open! bg-open/10"}
           disabled={product.disable_open || !hasStock ? true : false}
         >
           <PackageOpen className={iconClasses} />
@@ -57,7 +58,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
         <ActionLink
           href={`/scan/${code}/transfer`}
-          className={"text-transfer border-transfer bg-transfer/10"}
+          className={"text-transfer border-transfer! bg-transfer/10"}
           disabled={!hasStock || product.enable_tare_weight_handling ? true : false}
         >
           <MoveRight className={iconClasses} />
@@ -66,7 +67,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
         <ActionLink
           href={`/scan/${code}`}
-          className={"text-inventory border-inventory bg-inventory/10"}
+          className={"text-inventory border-inventory! bg-inventory/10"}
           disabled={!hasStock ? true : false}
         >
           <ShelvingUnit className={iconClasses} />
@@ -75,7 +76,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
         <ActionLink
           href={`/scan/${code}`}
-          className={"text-shopping-list border-shopping-list bg-shopping-list/10"}
+          className={"text-shopping-list border-shopping-list! bg-shopping-list/10"}
         >
           <List className={iconClasses} />
           Add to shopping list ...
@@ -107,17 +108,9 @@ export const ActionLink: React.FC<ActionLinkProps> = ({
   }
 
   const classes = clsx(
-    "border",
-    "rounded-lg",
-    "p-2",
-    "w-auto",
-    "uppercase",
-    "font-bold",
-    "tracking-wider",
-    "text-center",
-    "text-nowrap!",
-    "flex-grow",
-    "max-w-70",
+    inputCommonStyles,
+    "pb-0",
+    "focus:pb-0",
     className,
     disabled ? clsx("cursor-default", "disabled", "opacity-40") : "",
   );
