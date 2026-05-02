@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import Navbar from "@/ui/navbar";
 import UserProvider from "@/providers/user-context";
 import { getUser } from "./lib/user-db";
+import { countPendingProducts } from "./lib/product-db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,7 @@ export default function RootLayout({
           <div className="hidden w-10 md:flex-auto lg:block"></div>
           <main id="main" className="relative w-full max-w-240 grow bg-slate-800 px-2 py-2 text-sm md:px-4">
             <UserProvider promise={getUser(1)}>
-              <Navbar />
+              <Navbar promise={countPendingProducts()} />
               {children}
             </UserProvider>
           </main>

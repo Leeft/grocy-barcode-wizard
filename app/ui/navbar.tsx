@@ -1,15 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Barcode, Rows3, Settings } from "lucide-react";
+import { CountPendingProducts } from "@/lib/product-db";
 
-export default function Navbar() {
+export default function Navbar({ promise }: { promise: Promise<CountPendingProducts> }) {
   const iconClassName = "relative top-[-2] inline";
+  const count = use(promise);
   return (
     <nav className="mb-3 text-slate-500">
-      <div className="flex flex-wrap gap-x-2 pt-2 text-xs font-bold uppercase md:text-lg">
+      <div className="flex flex-wrap gap-x-0.5 md:gap-x-2 pt-2 text-xs font-bold uppercase md:text-lg tracking-tight md:tracking-normal">
         <NavigationElement href="/">
           <House size="15" className={iconClassName} /> Home
         </NavigationElement>
@@ -17,7 +19,7 @@ export default function Navbar() {
           <Barcode size="15" className={iconClassName} /> Scan
         </NavigationElement>
         <NavigationElement href="/queue">
-          <Rows3 size="15" className={iconClassName} /> Queue
+          <Rows3 size="15" className={iconClassName} /> Queue <span className="brightness-150">({count})</span>
         </NavigationElement>
         <NavigationElement href="/settings">
           <Settings size="15" className={iconClassName} /> Settings

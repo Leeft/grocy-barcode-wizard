@@ -85,7 +85,7 @@ function statusInfo(status: string): string {
       return "ATTEMPTING CONNECTION TO BARCODE STREAM";
     }
     case "connected": {
-      return "SYSTEM READY; AWAITING BARCODE SCAN";
+      return "SYSTEM STANDBY; AWAITING BARCODE SCAN";
     }
     default: {
       return "CONNECTION ERROR";

@@ -58,6 +58,22 @@ export type PendingProducts = Awaited<ReturnType<typeof getPendingProducts>>;
 
 //
 
+export async function countPendingProducts() {
+  "use server";
+
+  return await prisma.product.count({
+    where: {
+      grocyProductId: {
+        equals: null,
+      },
+    },
+  });
+}
+
+export type CountPendingProducts = Awaited<ReturnType<typeof countPendingProducts>>;
+
+//
+
 export async function getCapturedProductsByBarcode(barcode: string) {
   "use server";
 
