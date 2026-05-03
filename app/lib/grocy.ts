@@ -15,19 +15,19 @@ import {
 import { cache } from "react";
 import Barcode from "@/lib/barcode";
 
-export const baseUrl = process.env.GROCY_API_URL ?? process.env.NEXT_PUBLIC_GROCY_API_URL;
+export const baseUrl = process.env.GROCY_API_URL;
 
 if (baseUrl === undefined) {
   throw new Error("GROCY_API_URL is not configured");
 }
 
-export const apiKey = process.env.GROCY_API_KEY ?? process.env.NEXT_PUBLIC_GROCY_API_KEY;
+export const apiKey = process.env.GROCY_API_KEY;
 
 if (apiKey === undefined) {
   throw new Error("GROCY_API_KEY is not configured");
 }
 
-export const grocyUrl = process.env.GROCY_URL ?? process.env.NEXT_PUBLIC_GROCY_URL;
+export const grocyUrl = process.env.GROCY_URL;
 
 if (grocyUrl === undefined) {
   throw new Error("GROCY_URL is not configured");
@@ -94,7 +94,6 @@ export const fetchQuantityUnitConversionsResolved = cache(async (productId: numb
     throw new Error("Could not fetch resolved quantity units.");
   }
 });
-
 
 export const fetchQuantityUnitConversions = cache(async () => {
   try {
@@ -190,7 +189,7 @@ export const fetchProduct = cache(async (productId: number) => {
   try {
     const res = await grocyClient.GET("/objects/{entity}/{objectId}", {
       params: {
-        path: { entity: 'products', objectId: productId },
+        path: { entity: "products", objectId: productId },
       },
     });
     return res.data as Product;
@@ -215,7 +214,7 @@ export const fetchProductDetails = cache(async (productId: number) => {
 });
 
 export const fetchProductStock = cache(async (productId: number) => {
-  if ( productId === undefined || productId <= 0 ) return [];
+  if (productId === undefined || productId <= 0) return [];
   try {
     const res = await grocyClient.GET("/stock/products/{productId}/entries", {
       params: {
