@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { OneOffSound, OneOffSoundHandler } from "./one-off-sound";
-import { GetProductPhoto } from "@/lib/product-db";
+import { deleteProductPhoto, GetProductPhoto } from "@/lib/product-db";
 import { GetUser } from "@/lib/user-db";
 import { UserContext } from "@/providers/user-context";
 
@@ -494,25 +494,7 @@ function ButtonDeleteImage({
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl === undefined) {
-      throw new Error("Can't delete photo; NEXT_PUBLIC_API_URL not set");
-    }
-
-    const request = new Request(`${apiUrl}/image/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
-
-    const response = await fetch(request, {
-      body: JSON.stringify({ id: id }),
-      referrer: "",
-    });
-
-    if (response.status === 200) {
+    if (await deleteProductPhoto(id)) {
       setData("");
       setPhotoId(undefined);
       scrollIntoView(ref);

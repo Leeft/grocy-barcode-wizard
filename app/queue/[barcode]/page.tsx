@@ -8,11 +8,7 @@ import { EditProductForm } from "@/ui/forms/edit-product-form";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-export default async function QueuedEntryPage({
-  params,
-}: {
-  params: Promise<{ barcode: string }>;
-}) {
+export default async function QueuedEntryPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
 
   const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcode);
@@ -25,10 +21,7 @@ export default async function QueuedEntryPage({
       queuedProductId: products[0].id,
     });
 
-    if (
-      barcodeObject.queuedProductId === undefined ||
-      isNaN(barcodeObject.queuedProductId)
-    ) {
+    if (barcodeObject.queuedProductId === undefined || isNaN(barcodeObject.queuedProductId)) {
       redirect("/queue");
     }
 
@@ -42,6 +35,7 @@ export default async function QueuedEntryPage({
     // It does exist in the database but not in grocy. The user will
     // have to capture the essentials for this product.
     const product = getProduct(barcodeObject.queuedProductId);
+
     return (
       <Suspense>
         <EditProductForm code={barcode} product={product} />

@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { getProductPhoto } from "@/lib/product-db";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,29 +37,4 @@ export const GET = async (
     },
     { status: 400 },
   );
-};
-
-export const DELETE = async (
-  req: NextRequest,
-  { params }: { params: { id: string } },
-): Promise<NextResponse> => {
-  const { id } = await params;
-
-  try {
-    await prisma.productPhoto.delete({
-      where: {
-        id: Number(id),
-      },
-    });
-
-    return NextResponse.json({ message: `Photo ${id} deleted successfully` }, { status: 200 });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    return NextResponse.json(
-      {
-        error: `Error while deleting photo ${id}:` + err.message!,
-      },
-      { status: 404 },
-    );
-  }
 };

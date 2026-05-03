@@ -77,8 +77,7 @@ export type CountPendingProducts = Awaited<ReturnType<typeof countPendingProduct
 export async function getCapturedProductsByBarcode(barcode: string) {
   "use server";
 
-  if (barcode === undefined || barcode.trim() === "")
-    throw new Error("No barcode given");
+  if (barcode === undefined || barcode.trim() === "") throw new Error("No barcode given");
 
   return await prisma.product.findMany({
     select: {
@@ -98,9 +97,7 @@ export async function getCapturedProductsByBarcode(barcode: string) {
   });
 }
 
-export type CapturedProductsByBarcode = Awaited<
-  ReturnType<typeof getCapturedProductsByBarcode>
->;
+export type CapturedProductsByBarcode = Awaited<ReturnType<typeof getCapturedProductsByBarcode>>;
 
 //
 
@@ -119,3 +116,19 @@ export async function getProductPhoto(id: number) {
 }
 
 export type GetProductPhoto = Awaited<ReturnType<typeof getProductPhoto>>;
+
+//
+
+export async function deleteProductPhoto(id: number) {
+  "use server";
+
+  if (id === undefined) throw new Error("No productPhotoId given");
+
+  return await prisma.productPhoto.delete({
+    where: {
+      id: Number(id),
+    },
+  });
+}
+
+export type DeleteProductPhoto = Awaited<ReturnType<typeof deleteProductPhoto>>;
