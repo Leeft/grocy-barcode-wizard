@@ -67,7 +67,7 @@ export default function ActionShortCuts({ code }: { code: string }) {
         </ActionLink>
 
         <ActionLink
-          href={`/scan/${code}`}
+          href={`/scan/${code}/inventory`}
           className={"text-inventory border-inventory! bg-inventory/10"}
           disabled={!hasStock ? true : false}
         >

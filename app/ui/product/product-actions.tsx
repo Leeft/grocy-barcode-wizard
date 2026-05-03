@@ -20,28 +20,6 @@ export default function BarcodeActions({
 
   return (
     <div className={clsx("flex", "flex-col", "gap-y-5", "tracking-normal", "py-20", className)}>
-      <BarcodeAction>
-        <legend className="text-spoiled ml-3 px-2 font-bold tracking-wide uppercase">Consume spoiled</legend>
-        amount; transaction_type = 'consume'; spoiled = 'true'; recipe_id; location_id; exact_amount;
-        allow_subproduct_substitution;
-      </BarcodeAction>
-      <BarcodeAction>
-        <legend className="text-open ml-3 px-2 font-bold tracking-wide uppercase">Open</legend>
-        amount; allow_subproduct_substitution;
-      </BarcodeAction>
-      <BarcodeAction>
-        <legend className="text-inventory ml-3 px-2 font-bold tracking-wide uppercase">Inventory</legend>
-        new_amount; best_before_date; shopping_location_id; location_id; price; stock_label_type; note;
-      </BarcodeAction>
-      <BarcodeAction>
-        <legend className="text-shopping-list ml-3 px-2 font-bold tracking-wide uppercase">
-          Add to shopping list
-        </legend>
-        <a target="_blank" href="http://192.168.10.54/api#/Stock/post_stock_shoppinglist_add_product">
-          /shoppinglist/add_product
-        </a>
-        : product_id; qu_id; list_id; product_amount; note;
-      </BarcodeAction>
     </div>
   );
 }
