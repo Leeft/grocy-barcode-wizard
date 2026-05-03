@@ -42,6 +42,8 @@
 
   --color-form-fieldset-legend: var(--color-gray-200);
   --color-form-cancel-button: var(--color-teal-500);
+  --color-form-open-fold: var(--color-orange-300);
+  --color-form-close-fold: var(--color-teal-500);
 
   /* Camera app */
   --color-disable-camera: var(--color-green-800);

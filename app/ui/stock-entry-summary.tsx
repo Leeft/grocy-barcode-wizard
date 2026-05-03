@@ -4,9 +4,18 @@ import { Product, ProductLocation, QuantityUnit, StockEntry } from "@/interfaces
 import { toLookup } from "@/lib/utils";
 import { LocationContext } from "@/providers/location-context";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
+import { clsx } from "clsx";
 import { use, useContext } from "react";
 
-export function StockEntrySummary({ se, product }: { se: StockEntry; product: Product }) {
+export function StockEntrySummary({
+  se,
+  product,
+  className,
+}: {
+  se: StockEntry;
+  product: Product;
+  className: string;
+}) {
   const units = toLookup(use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>));
   const locations = toLookup(use(useContext(LocationContext) as Promise<ProductLocation[]>));
   const dueType = dueTypeToString(product.due_type!, product.default_best_before_days);
@@ -16,12 +25,16 @@ export function StockEntrySummary({ se, product }: { se: StockEntry; product: Pr
   }
 
   return (
-    <div className="w-full">
-      <code className="text-xs">{se.stock_id}</code> : {(se.amount !== null && se.amount) || "??"}&nbsp;
-      {se.amount !== null && se.amount !== undefined && se.amount != 1 && product?.qu_id_stock
-        ? units[product.qu_id_stock!]!.name_plural
-        : units[product.qu_id_stock!]!.name}{" "}
-      {se.open ? <span>(opened)</span> : ""} at {locations[se.location_id!]!.name}
+    <div className={clsx("w-full", className)}>
+      <code className="text-xs">{se.stock_id}</code> :{" "}
+      <span className="text-stock-unit">
+        {(se.amount !== null && se.amount) || "??"}&nbsp;
+        {se.amount !== null && se.amount !== undefined && se.amount != 1 && product?.qu_id_stock
+          ? units[product.qu_id_stock!]!.name_plural
+          : units[product.qu_id_stock!]!.name}
+      </span>{" "}
+      {se.open ? <span>(opened)</span> : ""} at{" "}
+      <span className="text-location">{locations[se.location_id!]!.name}</span>
       {dueType !== "No expiry" && se.best_before_date !== "2999-12-31" ? (
         <>
           ; {dueType} date is <code>{se.best_before_date}</code>{" "}

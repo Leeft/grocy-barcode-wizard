@@ -10,7 +10,7 @@ export default function Navbar({ promise }: { promise: Promise<CountPendingProdu
   const iconClassName = "relative top-[-2] inline";
   const count = use(promise);
   return (
-    <nav className="mb-3 text-slate-500">
+    <nav className="mb-3 md:mb-6 text-slate-500">
       <div className="flex flex-wrap gap-x-0.5 md:gap-x-2 pt-2 text-xs font-bold uppercase md:text-lg tracking-tight md:tracking-normal">
         <NavigationElement href="/">
           <House size="15" className={iconClassName} /> Home
