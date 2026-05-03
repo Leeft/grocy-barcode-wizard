@@ -40,8 +40,8 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({
   const options: CustomisableSelectOptionArray = [];
 
   if (units !== undefined) {
-    if ( firstOption !== undefined ) {
-      options.push( firstOption );
+    if (firstOption !== undefined) {
+      options.push(firstOption);
     } else if (!noFirstOption) {
       options.push({
         value: allowEmpty ? "0" : "",

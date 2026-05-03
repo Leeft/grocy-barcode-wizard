@@ -64,7 +64,11 @@ export async function ExistingProductInfo({ product }: { product: Product }) {
       : "-";
 
   const check = (val: boolean) =>
-    val ? <span className="text-check-active font-bold">✓</span> : <span className="text-check-inactive font-bold">✗</span>;
+    val ? (
+      <span className="text-check-active font-bold">✓</span>
+    ) : (
+      <span className="text-check-inactive font-bold">✗</span>
+    );
 
   return (
     <>
@@ -127,8 +131,7 @@ function GrocyProductLink({ productId, children }: { productId: number; children
         title="Link to the product in Grocy"
         className="static mb-[-2] inline-flex underline! decoration-dashed underline-offset-3"
       >
-        <Grocy className="relative top-0 ml-[-3] w-6 fill-[#4b7daa] stroke-[#467baa] pr-2 pl-0" />{" "}
-        {children}
+        <Grocy className="relative top-0 ml-[-3] w-6 fill-[#4b7daa] stroke-[#467baa] pr-2 pl-0" /> {children}
       </a>
     </div>
   );

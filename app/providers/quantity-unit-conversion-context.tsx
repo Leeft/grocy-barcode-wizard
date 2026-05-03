@@ -3,9 +3,7 @@
 import { QuantityUnitConversion } from "@/interfaces/grocy";
 import { createContext } from "react";
 
-export const QuantityUnitConversionContext = createContext<Promise<
-  QuantityUnitConversion[]
-> | null>(null);
+export const QuantityUnitConversionContext = createContext<Promise<QuantityUnitConversion[]> | null>(null);
 
 export default function QuantityUnitConversionProvider({
   children,
@@ -14,9 +12,5 @@ export default function QuantityUnitConversionProvider({
   children: React.ReactNode;
   promise: Promise<QuantityUnitConversion[]> | null;
 }) {
-  return (
-    <QuantityUnitConversionContext value={promise}>
-      {children}
-    </QuantityUnitConversionContext>
-  );
+  return <QuantityUnitConversionContext value={promise}>{children}</QuantityUnitConversionContext>;
 }

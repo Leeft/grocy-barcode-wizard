@@ -15,10 +15,7 @@ export default function FormRadiobutton({
 }) {
   return (
     <div className={`inline-flex grow items-center ${className}`}>
-      <label
-        className="relative w-8 flex-none cursor-pointer items-center pt-3"
-        htmlFor={id}
-      >
+      <label className="relative w-8 flex-none cursor-pointer items-center pt-3" htmlFor={id}>
         <input
           name={name}
           defaultValue={defaultValue}
@@ -29,10 +26,7 @@ export default function FormRadiobutton({
         />
         <span className="absolute top-5.5 left-2.5 h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-slate-300 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"></span>
       </label>
-      <label
-        className="float-left cursor-pointer pt-1 text-sm text-slate-200"
-        htmlFor={id}
-      >
+      <label className="float-left cursor-pointer pt-1 text-sm text-slate-200" htmlFor={id}>
         {children}
       </label>
     </div>

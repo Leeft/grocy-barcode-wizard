@@ -3,9 +3,7 @@
 import { ShoppingLocation } from "@/interfaces/grocy";
 import { createContext } from "react";
 
-export const ShoppingLocationContext = createContext<Promise<
-  ShoppingLocation[]
-> | null>(null);
+export const ShoppingLocationContext = createContext<Promise<ShoppingLocation[]> | null>(null);
 
 export default function ShoppingLocationProvider({
   children,
@@ -14,9 +12,5 @@ export default function ShoppingLocationProvider({
   children: React.ReactNode;
   promise: Promise<ShoppingLocation[]> | null;
 }) {
-  return (
-    <ShoppingLocationContext value={promise}>
-      {children}
-    </ShoppingLocationContext>
-  );
+  return <ShoppingLocationContext value={promise}>{children}</ShoppingLocationContext>;
 }

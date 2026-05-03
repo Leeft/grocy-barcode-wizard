@@ -96,7 +96,7 @@ export function AmountPlusUnitSelection({
                   setTimeout(() => form.validate(), 40);
                 }}
               >
-                <CornerDownLeft className="radius-md mb-2 size-5 cursor-pointer border border-dashed border-form-input-border p-0.5" />
+                <CornerDownLeft className="radius-md border-form-input-border mb-2 size-5 cursor-pointer border border-dashed p-0.5" />
               </Button>
             </div>
           </div>

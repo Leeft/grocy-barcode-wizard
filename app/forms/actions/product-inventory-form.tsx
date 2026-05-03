@@ -8,22 +8,19 @@ import { createProductInventorySchema } from "./product-inventory-schema";
 import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import { dateInputCommonStyles, inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
-import { UnitForAmount } from "@/components/unit-for-amount";
+import { inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
 import {
   Product,
   ProductLocation as PrLocation,
   ShoppingLocation,
-  StockEntry,
   QuantityUnitConversion,
 } from "@/interfaces/grocy";
 import CustomisableSelect from "@/ui/customisable-select";
-import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
+import { StockLabelType } from "@/generated/prisma/enums";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
 import Link from "next/link";
-import { GrocyConfigContext } from "@/providers/grocy-config-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
@@ -120,7 +117,7 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
                       })}
                       required
                       onFocus={(e) => e.currentTarget.select()}
-                      className={dateInputCommonStyles}
+                      className={inputCommonStyles}
                     />
                   </FormField>
                 </div>

@@ -5,7 +5,6 @@ import {
   inputCommonStyles,
   unitSystemOptions,
   dueDateTypeOptions,
-  dateInputCommonStyles,
   purchasePriceOptions,
 } from "@/lib/product-form-shared";
 import {
@@ -256,7 +255,7 @@ export default function CreateProductFields({
                     type: "date",
                   })}
                   required
-                  className={dateInputCommonStyles}
+                  className={inputCommonStyles}
                   onChange={(e) => {
                     if (fields.packagingDate.value)
                       setDueDays(
@@ -277,7 +276,7 @@ export default function CreateProductFields({
               <FormField>
                 <input
                   {...getInputProps(fields.packagingDate, { type: "date" })}
-                  className={dateInputCommonStyles}
+                  className={inputCommonStyles}
                   max={dateToISODate(new Date())}
                   onChange={(e) => {
                     if (fields.dueOrExpiryDate.value)

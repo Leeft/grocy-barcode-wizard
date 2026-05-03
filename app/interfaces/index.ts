@@ -3,15 +3,6 @@ export interface Option {
   label: string;
 }
 
-export type QUConversion = {
-  id: number | undefined;
-  from_qu_id: number | undefined;
-  to_qu_id: number | undefined;
-  factor: number | undefined;
-  product_id: number | undefined;
-  row_created_timestamp: string | undefined;
-};
-
 export interface SerialisedBarcode {
   barcode: string;
   type: string;

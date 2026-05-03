@@ -27,9 +27,7 @@ export default function QueueLayout({
           <ProductProvider promise={fetchProducts()}>
             <ShoppingLocationProvider promise={fetchShoppingLocations()}>
               <LocationProvider promise={fetchLocations()}>
-                <GrocyConfigProvider promise={fetchConfig()}>
-                  {children}
-                </GrocyConfigProvider>
+                <GrocyConfigProvider promise={fetchConfig()}>{children}</GrocyConfigProvider>
               </LocationProvider>
             </ShoppingLocationProvider>
           </ProductProvider>

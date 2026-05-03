@@ -3,7 +3,7 @@ import { fetchProductStock, findProductInGrocy } from "@/lib/grocy";
 import { redirect } from "next/navigation";
 import { ProductOpenForm } from "@/forms/actions/product-open-form";
 
-export default async function OpenPage(props: PageProps<'/scan/[barcode]/open'>) {
+export default async function OpenPage(props: PageProps<"/scan/[barcode]/open">) {
   const { barcode } = await props.params;
 
   const barcodeObject = new Barcode({
@@ -13,7 +13,12 @@ export default async function OpenPage(props: PageProps<'/scan/[barcode]/open'>)
 
   const grocyProduct = await findProductInGrocy(barcodeObject);
 
-  if (grocyProduct === undefined || grocyProduct === null || grocyProduct.active === 0 || grocyProduct.id === undefined) {
+  if (
+    grocyProduct === undefined ||
+    grocyProduct === null ||
+    grocyProduct.active === 0 ||
+    grocyProduct.id === undefined
+  ) {
     redirect("/scan");
   }
 

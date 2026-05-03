@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ProductConsumeForm } from "@/forms/actions/product-consume-form";
 
-export default async function ConsumePage(props: PageProps<'/scan/[barcode]/consume'>) {
+export default async function ConsumePage(props: PageProps<"/scan/[barcode]/consume">) {
   const { barcode } = await props.params;
   const query = await props.searchParams;
 

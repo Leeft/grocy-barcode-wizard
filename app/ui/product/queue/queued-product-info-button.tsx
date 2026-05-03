@@ -77,7 +77,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
             </div>
 
             {product.dueDateType !== DueDateType.NO_EXPIRY && product.canBeFrozen && (
-              <div className="flex-1 text-is-freezer">
+              <div className="text-is-freezer flex-1">
                 <Snowflake size="15" className="relative top-[-2] inline" /> Product can be frozen
               </div>
             )}
@@ -85,7 +85,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
             {product.dueDateType !== DueDateType.NO_EXPIRY &&
               product.canBeFrozen &&
               !defaultLocation!.is_freezer && (
-                <div className="flex-1 text-alert">
+                <div className="text-alert flex-1">
                   <>
                     <TriangleAlert size="15" className="relative top-[-2] inline" /> Default storage location
                     is not a freezer

@@ -6,38 +6,20 @@ import CustomisableSelect, {
   CustomisableSelectProps,
 } from "@/ui/customisable-select";
 
-interface ShoppingLocationDropdownProps extends Omit<
-  CustomisableSelectProps,
-  "options"
-> {
+interface ShoppingLocationDropdownProps extends Omit<CustomisableSelectProps, "options"> {
   units: Location[];
   options?: CustomisableSelectProps["options"];
 }
 
-export const ShoppingLocationDropdown: React.FC<
-  ShoppingLocationDropdownProps
-> = ({
-  units,
-  ...rest
-}) => {
+export const ShoppingLocationDropdown: React.FC<ShoppingLocationDropdownProps> = ({ units, ...rest }) => {
   const options: CustomisableSelectOptionArray = locationsToOptions({
     entityObjects: units,
   });
 
-  return (
-    <CustomisableSelect
-      {...rest}
-      options={options}
-
-    />
-  );
+  return <CustomisableSelect {...rest} options={options} />;
 };
 
-function locationsToOptions({
-  entityObjects,
-}: {
-  entityObjects: Location[];
-}): CustomisableSelectOptionArray {
+function locationsToOptions({ entityObjects }: { entityObjects: Location[] }): CustomisableSelectOptionArray {
   if (entityObjects === undefined) return [];
 
   const options: CustomisableSelectOptionArray = [];

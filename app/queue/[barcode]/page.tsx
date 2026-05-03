@@ -1,9 +1,5 @@
 import Barcode from "@/lib/barcode";
-import {
-  getProduct,
-  getCapturedProductsByBarcode,
-  CapturedProductsByBarcode,
-} from "@/lib/product-db";
+import { getProduct, getCapturedProductsByBarcode, CapturedProductsByBarcode } from "@/lib/product-db";
 import { EditProductForm } from "@/ui/forms/edit-product-form";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

@@ -23,10 +23,6 @@ export const inputCommonStyles: string = clsx(
   "text-md",
 );
 
-export const dueDaysInputCommonStyles: string = clsx(inputCommonStyles);
-
-export const dateInputCommonStyles: string = clsx(inputCommonStyles);
-
 export const dueDateTypeOptions = [
   { value: DueDateType.BEST_BEFORE, label: "Best before" },
   { value: DueDateType.EXPIRY_DATE, label: "Expires at" },

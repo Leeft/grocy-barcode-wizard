@@ -42,16 +42,10 @@ export function ModeToUnitTitle(mode: UnitSystem | string | undefined) {
   return <>{value} *</>;
 }
 
-interface UnitModeDropdownProps extends Omit<CustomisableSelectProps, 'options'> {
-  options?: CustomisableSelectProps['options'];
+interface UnitModeDropdownProps extends Omit<CustomisableSelectProps, "options"> {
+  options?: CustomisableSelectProps["options"];
 }
 
-export const UnitModeDropdown: React.FC<UnitModeDropdownProps> = ({
-  ...rest
-}) => {
-  return (
-    <CustomisableSelect {...rest}
-      options={unitSystemOptions}
-    />
-  );
-}
+export const UnitModeDropdown: React.FC<UnitModeDropdownProps> = ({ ...rest }) => {
+  return <CustomisableSelect {...rest} options={unitSystemOptions} />;
+};

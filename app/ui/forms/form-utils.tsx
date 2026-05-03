@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { dueDaysInputCommonStyles } from "@/lib/product-form-shared";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 import { FieldMetadata, getInputProps } from "@conform-to/react";
 import TooltipWrapper from "../tooltip-wrapper";
 import clsx from "clsx";
@@ -132,7 +132,7 @@ const DueDaysInput: React.FC<DueDaysInputProps> = ({
         {...getInputProps(fieldInfo, {
           type: "number",
         })}
-        className={`${dueDaysInputCommonStyles} ${className}`}
+        className={`${inputCommonStyles} ${className}`}
         placeholder={placeholder}
         min={0}
         max={10000}
@@ -149,7 +149,7 @@ const DueDaysInput: React.FC<DueDaysInputProps> = ({
         {...getInputProps(fieldInfo, {
           type: "number",
         })}
-        className={`${dueDaysInputCommonStyles} ${className}`}
+        className={`${inputCommonStyles} ${className}`}
         placeholder={placeholder}
         min={0}
         max={10000}

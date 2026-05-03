@@ -13,7 +13,7 @@ export default async function AddPage({ params }: { params: Promise<{ barcode: s
 
   const grocyProduct = await findProductInGrocy(barcodeObject);
 
-  if (grocyProduct === undefined || grocyProduct === null || grocyProduct.active === 0 ) {
+  if (grocyProduct === undefined || grocyProduct === null || grocyProduct.active === 0) {
     redirect("/scan");
   }
 

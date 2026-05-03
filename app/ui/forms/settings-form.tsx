@@ -29,7 +29,7 @@ export function SettingsForm({
   const data = use(settings);
   const apiKeyData = use(apiKeysPromise);
 
-console.log( apiKeyData );
+  console.log(apiKeyData);
 
   const [form, fields] = useForm({
     lastResult,

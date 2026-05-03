@@ -3,9 +3,7 @@
 import { ProductGroup } from "@/interfaces/grocy";
 import { createContext } from "react";
 
-export const ProductGroupContext = createContext<Promise<
-  ProductGroup[]
-> | null>(null);
+export const ProductGroupContext = createContext<Promise<ProductGroup[]> | null>(null);
 
 export default function ProductGroupProvider({
   children,

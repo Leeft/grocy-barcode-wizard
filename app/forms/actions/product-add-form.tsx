@@ -8,7 +8,7 @@ import { createProductAddSchema } from "./product-add-schema";
 import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import { dateInputCommonStyles, inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
+import { inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import {
   Product,
@@ -217,7 +217,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                       })}
                       required
                       onFocus={(e) => e.currentTarget.select()}
-                      className={dateInputCommonStyles}
+                      className={inputCommonStyles}
                     />
                   </FormField>
                 </div>
