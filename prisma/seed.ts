@@ -11,6 +11,14 @@ const userData: Prisma.UserCreateInput[] = [
         openCameraByDefault: true,
       },
     },
+    userApiKeys: {
+      create: [
+        {
+          apiKey: 'dBn5rdkuJ9w8KaxWpuSezWiaEK68TzyH',
+          created: new Date(),
+        }
+      ]
+    },
     created: new Date(),
   },
 ];

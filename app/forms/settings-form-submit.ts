@@ -10,6 +10,7 @@ export async function settingsSubmit(prevstate: unknown, formData: FormData) {
   const submission = parseWithZod(formData, { schema: SettingsFormSchema });
 
   if (submission.status !== "success") {
+    console.log("Settings submit error:", submission);
     return submission.reply();
   }
 
@@ -28,7 +29,31 @@ export async function settingsSubmit(prevstate: unknown, formData: FormData) {
     },
   });
 
-  // Revalidate the cache for the invoices page and redirect the user.
+  const toDelete = data.apiKeys
+    .filter((key) => key.delete !== undefined && key.id !== undefined)
+    .map((key) => Number(key.id));
+
+  await prisma.userApiKey.deleteMany({
+    where: {
+      userId: 1, // TODO: Actual users
+      id: { in: toDelete },
+    },
+  });
+
+  const toCreate = data.apiKeys
+    .filter((key) => key.delete === undefined && key.id === undefined)
+    .map((key) => {
+      return {
+        userId: 1, // TODO: Actual users
+        apiKey: key.apiKey,
+        created: key.created!,
+      };
+    });
+
+  await prisma.userApiKey.createMany({
+    data: toCreate,
+  });
+
   revalidatePath("/settings");
   redirect("/settings");
 }

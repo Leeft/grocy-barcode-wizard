@@ -3,21 +3,27 @@ import { NextRequest } from "next/server";
 import { findProductInGrocy } from "@/lib/grocy";
 import Barcode from "@/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
-import { ReceivedBarcode } from "@/interfaces/json-objects";
+import { ReceivedBarcode, ReceivedApiKey } from "@/interfaces/json-objects";
 import { findProductInOpenFoodFacts } from "@/lib/open-food-facts";
 import { NotFoundError } from "@/lib/errors";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import { Product } from "@/interfaces/grocy";
-
-// TODO FIXME: Access control
+import { getApiKey } from "@/lib/user-db";
 
 /************************** endpoints ****************************/
 
 export async function POST(req: Request) {
+  const userId = await isAuthorized(req);
+  if (userId === undefined) {
+    return bbuddyErrorResponse(401, `Unauthorized`);
+  }
+
   if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
     const formData = await req.formData();
     const code = formData.get("barcode")?.toString();
-    if (code !== undefined && code !== null) return processReceivedBarcode(code);
+    if (code !== undefined && code !== null) {
+      return processReceivedBarcode(code);
+    }
   }
 
   if (req.headers.get("content-type") === "application/json") {
@@ -38,6 +44,11 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: NextRequest) {
+  const userId = await isAuthorized(req);
+  if (userId === undefined) {
+    return bbuddyErrorResponse(401, `Unauthorized`);
+  }
+
   if (req.nextUrl.searchParams.get("barcode")) {
     const code = req.nextUrl.searchParams.get("barcode");
     if (code !== undefined && code !== null) return processReceivedBarcode(code);
@@ -57,6 +68,53 @@ export async function GET(req: NextRequest) {
 }
 
 /************************* supporting code ****************************/
+
+/* Fuzzy logic request matching, may get the apikey as a header, an
+ * url parameter, or as a form submit or a JSON encoded payload.
+ */
+async function isAuthorized(req: Request | NextRequest): Promise<number | undefined> {
+  let apiKey;
+
+  if (req.headers.get("bbuddy-api-key")) {
+    apiKey = req.headers.get("bbuddy-api-key");
+  } else if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
+    const formData = await req.formData();
+    apiKey = formData.get("apikey")?.toString();
+  }
+
+  if (apiKey === undefined && (req as NextRequest).nextUrl !== undefined) {
+    const nReq = req as NextRequest;
+    if (nReq.nextUrl.searchParams.get("apikey")) {
+      apiKey = nReq.nextUrl.searchParams.get("apikey");
+    }
+  }
+
+  if (
+    apiKey === undefined &&
+    req.method !== "GET" &&
+    req.headers.get("content-type") === "application/json"
+  ) {
+    const reqDecoder = JsonDecoder.object<ReceivedApiKey>(
+      {
+        apikey: JsonDecoder.string(),
+      },
+      "ReceivedApiKey",
+    );
+    const decoded = reqDecoder.decode(await req.json());
+    if (decoded.isOk()) {
+      apiKey = decoded.value.apikey;
+    }
+  }
+
+  if (apiKey !== undefined && apiKey !== null) {
+    const res = await getApiKey(apiKey);
+    if (res !== undefined && res !== null && res.userId !== undefined) {
+      return res.userId;
+    }
+  }
+
+  return;
+}
 
 async function processReceivedBarcode(code: string) {
   let barcode: Barcode;

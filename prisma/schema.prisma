@@ -131,7 +131,7 @@ model User {
   email         String
   created       DateTime
   settings      Settings?
-  userApiKeys   UserApiKeys?
+  userApiKeys   UserApiKey[]
   products      Product[]
   productPhotos ProductPhoto[]
 }
@@ -143,10 +143,10 @@ model Settings {
   playSoundOnScan     Boolean @default(false)
 }
 
-model UserApiKeys {
+model UserApiKey {
   id      Int      @id @default(autoincrement())
-  userId  Int      @unique
+  userId  Int
   user    User     @relation(fields: [userId], references: [id])
-  apiKey  String
+  apiKey  String   @unique
   created DateTime
 }

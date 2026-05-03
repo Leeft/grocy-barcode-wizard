@@ -18,3 +18,6 @@ export type OpenFoodFactsNotFoundResult = {
 export type ReceivedBarcode = {
   barcode: string;
 };
+export type ReceivedApiKey = {
+  apikey: string;
+};

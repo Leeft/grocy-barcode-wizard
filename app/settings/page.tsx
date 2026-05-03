@@ -1,13 +1,11 @@
 import { getSettings } from "@/lib/settings-db";
+import { getApiKeys } from "@/lib/user-db";
 import { SettingsForm } from "@/ui/forms/settings-form";
 
 export default function Settings() {
-
-  const settings = getSettings(1);
-
   return (
     <div>
-      <SettingsForm settings={settings} />
+      <SettingsForm settings={getSettings(1)} apiKeys={getApiKeys(1)} />
     </div>
   );
 }
