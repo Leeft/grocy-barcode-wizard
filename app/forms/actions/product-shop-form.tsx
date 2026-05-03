@@ -5,21 +5,18 @@ import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productShopSubmit } from "./product-shop-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { createProductShopSchema } from "./product-shop-schema";
-import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
-import clsx from "clsx";
-import { inputCommonStyles } from "@/lib/product-form-shared";
 import { Product, ShoppingList } from "@/interfaces/grocy";
-import Link from "next/link";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 import { CaptureSubmitOnEnter } from "../capture-submit";
 import { CustomisableSelect, CustomisableSelectOptionArray } from "@/ui/customisable-select";
 import { ShoppingListContext } from "@/providers/shopping-list-context";
+import { ActionFormNote } from "./components/action-form-note";
+import { ActionFormSubmit } from "./components/action-form-submit";
+import { ActionFormCancel } from "./components/action-form-cancel";
 
 export function ProductShopForm({ code, product }: { code: string; product: Product }) {
-  const schema = createProductShopSchema();
-
   const [lastResult, action, submitPending] = useActionState(productShopSubmit, undefined);
 
   const shoppingLists = use(useContext(ShoppingListContext) as Promise<ShoppingList[]>);
@@ -37,7 +34,7 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: schema });
+      return parseWithZod(formData, { schema: createProductShopSchema() });
     },
 
     shouldValidate: "onBlur",
@@ -72,11 +69,11 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
             />
           </FormRow>
 
-          <FormRow comment="stock entry">
+          <FormRow comment="shopping list entry">
             <FormColumn className="w-full">
               <FormLabel
                 htmlFor={fields.listId.name}
-                title="Specific stock entry"
+                title="Shopping list entry"
                 className="relative top-[-8] mb-0!"
               />
               <FormField className="flex flex-row gap-x-2">
@@ -85,7 +82,7 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
                     type: "hidden",
                   })}
                   options={shoppingListOptions}
-                  className="w-full"
+                  className="w-full md:w-110"
                 />
               </FormField>
               <FormErrors id={fields.listId.errorId} errors={fields.listId.errors} />
@@ -93,56 +90,19 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
           </FormRow>
 
           <FormRow comment="note">
-            <FormColumn className="w-full md:w-110">
-              <div className={`flex`}>
-                <FormLabel htmlFor={fields.note.name} title="Note" className="relative top-[-8] mb-0!" />
-              </div>
-              <FormField>
-                <textarea
-                  {...getInputProps(fields.note, {
-                    type: "text",
-                    value: false,
-                  })}
-                  className={clsx(inputCommonStyles, "w-full")}
-                >
-                  {fields.note.value}
-                </textarea>
-              </FormField>
-              <FormErrors id={fields.note.errorId} errors={fields.note.errors} />
-            </FormColumn>
+            <ActionFormNote field={fields.note} multiLine={true} />
           </FormRow>
 
           <FormRow comment="Add to list button">
-            <FormColumn className="pt-3">
-              <Button
-                type="submit"
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "bg-shopping-list/50!",
-                  "border-shopping-list/90!",
-                )}
-                disabled={submitPending}
-              >
-                Add to list
-              </Button>
-            </FormColumn>
-            <FormColumn className="pt-5.5">
-              <Link
-                href={`/scan/${code}`}
-                onClick={() => form.reset()}
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "p-2.5!",
-                  "rounded-lg",
-                  "bg-form-cancel-button/30!",
-                  "border-form-cancel-button/70!",
-                )}
-              >
-                Cancel
-              </Link>
-            </FormColumn>
+            <ActionFormSubmit
+              className="bg-shopping-list/50! border-shopping-list/90!"
+              pending={submitPending}
+            >
+              Add to list
+            </ActionFormSubmit>
+            <ActionFormCancel code={code} onClick={() => form.reset()}>
+              Cancel
+            </ActionFormCancel>
           </FormRow>
         </FieldSet>
       </form>

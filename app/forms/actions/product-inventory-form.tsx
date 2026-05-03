@@ -5,26 +5,27 @@ import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productInventorySubmit } from "./product-inventory-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { createProductInventorySchema } from "./product-inventory-schema";
-import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import { inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 import {
   Product,
   ProductLocation as PrLocation,
   ShoppingLocation,
   QuantityUnitConversion,
 } from "@/interfaces/grocy";
-import CustomisableSelect from "@/ui/customisable-select";
 import { StockLabelType } from "@/generated/prisma/enums";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
-import Link from "next/link";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 import { CaptureSubmitOnEnter } from "../capture-submit";
+import { ActionFormStockLabelType } from "./components/action-form-stock-label-type";
+import { ActionFormNote } from "./components/action-form-note";
+import { ActionFormCancel } from "./components/action-form-cancel";
+import { ActionFormSubmit } from "./components/action-form-submit";
 
 export function ProductInventoryForm({ code, product }: { code: string; product: Product }) {
   const conversions = use(
@@ -195,75 +196,20 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
           </FormRow>
 
           <FormRow comment="stockLabelType">
-            <FormColumn className="w-full">
-              <div className="w-full md:w-110">
-                <FormLabel
-                  htmlFor={fields.stockLabelType.name}
-                  title={`Stock entry label`}
-                  className="inline-block"
-                ></FormLabel>
-                <FormField>
-                  <CustomisableSelect
-                    {...getInputProps(fields.stockLabelType, {
-                      type: "hidden",
-                    })}
-                    options={stockLabelOptions}
-                    className="w-40"
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.stockLabelType.errorId} errors={fields.stockLabelType.errors} />
-            </FormColumn>
+            <ActionFormStockLabelType field={fields.stockLabelType} />
           </FormRow>
 
           <FormRow comment="note">
-            <FormColumn className="w-full md:w-110">
-              <div className={`flex`}>
-                <FormLabel htmlFor={fields.note.name} title="Note" className="relative top-[-8] mb-0!" />
-              </div>
-              <FormField>
-                <input
-                  {...getInputProps(fields.note, {
-                    type: "text",
-                  })}
-                  className={clsx(inputCommonStyles, "w-full")}
-                />
-              </FormField>
-              <FormErrors id={fields.note.errorId} errors={fields.note.errors} />
-            </FormColumn>
+            <ActionFormNote field={fields.note} />
           </FormRow>
 
           <FormRow comment="Inventory button">
-            <FormColumn className="pt-3">
-              <Button
-                type="submit"
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "bg-inventory/50!",
-                  "border-inventory/90!",
-                )}
-                disabled={submitPending}
-              >
-                Update inventory
-              </Button>
-            </FormColumn>
-            <FormColumn className="pt-5.5">
-              <Link
-                href={`/scan/${code}`}
-                onClick={() => form.reset()}
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "p-2.5!",
-                  "rounded-lg",
-                  "bg-form-cancel-button/30!",
-                  "border-form-cancel-button/70!",
-                )}
-              >
-                Cancel
-              </Link>
-            </FormColumn>
+            <ActionFormSubmit className="bg-inventory/50! border-inventory/90!" pending={submitPending}>
+              Update inventory
+            </ActionFormSubmit>
+            <ActionFormCancel code={code} onClick={() => form.reset()}>
+              Cancel
+            </ActionFormCancel>
           </FormRow>
         </FieldSet>
       </form>

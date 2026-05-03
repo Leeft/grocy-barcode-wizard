@@ -3,24 +3,21 @@
 import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { Button } from "@/ui/button";
-import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
-import clsx from "clsx";
+import { FormRow } from "@/ui/forms/form-utils";
 import { Product, ProductLocation, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
-import Link from "next/link";
-import CustomisableSelect from "@/ui/customisable-select";
-import { StockEntrySummaryText } from "@/ui/stock-entry-summary";
 import { sumStock } from "@/lib/utils";
 import { productTransferSubmit } from "@/forms/actions/product-transfer-submit";
 import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
 import { LocationContext } from "@/providers/location-context";
-import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { CaptureSubmitOnEnter } from "../capture-submit";
-import { inputCommonStyles } from "@/lib/product-form-shared";
+import { ActionFormStockEntryId } from "./components/action-form-stock-entry-id";
+import { ActionFormCancel } from "./components/action-form-cancel";
+import { ActionFormSubmit } from "./components/action-form-submit";
+import { ActionFormLocationId } from "./components/action-form-location-id";
 
 export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
   const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
@@ -53,21 +50,8 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
       return parseWithZod(formData, { schema: schema });
     },
 
-    // Validate the form on blur event triggered
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
-  });
-
-  const stockOptions = stock
-    .filter((se) => se.location_id === locationFrom)
-    .map((se) => {
-      const node = StockEntrySummaryText({ product: product, se: se });
-      return { value: se.stock_id!, label: node };
-    });
-
-  stockOptions.unshift({
-    value: "",
-    label: "",
   });
 
   const uniqueLocationsFromStock = [
@@ -113,38 +97,19 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
           <Legend className="text-transfer">Transfer</Legend>
 
           <FormRow comment="fromLocationId">
-            <FormColumn className="w-full">
-              <div className="w-full md:w-110">
-                <FormLabel
-                  htmlFor={fields.locationIdFrom.name}
-                  title={`Transfer from location`}
-                  className="inline-block"
-                ></FormLabel>
-                <FormField>
-                  <LocationDropdown
-                    {...getInputProps(fields.locationIdFrom, {
-                      type: "number",
-                      value: false,
-                    })}
-                    units={stockFromLocations}
-                    value={locationFrom}
-                    className="w-full flex-2"
-                    noFreezers={product.should_not_be_frozen ? true : false}
-                    allowEmpty={false}
-                    autoFocus={true}
-                    onChange={(e) => {
-                      setLocationFrom(Number(e.currentTarget.value));
-                      const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
-                      setStockAtLocation(newStock);
-                      setAmountValue(
-                        sumStock({ stock: newStock, stockId: fields.stockEntryId.value }).toString(),
-                      );
-                    }}
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.locationIdFrom.errorId} errors={fields.locationIdFrom.errors} />
-            </FormColumn>
+            <ActionFormLocationId
+              field={fields.locationIdFrom}
+              title="Transfer from location"
+              units={stockFromLocations}
+              value={locationFrom}
+              noFreezers={product.should_not_be_frozen ? true : false}
+              onChange={(e) => {
+                setLocationFrom(Number(e.currentTarget.value));
+                const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
+                setStockAtLocation(newStock);
+                setAmountValue(sumStock({ stock: newStock, stockId: fields.stockEntryId.value }).toString());
+              }}
+            />
           </FormRow>
 
           <FormRow comment="amount">
@@ -157,87 +122,33 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
           </FormRow>
 
           <FormRow comment="toLocationId">
-            <FormColumn className="w-full">
-              <div className="w-full md:w-110">
-                <FormLabel
-                  htmlFor={fields.locationIdTo.name}
-                  title={`Transfer to location`}
-                  className="inline-block"
-                ></FormLabel>
-                <FormField>
-                  <LocationDropdown
-                    {...getInputProps(fields.locationIdTo, {
-                      type: "number",
-                      value: false,
-                    })}
-                    units={targetLocations}
-                    value={locationTo}
-                    disableOption={locationFrom.toString()}
-                    className="w-full flex-2"
-                    noFreezers={product.should_not_be_frozen === 1 ? true : false}
-                    allowEmpty={false}
-                    onChange={(e) => setLocationTo(Number(e.currentTarget.value))}
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.locationIdTo.errorId} errors={fields.locationIdTo.errors} />
-            </FormColumn>
+            <ActionFormLocationId
+              field={fields.locationIdTo}
+              title="Transfer to location"
+              units={targetLocations}
+              value={locationTo}
+              noFreezers={product.should_not_be_frozen ? true : false}
+              disableOption={locationFrom.toString()}
+              onChange={(e) => setLocationTo(Number(e.currentTarget.value))}
+            />
           </FormRow>
 
           <FormRow comment="stock entry">
-            <FormColumn className="w-full">
-              <FormLabel
-                htmlFor={fields.stockEntryId.name}
-                title="Specific stock entry"
-                className="relative top-[-8] mb-0!"
-              />
-              <FormField className="flex flex-row gap-x-2">
-                <CustomisableSelect
-                  {...getInputProps(fields.stockEntryId, {
-                    type: "hidden",
-                  })}
-                  options={stockOptions}
-                  className="w-full md:w-110"
-                  onChange={(e) => {
-                    setAmountValue(sumStock({ stock: stock, stockId: e.currentTarget.value }).toString());
-                  }}
-                />
-              </FormField>
-              <FormErrors id={fields.amount.errorId} errors={fields.amount.errors} />
-            </FormColumn>
+            <ActionFormStockEntryId
+              field={fields.stockEntryId}
+              product={product}
+              stock={stock}
+              setAmountValue={setAmountValue}
+            />
           </FormRow>
 
           <FormRow comment="Transfer product button">
-            <FormColumn className="pt-3">
-              <Button
-                type="submit"
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "bg-transfer/50!",
-                  "border-transfer/90!",
-                )}
-                disabled={submitPending}
-              >
-                Transfer
-              </Button>
-            </FormColumn>
-            <FormColumn className="pt-5.5">
-              <Link
-                href={`/scan/${code}`}
-                onClick={() => form.reset()}
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "p-2.5!",
-                  "rounded-lg",
-                  "bg-form-cancel-button/30!",
-                  "border-form-cancel-button/70!",
-                )}
-              >
-                Cancel
-              </Link>
-            </FormColumn>
+            <ActionFormSubmit className="bg-transfer/50! border-transfer/90!" pending={submitPending}>
+              Transfer
+            </ActionFormSubmit>
+            <ActionFormCancel code={code} onClick={() => form.reset()}>
+              Cancel
+            </ActionFormCancel>
           </FormRow>
         </FieldSet>
       </form>

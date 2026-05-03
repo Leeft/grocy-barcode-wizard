@@ -6,14 +6,13 @@ import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { Button } from "@/ui/button";
-import { FormRow, FormColumn, FormLabel, FormField, FormErrors, FormCheckbox } from "@/ui/forms/form-utils";
+import { FormRow, FormColumn, FormField, FormErrors, FormCheckbox } from "@/ui/forms/form-utils";
 import {
   Product,
   ProductLocation as PrLocation,
   StockEntry,
   QuantityUnitConversion,
 } from "@/interfaces/grocy";
-import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { createProductConsumeSchema } from "./product-consume-schema";
 import { productConsumeSubmit } from "./product-consume-submit";
@@ -25,6 +24,10 @@ import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { CaptureSubmitOnEnter } from "../capture-submit";
 import { inputCommonStyles } from "@/lib/product-form-shared";
+import { ActionFormLocationId } from "./components/action-form-location-id";
+import { ActionFormAllowSubproductSubstitution } from "./components/action-form-allowsubproduct";
+import { ActionFormCancel } from "./components/action-form-cancel";
+import { ActionFormSubmit } from "./components/action-form-submit";
 
 export function ProductConsumeForm({
   code,
@@ -122,36 +125,20 @@ export function ProductConsumeForm({
           </Legend>
 
           <FormRow comment="locationId">
-            <FormColumn className="w-full">
-              <div className="w-full md:w-110">
-                <FormLabel
-                  htmlFor={fields.locationId.name}
-                  title={`Consume from location`}
-                  className="inline-block"
-                ></FormLabel>
-                <FormField>
-                  <LocationDropdown
-                    {...getInputProps(fields.locationId, {
-                      type: "number",
-                      value: false,
-                    })}
-                    units={stockLocations}
-                    firstOption={{ value: "0", label: "Pick ..." }}
-                    value={fromLocation}
-                    className="w-full flex-2"
-                    noFreezers={product.should_not_be_frozen ? true : false}
-                    autoFocus={true}
-                    allowEmpty={true}
-                    onChange={(e) => {
-                      const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
-                      setFromLocation(e.currentTarget.value);
-                      setStockFromLocation(newStock);
-                    }}
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.locationId.errorId} errors={fields.locationId.errors} />
-            </FormColumn>
+            <ActionFormLocationId
+              field={fields.locationId}
+              title="Consume from location"
+              units={stockLocations}
+              value={fromLocation}
+              noFreezers={product.should_not_be_frozen ? true : false}
+              firstOption={{ value: "0", label: "Pick ..." }}
+              allowEmpty={true}
+              onChange={(e) => {
+                const newStock = stock.filter((se) => se.location_id === Number(e.currentTarget.value));
+                setFromLocation(e.currentTarget.value);
+                setStockFromLocation(newStock);
+              }}
+            />
           </FormRow>
 
           <FormRow comment="amount">
@@ -180,33 +167,14 @@ export function ProductConsumeForm({
                     </FormCheckbox>
                   </FormField>
                   <FormErrors id={fields.exactAmount.errorId} errors={fields.exactAmount.errors} />
-                </div>{" "}
+                </div>
               </FormColumn>
             </FormRow>
           )}
 
-          <input {...getInputProps(fields.allowSubproductSubstitution, { type: "hidden" })} />
-          {false && (
-            <FormRow comment="allowSubproductSubstitution">
-              <FormColumn className="w-full">
-                <div className="flex flex-col leading-7">
-                  <FormField>
-                    <FormCheckbox fieldInfo={fields.allowSubproductSubstitution}>
-                      Allow subproduct substitution
-                      <TooltipWrapper id="allow-subproduct-substitution">
-                        <code>true</code> when any in stock sub product should be used when the given product
-                        is a parent product and currently not in stock.
-                      </TooltipWrapper>
-                    </FormCheckbox>
-                  </FormField>
-                  <FormErrors
-                    id={fields.allowSubproductSubstitution.errorId}
-                    errors={fields.allowSubproductSubstitution.errors}
-                  />
-                </div>{" "}
-              </FormColumn>
-            </FormRow>
-          )}
+          <FormRow comment="allowSubproductSubstitution">
+            <ActionFormAllowSubproductSubstitution field={fields.allowSubproductSubstitution} />
+          </FormRow>
 
           <FormRow comment="spoiled">
             <FormColumn className="w-full">
@@ -217,45 +185,24 @@ export function ProductConsumeForm({
                   </FormCheckbox>
                 </FormField>
                 <FormErrors id={fields.spoiled.errorId} errors={fields.spoiled.errors} />
-              </div>{" "}
+              </div>
             </FormColumn>
           </FormRow>
 
           <FormRow comment="Consume product button">
-            <FormColumn className="pt-3">
-              <Button
-                type="submit"
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  fields.spoiled.value ? "bg-spoiled/50!" : "bg-consume/50!",
-                  fields.spoiled.value ? "border-spoiled/90!" : "border-consume/90!",
-                )}
-                disabled={submitPending}
-              >
-                {fields.spoiled.value ? "Spoil" : "Consume"}
-              </Button>
-            </FormColumn>
-            <FormColumn className="pt-5.5">
-              <Link
-                href={`/scan/${code}`}
-                onClick={() => form.reset()}
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "p-2.5!",
-                  "rounded-lg",
-                  "bg-form-cancel-button/30!",
-                  "border-form-cancel-button/70!",
-                )}
-              >
-                Cancel
-              </Link>
-            </FormColumn>
+            <ActionFormSubmit
+              pending={submitPending}
+              className={clsx(
+                fields.spoiled.value ? "bg-spoiled/50!" : "bg-consume/50!",
+                fields.spoiled.value ? "border-spoiled/90!" : "border-consume/90!",
+              )}
+            >
+              {fields.spoiled.value ? "Spoil" : "Consume"}
+            </ActionFormSubmit>
+            <ActionFormCancel code={code} onClick={() => form.reset()}>
+              Cancel
+            </ActionFormCancel>
           </FormRow>
-          {/*
-
-           */}
         </FieldSet>
       </form>
     </FormProvider>

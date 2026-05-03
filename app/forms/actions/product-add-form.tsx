@@ -5,10 +5,9 @@ import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productAddSubmit } from "./product-add-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { createProductAddSchema } from "./product-add-schema";
-import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import clsx from "clsx";
-import { inputCommonStyles, stockLabelOptions } from "@/lib/product-form-shared";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import {
   Product,
@@ -22,15 +21,16 @@ import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/pris
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
-import Link from "next/link";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
 import { ProductStockContext } from "@/providers/product-stock-context";
 import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 import { CaptureSubmitOnEnter } from "../capture-submit";
-
-const unitTaggedLabelClass = clsx(); //"w-60 flex grow");
+import { ActionFormCancel } from "./components/action-form-cancel";
+import { ActionFormSubmit } from "./components/action-form-submit";
+import { ActionFormStockLabelType } from "./components/action-form-stock-label-type";
+import { ActionFormNote } from "./components/action-form-note";
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
   const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
@@ -143,7 +143,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
           <FormRow comment="price">
             <FormColumn className="inline w-full">
               <div className="w-72">
-                <div className={`${unitTaggedLabelClass} flex`}>
+                <div className={`flex`}>
                   <div>
                     <FormLabel
                       htmlFor={fields.price.name}
@@ -275,70 +275,20 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
           </FormRow>
 
           <FormRow comment="stockLabelType">
-            <FormColumn className="w-full">
-              <div className="w-full md:w-110">
-                <FormLabel
-                  htmlFor={fields.stockLabelType.name}
-                  title={`Stock entry label`}
-                  className="inline-block"
-                ></FormLabel>
-                <FormField>
-                  <CustomisableSelect
-                    {...getInputProps(fields.stockLabelType, {
-                      type: "hidden",
-                    })}
-                    options={stockLabelOptions}
-                    className="w-40"
-                  />
-                </FormField>
-              </div>
-              <FormErrors id={fields.stockLabelType.errorId} errors={fields.stockLabelType.errors} />
-            </FormColumn>
+            <ActionFormStockLabelType field={fields.stockLabelType} />
           </FormRow>
 
           <FormRow comment="note">
-            <FormColumn className="w-full md:w-110">
-              <div className={`${unitTaggedLabelClass} flex`}>
-                <FormLabel htmlFor={fields.note.name} title="Note" className="relative top-[-8] mb-0!" />
-              </div>
-              <FormField>
-                <input
-                  {...getInputProps(fields.note, {
-                    type: "text",
-                  })}
-                  className={clsx(inputCommonStyles, "w-full")}
-                />
-              </FormField>
-              <FormErrors id={fields.note.errorId} errors={fields.note.errors} />
-            </FormColumn>
+            <ActionFormNote field={fields.note} />
           </FormRow>
 
           <FormRow comment="Add product button">
-            <FormColumn className="pt-3">
-              <Button
-                type="submit"
-                className={clsx(inputCommonStyles, "cursor-pointer", "bg-add/50!", "border-add/90!")}
-                disabled={submitPending}
-              >
-                Purchase
-              </Button>
-            </FormColumn>
-            <FormColumn className="pt-5.5">
-              <Link
-                href={`/scan/${code}`}
-                onClick={() => form.reset()}
-                className={clsx(
-                  inputCommonStyles,
-                  "cursor-pointer",
-                  "p-2.5!",
-                  "rounded-lg",
-                  "bg-form-cancel-button/30!",
-                  "border-form-cancel-button/70!",
-                )}
-              >
-                Cancel
-              </Link>
-            </FormColumn>
+            <ActionFormSubmit className="bg-add/50! border-add/90!" pending={submitPending}>
+              Purchase
+            </ActionFormSubmit>
+            <ActionFormCancel code={code} onClick={() => form.reset()}>
+              Cancel
+            </ActionFormCancel>
           </FormRow>
         </FieldSet>
       </form>
