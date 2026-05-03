@@ -35,14 +35,16 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
 
   try {
     grocyProduct = await findProductInGrocy(barcodeObject);
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (barcodeObject.queuedProductId !== null && barcodeObject.queuedProductId !== undefined) {
       const product = await getProduct(barcodeObject.queuedProductId);
       return <SingleQueuedProduct product={product} />;
     }
 
     if (
+      // @ts-expect-error Can't really make TS here at all
       err.error_message !== undefined &&
+      // @ts-expect-error Can't really make TS here at all
       err.error_message !== "Could not find product in grocy by id or barcode"
     ) {
       console.log("Product promise did not resolve:", err);
