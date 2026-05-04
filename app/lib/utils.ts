@@ -1,3 +1,4 @@
+import { ActionState } from "@/interfaces";
 import { QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { KeyboardEvent } from "react";
 
@@ -106,4 +107,11 @@ export const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
   ) {
     e.preventDefault();
   }
+};
+
+export const toActionState = (
+  message: string,
+  status: "success" | "error",
+): ActionState => {
+  return { message, status };
 };

@@ -6,6 +6,7 @@ import Navbar from "@/ui/navbar";
 import UserProvider from "@/providers/user-context";
 import { getUser } from "./lib/user-db";
 import { countPendingProducts } from "./lib/product-db";
+import toast, { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,32 @@ export default function RootLayout({
           <div className="hidden w-10 md:flex-auto lg:block"></div>
           <main id="main" className="relative w-full max-w-240 grow bg-slate-800 px-2 py-2 text-sm md:px-4">
             <UserProvider promise={getUser(1)}>
+              <div>
+                <Toaster
+                  toastOptions={{
+                    // Define default options
+                    className: "",
+                    duration: 6000,
+                    removeDelay: 1000,
+                    style: {
+                      background: "#363636",
+                      color: "#fff",
+                    },
+
+                    // Default options for specific types
+                    success: {
+                      duration: 3000,
+                      iconTheme: {
+                        primary: "green",
+                        secondary: "black",
+                      },
+                    },
+                    error: {
+                      duration: 10000,
+                    },                    
+                  }}
+                />
+              </div>
               <Navbar promise={countPendingProducts()} />
               {children}
             </UserProvider>

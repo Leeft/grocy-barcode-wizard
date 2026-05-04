@@ -3,17 +3,18 @@
 import clsx from "clsx";
 import Link, { LinkProps } from "next/link";
 import { ShoppingBasket, X, Trash2, PackageOpen, ShelvingUnit, MoveRight, List } from "lucide-react";
-import { Product, StockEntry } from "@/interfaces/grocy";
+import { Product } from "@/interfaces/grocy";
 import React, { use, useContext } from "react";
 import { UrlObject } from "url";
 import { RouteType } from "next/dist/lib/load-custom-routes";
 import { GrocyProductContext } from "@/providers/grocy-product-context";
-import { ProductStockContext } from "@/providers/product-stock-context";
 import { inputCommonStyles } from "@/lib/product-form-shared";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export default function ActionShortCuts({ code }: { code: string }) {
+  const multi = useGetAmountPlusUnitObject();
+  const stock = use(multi.stockEntryPromise);
   const product = use(useContext(GrocyProductContext) as Promise<Product>);
-  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
 
   if (product.active === 0) return <></>;
 
@@ -22,10 +23,15 @@ export default function ActionShortCuts({ code }: { code: string }) {
 
   return (
     <fieldset className="my-2 mt-5 flex flex-col gap-y-4 rounded-md border border-slate-500 px-4 pt-2 pb-5 tracking-[0.9]">
-      <legend className="mb-1 ml-1 px-2 font-bold text-form-fieldset-legend uppercase">Product actions</legend>
+      <legend className="text-form-fieldset-legend mb-1 ml-1 px-2 font-bold uppercase">
+        Product actions
+      </legend>
       <div className="mb-1 flex flex-row flex-wrap gap-3">
-        <ActionLink autoFocus={true} href={`/scan/${code}/add`}
-         className={"text-add! border-add! bg-add/10!"}>
+        <ActionLink
+          autoFocus={true}
+          href={`/scan/${code}/add`}
+          className={"text-add! border-add! bg-add/10!"}
+        >
           <ShoppingBasket className={iconClasses} />
           Purchase ...
         </ActionLink>
@@ -117,11 +123,7 @@ export const ActionLink: React.FC<ActionLinkProps> = ({
   );
 
   if (disabled) {
-    return (
-      <div className={clsx(classes)}>
-        {children}
-      </div>
-    );
+    return <div className={clsx(classes)}>{children}</div>;
   }
 
   return (

@@ -13,12 +13,13 @@ import {
 import { use, useContext, useState } from "react";
 import { GrocyProductContext } from "@/providers/grocy-product-context";
 import { LocationContext } from "@/providers/location-context";
-import { ProductStockContext } from "@/providers/product-stock-context";
 import { StockEntrySummary } from "../stock-entry-summary";
 import { clsx } from "clsx";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export function StockOverview({ code }: { code: string }) {
-  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
+  const multi = useGetAmountPlusUnitObject();
+  const stock = use(multi.stockEntryPromise);
   const product = use(useContext(GrocyProductContext) as Promise<Product>);
 
   if (stock === undefined || product.active === 0) return <></>;
