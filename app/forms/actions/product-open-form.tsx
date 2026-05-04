@@ -1,14 +1,12 @@
 "use client";
 
-import { use, useActionState, useContext, useState } from "react";
+import { useActionState, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { FormRow } from "@/ui/forms/form-utils";
-import { Product, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
+import { Product, StockEntry } from "@/interfaces/grocy";
 import { sumStock } from "@/lib/utils";
 import { productOpenSubmit } from "@/forms/actions/product-open-submit";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
-import { createProductOpenSchema } from "./product-open-schema";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
 import { CaptureSubmitOnEnter } from "../capture-submit";
@@ -16,6 +14,7 @@ import { ActionFormStockEntryId } from "./components/action-form-stock-entry-id"
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormAllowSubproductSubstitution } from "./components/action-form-allowsubproduct";
+import { ProductOpenSchema } from "../action-form-schemas";
 
 export function ProductOpenForm({
   code,
@@ -26,24 +25,27 @@ export function ProductOpenForm({
   product: Product;
   stock: StockEntry[];
 }) {
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
-
   const [lastResult, action, submitPending] = useActionState(productOpenSubmit, undefined);
 
   const [form, fields] = useForm({
     lastResult,
 
     defaultValue: {
-      barcode: code,
-      productId: product.id,
-      amount: 1,
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       allowSubproductSubstitution: true,
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: createProductOpenSchema(product, stock, conversions) });
+      return parseWithZod(formData, { schema: ProductOpenSchema });
     },
 
     shouldValidate: "onBlur",
@@ -72,8 +74,8 @@ export function ProductOpenForm({
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className="text-open">Open</Legend>
@@ -85,6 +87,7 @@ export function ProductOpenForm({
               amountValue={amountValue}
               setAmountValue={setAmountValue}
               autoFocus={true}
+              compoundField={fields.amount.getFieldset()}
             />
           </FormRow>
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { use, useActionState, useContext, useState } from "react";
+import { use, useActionState, useContext } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productShopSubmit } from "./product-shop-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { createProductShopSchema } from "./product-shop-schema";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
 import { Product, ShoppingList } from "@/interfaces/grocy";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
@@ -15,6 +14,7 @@ import { ShoppingListContext } from "@/providers/shopping-list-context";
 import { ActionFormNote } from "./components/action-form-note";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormCancel } from "./components/action-form-cancel";
+import { ProductShopSchema } from "../action-form-schemas";
 
 export function ProductShopForm({ code, product }: { code: string; product: Product }) {
   const [lastResult, action, submitPending] = useActionState(productShopSubmit, undefined);
@@ -29,19 +29,26 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
     lastResult,
 
     defaultValue: {
-      amount: "1",
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       note: undefined,
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: createProductShopSchema() });
+      return parseWithZod(formData, { schema: ProductShopSchema });
     },
 
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
-
-  const [amountValue, setAmountValue] = useState<string>("1");
 
   return (
     <FormProvider context={form.context}>
@@ -55,18 +62,14 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} value={product.id} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className="text-shopping-list">Add to shopping list</Legend>
 
           <FormRow comment="amount">
-            <AmountPlusUnitSelectionAdd
-              product={product}
-              amountValue={amountValue}
-              setAmountValue={setAmountValue}
-            />
+            <AmountPlusUnitSelectionAdd product={product} title="Amount to add *" />
           </FormRow>
 
           <FormRow comment="shopping list entry">

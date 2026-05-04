@@ -3,26 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
-import {
-  fetchProduct,
-  fetchProductStock,
-  fetchQuantityUnitConversionsResolved,
-  grocyClient,
-} from "@/lib/grocy";
-import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
+import { grocyClient } from "@/lib/grocy";
+import { ProductTransferSchema } from "../action-form-schemas";
 
 export async function productTransferSubmit(prevstate: unknown, formData: FormData) {
-  const productId = Number(formData.get("productId")?.valueOf());
+  console.log("submit", formData);
+  const productId = Number(formData.get("base.productId")?.valueOf());
+  const barcode = formData.get("base.barcode")?.valueOf();
+
   if (productId === null || productId === undefined || !productId) {
     console.error("no productId from form?", productId, formData);
   }
 
-  const product = await fetchProduct(productId);
-  const stock = await fetchProductStock(productId);
-  const conversions = await fetchQuantityUnitConversionsResolved(productId);
-  const schema = createProductTransferSchema(product, stock, conversions);
-
-  const submission = parseWithZod(formData, { schema: schema });
+  const submission = parseWithZod(formData, { schema: ProductTransferSchema });
 
   if (submission.status !== "success") {
     const err = submission.error;
@@ -32,17 +25,25 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
 
   const data = submission.value;
 
-  await grocyClient.POST("/stock/products/{productId}/transfer", {
-    params: { path: { productId: data.productId } },
+    const body = {
+      amount: data.amount.amountShadow,
+      location_id_from: data.locationIdFrom,
+      location_id_to: data.locationIdTo,
+      stock_entry_id: data.stockEntryId,
+    };
+  console.log(data, body);
+
+  const { data: res } = await grocyClient.POST("/stock/products/{productId}/transfer", {
+    params: { path: { productId: data.base.productId } },
     body: {
-      amount: data.amountShadow,
+      amount: data.amount.amountShadow,
       location_id_from: data.locationIdFrom,
       location_id_to: data.locationIdTo,
       stock_entry_id: data.stockEntryId,
     },
   });
-
+  console.log("res is", res);
   // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath(`/scan/${data.barcode}`);
-  redirect(`/scan/${data.barcode}`);
+  revalidatePath(`/scan/${barcode}`);
+  redirect(`/scan/${barcode}`);
 }

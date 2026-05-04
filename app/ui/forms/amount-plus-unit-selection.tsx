@@ -1,9 +1,7 @@
 import { Product, QuantityUnit, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
 import { amountToStockUnit, sumStock, toLookup } from "@/lib/utils";
-import { QuantityUnitContext } from "@/providers/quantity-unit-context";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { getInputProps, useField } from "@conform-to/react";
-import { Dispatch, SetStateAction, use, useContext, useState } from "react";
+import { Dispatch, SetStateAction, use, useState } from "react";
 import { FormColumn, FormErrors, FormField, FormLabel } from "./form-utils";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import { Button } from "../button";
@@ -11,6 +9,7 @@ import { CornerDownLeft } from "lucide-react";
 import { clsx } from "clsx";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import { CustomisableSelect, CustomisableSelectOptionArray } from "../customisable-select";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export function AmountPlusUnitSelection({
   product,
@@ -21,6 +20,7 @@ export function AmountPlusUnitSelection({
   autoFocus = false,
   amountValue,
   setAmountValue,
+  compoundField,
 }: {
   product: Product;
   stock: StockEntry[];
@@ -30,18 +30,20 @@ export function AmountPlusUnitSelection({
   autoFocus?: boolean;
   amountValue: string;
   setAmountValue: Dispatch<SetStateAction<string>>;
+  compoundField: any;
 }) {
-  const [fieldAmount, form] = useField("amount");
-  const [fieldAmountShadow] = useField("amountShadow");
-  const [fieldQuantityUnitId] = useField("amountQuantityUnitId");
+  const [, form] = useField("amount");
+  const fieldAmount = compoundField.amount;
+  const fieldMaxAmount = compoundField.maximumAmount;
+  const fieldQuantityUnitId = compoundField.amountQuantityUnitId;
+  const fieldAmountShadow = compoundField.amountShadow;
+
+  const multi = useGetAmountPlusUnitObject();
 
   const availableStock = sumStock({ stock: stock });
 
-  const unitsLookup = toLookup(use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>));
-
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
+  const unitsLookup = toLookup(use(multi.quantityUnitsPromise));
+  const conversions = use(multi.resolvedQuantityUnitsConversionPromise);
 
   const options = buildOptions({
     conversions: conversions,
@@ -73,6 +75,7 @@ export function AmountPlusUnitSelection({
     <>
       <FormColumn className={`w-full ${className}`}>
         <input {...getInputProps(fieldAmountShadow, { type: "hidden", value: false })} value={equivalent} />
+        <input {...getInputProps(fieldMaxAmount, { type: "hidden" })} />
         <div className="w-ful md:max-w-110">
           <div className={`flex`}>
             <div className="grow">
@@ -145,14 +148,19 @@ export function AmountPlusUnitSelection({
               disabled={disabled}
               onChange={(e) => {
                 setConversionUnit(Number(e.target.value));
-                setAvailableStockSelectedUnit(
-                  amountToStockUnit({
-                    conversions: conversions,
-                    amount: availableStock,
-                    unit: Number(product.qu_id_stock),
-                    targetUnit: Number(fieldQuantityUnitId.value),
-                  }),
-                );
+                const newAvailableStockAmount = amountToStockUnit({
+                  conversions: conversions,
+                  amount: availableStock,
+                  unit: Number(product.qu_id_stock),
+                  targetUnit: Number(fieldQuantityUnitId.value),
+                });
+                setAvailableStockSelectedUnit(newAvailableStockAmount);
+                if (newAvailableStockAmount < fieldAmount.value) {
+                  form.update({
+                    name: fieldAmount.name,
+                    value: newAvailableStockAmount,
+                  });
+                }
               }}
             />{" "}
           </FormField>

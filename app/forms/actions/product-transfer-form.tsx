@@ -4,28 +4,23 @@ import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { FormRow } from "@/ui/forms/form-utils";
-import { Product, ProductLocation, QuantityUnitConversion, StockEntry } from "@/interfaces/grocy";
+import { Product, ProductLocation, StockEntry } from "@/interfaces/grocy";
 import { sumStock } from "@/lib/utils";
 import { productTransferSubmit } from "@/forms/actions/product-transfer-submit";
-import { createProductTransferSchema } from "@/forms/actions/product-transfer-schema";
 import { LocationContext } from "@/providers/location-context";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
-import { ProductStockContext } from "@/providers/product-stock-context";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { CaptureSubmitOnEnter } from "../capture-submit";
 import { ActionFormStockEntryId } from "./components/action-form-stock-entry-id";
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormLocationId } from "./components/action-form-location-id";
+import { ProductTransferSchema } from "../action-form-schemas";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
-  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
-
-  const schema = createProductTransferSchema(product, stock, conversions);
+  const multi = useGetAmountPlusUnitObject();
+  const stock = use(multi.stockEntryPromise);
 
   const [lastResult, action, submitPending] = useActionState(productTransferSubmit, undefined);
 
@@ -38,16 +33,25 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
     lastResult,
 
     defaultValue: {
-      barcode: code,
-      productId: product.id,
-      amount: "1",
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       locationIdFrom: product.location_id,
       locationIdTo: undefined,
       stockEntryId: undefined,
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: schema });
+      const r = parseWithZod(formData, { schema: ProductTransferSchema });
+      console.log("onvalidate", r);
+      return r;
     },
 
     shouldValidate: "onBlur",
@@ -90,8 +94,8 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className="text-transfer">Transfer</Legend>
@@ -118,6 +122,7 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
               stock={stockAtLocation}
               amountValue={amountValue}
               setAmountValue={setAmountValue}
+              compoundField={fields.amount.getFieldset()}
             />
           </FormRow>
 

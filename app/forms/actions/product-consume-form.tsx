@@ -1,33 +1,24 @@
 "use client";
 
 import clsx from "clsx";
-import Link from "next/link";
 import { use, useActionState, useContext, useState } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { Button } from "@/ui/button";
 import { FormRow, FormColumn, FormField, FormErrors, FormCheckbox } from "@/ui/forms/form-utils";
-import {
-  Product,
-  ProductLocation as PrLocation,
-  StockEntry,
-  QuantityUnitConversion,
-} from "@/interfaces/grocy";
+import { Product, ProductLocation as PrLocation, StockEntry } from "@/interfaces/grocy";
 import { LocationContext } from "@/providers/location-context";
-import { createProductConsumeSchema } from "./product-consume-schema";
 import { productConsumeSubmit } from "./product-consume-submit";
-import { ProductStockContext } from "@/providers/product-stock-context";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";
 import { Trash2 } from "lucide-react";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { CaptureSubmitOnEnter } from "../capture-submit";
-import { inputCommonStyles } from "@/lib/product-form-shared";
 import { ActionFormLocationId } from "./components/action-form-location-id";
 import { ActionFormAllowSubproductSubstitution } from "./components/action-form-allowsubproduct";
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
+import { ProductConsumeSchema } from "../action-form-schemas";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export function ProductConsumeForm({
   code,
@@ -38,12 +29,8 @@ export function ProductConsumeForm({
   product: Product;
   query: Record<string, string | string[] | undefined>;
 }) {
-  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
-
-  const schema = createProductConsumeSchema(product, stock, conversions);
+  const multi = useGetAmountPlusUnitObject();
+  const stock = use(multi.stockEntryPromise);
 
   const [lastResult, action, submitPending] = useActionState(productConsumeSubmit, undefined);
 
@@ -73,11 +60,16 @@ export function ProductConsumeForm({
     lastResult,
 
     defaultValue: {
-      barcode: code,
-      productId: product.id,
-      amount: "1",
-      amountShadow: "1",
-      amountQuantityUnitId: product.qu_id_stock,
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       locationId: consumeLocationId,
       //recipeId: "", // TODO
       exactAmount: true,
@@ -87,7 +79,7 @@ export function ProductConsumeForm({
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: schema });
+      return parseWithZod(formData, { schema: ProductConsumeSchema });
     },
 
     shouldValidate: "onInput",
@@ -116,8 +108,8 @@ export function ProductConsumeForm({
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className={fields.spoiled.value ? "text-spoiled" : "text-consume"}>
@@ -148,6 +140,7 @@ export function ProductConsumeForm({
                 stock={stockFromLocation}
                 amountValue={amountValue}
                 setAmountValue={setAmountValue}
+                compoundField={fields.amount.getFieldset()}
               />
             )}
           </FormRow>

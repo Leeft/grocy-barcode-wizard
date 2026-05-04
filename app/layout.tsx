@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// @ts-expect-error can't import CSS in typescript
 import "@/styles/globals.css";
 import Navbar from "@/ui/navbar";
 import UserProvider from "@/providers/user-context";

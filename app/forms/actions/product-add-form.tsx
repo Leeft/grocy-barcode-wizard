@@ -1,29 +1,27 @@
 "use client";
 
-import { use, useActionState, useContext, useState } from "react";
+import { use, useActionState, useContext } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productAddSubmit } from "./product-add-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { createProductAddSchema } from "./product-add-schema";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import {
   Product,
   ProductLocation as PrLocation,
   ShoppingLocation,
-  StockEntry,
-  QuantityUnitConversion,
+  grocyAsPurchasePriceType,
+  grocyAsStockLabelType,
+  grocyAsDueType,
 } from "@/interfaces/grocy";
 import CustomisableSelect from "@/ui/customisable-select";
-import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
+import { PurchasePriceType } from "@/generated/prisma/enums";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
 import { GrocyConfigContext } from "@/providers/grocy-config-context";
-import { ProductStockContext } from "@/providers/product-stock-context";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 import { CaptureSubmitOnEnter } from "../capture-submit";
@@ -31,60 +29,22 @@ import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormStockLabelType } from "./components/action-form-stock-label-type";
 import { ActionFormNote } from "./components/action-form-note";
+import { ProductAddSchema } from "../action-form-schemas";
+import { withCallbacks } from "@/interfaces";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
-  const stock = use(useContext(ProductStockContext) as Promise<StockEntry[]>);
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productAddSubmit,
+      createToastCallbacks({
+        loadingMessage: "Purchasing stock in Grocy ...",
+      }),
+    ),
+    undefined,
   );
 
-  const schema = createProductAddSchema(product, stock, conversions);
-
-  const [lastResult, action, submitPending] = useActionState(productAddSubmit, undefined);
-
   const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
-
-  let purchasePriceType;
-  switch (product.default_purchase_price_type) {
-    default:
-    case 1:
-      purchasePriceType = PurchasePriceType.UNSPECIFIED;
-      break;
-    case 2:
-      purchasePriceType = PurchasePriceType.UNIT_PRICE;
-      break;
-    case 3:
-      purchasePriceType = PurchasePriceType.TOTAL_PRICE;
-      break;
-  }
-
-  let stockLabelType;
-  switch (product.default_stock_label_type) {
-    default:
-    case 0:
-      stockLabelType = StockLabelType.NO_LABEL;
-      break;
-    case 1:
-      stockLabelType = StockLabelType.SINGLE_LABEL;
-      break;
-    case 2:
-      stockLabelType = StockLabelType.LABEL_PER_UNIT;
-      break;
-  }
-
-  let dueDateType;
-  switch (product.due_type) {
-    default:
-      dueDateType = DueDateType.NO_EXPIRY;
-      break;
-    case 1:
-      dueDateType = DueDateType.BEST_BEFORE;
-      break;
-    case 2:
-      dueDateType = DueDateType.EXPIRY_DATE;
-      break;
-  }
-
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
   const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);
 
@@ -92,26 +52,40 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
     lastResult,
 
     defaultValue: {
-      amount: "1",
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       bestBeforeDate: "",
       price: "0",
       locationId: product.location_id,
       shoppingLocationId: "",
-      stockLabelType: stockLabelType,
+      stockLabelType: grocyAsStockLabelType(product.default_stock_label_type),
       note: undefined,
-      dueDateType: dueDateType,
-      purchasePriceType: purchasePriceType,
+      dueDateType: grocyAsDueType(product.due_type),
+      purchasePriceType: grocyAsPurchasePriceType(product.default_purchase_price_type),
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: schema });
+      return parseWithZod(formData, { schema: ProductAddSchema });
     },
 
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
 
-  const [amountValue, setAmountValue] = useState<string>("1");
+  const priceValue = Number(fields.price.value);
+  const amountValue = Number(fields.amount.getFieldset().amount.value);
+  let total = priceValue * amountValue;
+  let perUnit = priceValue / amountValue;
+  if (isNaN(total)) total = 0;
+  if (isNaN(perUnit)) perUnit = 0;
 
   return (
     <FormProvider context={form.context}>
@@ -125,19 +99,15 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} value={product.id} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
         <input {...getInputProps(fields.dueDateType, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className="text-add">Add / purchase</Legend>
 
           <FormRow comment="amount">
-            <AmountPlusUnitSelectionAdd
-              product={product}
-              amountValue={amountValue}
-              setAmountValue={setAmountValue}
-            />
+            <AmountPlusUnitSelectionAdd product={product} title="Amount to add *" />
           </FormRow>
 
           <FormRow comment="price">
@@ -152,11 +122,10 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                     />
                   </div>
                   <div className="flex grow flex-row text-right">
-                    <div className="inline grow pr-1">
+                    <div className="inline grow pr-1 text-form-label">
                       {fields.purchasePriceType.value === PurchasePriceType.TOTAL_PRICE ? (
                         <div className="inline-flex text-right">
-                          {grocyConfig.CURRENCY}{" "}
-                          {(Number(fields.price.value) / Number(fields.amount.value)).toFixed(2)}
+                          {grocyConfig.CURRENCY} {perUnit.toFixed(2)}
                           {" per "}
                           <UnitForAmount
                             unit={product.qu_id_stock!}
@@ -167,8 +136,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                         </div>
                       ) : (
                         <div>
-                          {grocyConfig.CURRENCY}{" "}
-                          {(Number(fields.price.value) * Number(fields.amount.value)).toFixed(2)} total price
+                          {grocyConfig.CURRENCY} {total.toFixed(2)} total price
                         </div>
                       )}
                     </div>

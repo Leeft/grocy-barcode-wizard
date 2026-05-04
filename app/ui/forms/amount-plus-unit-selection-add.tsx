@@ -1,9 +1,7 @@
 import { Product, QuantityUnit, QuantityUnitConversion } from "@/interfaces/grocy";
 import { amountToStockUnit, toLookup } from "@/lib/utils";
-import { QuantityUnitContext } from "@/providers/quantity-unit-context";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { getInputProps, useField } from "@conform-to/react";
-import { Dispatch, SetStateAction, use, useContext, useState } from "react";
+import { use, useState } from "react";
 import { FormColumn, FormErrors, FormField, FormLabel } from "./form-utils";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import { Button } from "../button";
@@ -11,27 +9,26 @@ import { CornerDownLeft } from "lucide-react";
 import { clsx } from "clsx";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import { CustomisableSelect, CustomisableSelectOptionArray } from "../customisable-select";
+import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 
 export function AmountPlusUnitSelectionAdd({
   product,
   title = "Amount to add *",
-  amountValue,
-  setAmountValue,
 }: {
   product: Product;
   title?: string;
-  amountValue: string;
-  setAmountValue: Dispatch<SetStateAction<string>>;
 }) {
-  const [fieldAmount, form] = useField("amount");
-  const [fieldAmountShadow] = useField("amountShadow");
-  const [fieldQuantityUnitId] = useField("amountQuantityUnitId");
+  const [fieldAmount, form] = useField("amount.amount");
+  const [fieldMaxAmount] = useField("amount.maximumAmount");
+  const [fieldAmountShadow] = useField("amount.amountShadow");
+  const [fieldQuantityUnitId] = useField("amount.amountQuantityUnitId");
 
-  const unitsLookup = toLookup(use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>));
+  const [amountValue, setAmountValue] = useState<string>("1");
 
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
+  const multi = useGetAmountPlusUnitObject();
+
+  const unitsLookup = toLookup(use(multi.quantityUnitsPromise));
+  const conversions = use(multi.resolvedQuantityUnitsConversionPromise);
 
   const options = buildOptions({
     conversions: conversions,
@@ -63,6 +60,7 @@ export function AmountPlusUnitSelectionAdd({
     <>
       <FormColumn className={`w-full`}>
         <input {...getInputProps(fieldAmountShadow, { type: "hidden", value: false })} value={equivalent} />
+        <input {...getInputProps(fieldMaxAmount, { type: "hidden" })} />
         <div className="w-ful md:max-w-110">
           <div className={`flex`}>
             <div className="grow">
@@ -99,7 +97,7 @@ export function AmountPlusUnitSelectionAdd({
               })}
               min={0}
               step={1}
-              max={availableStockSelectedUnit}
+              max={Number(fieldMaxAmount.value)}
               className={clsx(inputCommonStyles, "w-full")}
               placeholder="Amount"
               value={amountValue}

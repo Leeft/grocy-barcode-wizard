@@ -3,22 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { createProductInventorySchema } from "@/forms/actions/product-inventory-schema";
-import { fetchProduct, fetchQuantityUnitConversionsResolved, grocyClient } from "@/lib/grocy";
+import { fetchProduct, grocyClient } from "@/lib/grocy";
 import { labelTypeToGrocy } from "@/interfaces/grocy";
 import { StockLabelType } from "@/generated/prisma/browser";
+import { ProductInventorySchema } from "../action-form-schemas";
 
 export async function productInventorySubmit(prevstate: unknown, formData: FormData) {
-  const productId = Number(formData.get("productId")?.valueOf());
+  const productId = Number(formData.get("base.productId")?.valueOf());
+  const barcode = formData.get("base.barcode")?.valueOf();
+
   if (productId === null || productId === undefined || !productId) {
     console.error("no productId from form?", productId, formData);
   }
 
   const product = await fetchProduct(productId);
-  const conversions = await fetchQuantityUnitConversionsResolved(productId);
-  const schema = createProductInventorySchema(product, conversions);
 
-  const submission = parseWithZod(formData, { schema: schema });
+  const submission = parseWithZod(formData, { schema: ProductInventorySchema });
 
   if (submission.status !== "success") {
     const err = submission.error;
@@ -31,11 +31,11 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
   // console.log("data is", data);
 
   const { data: inventoried, error } = await grocyClient.POST("/stock/products/{productId}/inventory", {
-    params: { path: { productId: data.productId } },
+    params: { path: { productId: data.base.productId } },
     body: {
-      new_amount: data.amountShadow,
+      new_amount: data.amount.amountShadow,
       best_before_date: data.bestBeforeDate!.toISOString(),
-      price: product.default_purchase_price_type === 3 ? data.price! / data.amountShadow : data.price,
+      price: product.default_purchase_price_type === 3 ? data.price! / data.amount.amountShadow : data.price,
       shopping_location_id: data.shoppingLocationId,
       location_id: data.locationId,
       stock_label_type: labelTypeToGrocy(data.stockLabelType! as StockLabelType),
@@ -44,14 +44,14 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
     },
   });
 
-  // @ts-expect-error TS doesn't handle these responses too well
-  if (error || data.error_message! ) {
+  // @ts-expect-error Shut up already
+  if (error || inventoried.error_message!) {
     console.log("Error updating inventory:", error);
   } else {
     console.log("Updated inventory:", inventoried);
 
     // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath(`/scan/${data.barcode}`);
-    redirect(`/scan/${data.barcode}`);
+    revalidatePath(`/scan/${barcode}`);
+    redirect(`/scan/${barcode}`);
   }
 }

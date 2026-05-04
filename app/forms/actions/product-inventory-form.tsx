@@ -1,24 +1,21 @@
 "use client";
 
-import { use, useActionState, useContext, useState } from "react";
+import { use, useActionState, useContext } from "react";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { productInventorySubmit } from "./product-inventory-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { createProductInventorySchema } from "./product-inventory-schema";
 import { FormRow, FormColumn, FormLabel, FormField, FormErrors } from "@/ui/forms/form-utils";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import {
   Product,
   ProductLocation as PrLocation,
   ShoppingLocation,
-  QuantityUnitConversion,
+  grocyAsStockLabelType,
 } from "@/interfaces/grocy";
-import { StockLabelType } from "@/generated/prisma/enums";
 import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { LocationContext } from "@/providers/location-context";
 import { ShoppingLocationContext } from "@/providers/shopping-location-context";
-import { QuantityUnitConversionResolvedContext } from "@/providers/quantity-unit-conversion-resolved-context";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelectionAdd } from "@/ui/forms/amount-plus-unit-selection-add";
 import { CaptureSubmitOnEnter } from "../capture-submit";
@@ -26,29 +23,10 @@ import { ActionFormStockLabelType } from "./components/action-form-stock-label-t
 import { ActionFormNote } from "./components/action-form-note";
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
+import { ProductInventorySchema } from "../action-form-schemas";
 
 export function ProductInventoryForm({ code, product }: { code: string; product: Product }) {
-  const conversions = use(
-    useContext(QuantityUnitConversionResolvedContext) as Promise<QuantityUnitConversion[]>,
-  );
-
-  const schema = createProductInventorySchema(product, conversions);
-
   const [lastResult, action, submitPending] = useActionState(productInventorySubmit, undefined);
-
-  let stockLabelType;
-  switch (product.default_stock_label_type) {
-    default:
-    case 0:
-      stockLabelType = StockLabelType.NO_LABEL;
-      break;
-    case 1:
-      stockLabelType = StockLabelType.SINGLE_LABEL;
-      break;
-    case 2:
-      stockLabelType = StockLabelType.LABEL_PER_UNIT;
-      break;
-  }
 
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
   const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);
@@ -57,24 +35,31 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
     lastResult,
 
     defaultValue: {
-      amount: "1",
+      base: {
+        barcode: code,
+        productId: product.id,
+      },
+      amount: {
+        amount: "1",
+        amountShadow: "1",
+        amountQuantityUnitId: product.qu_id_stock,
+        maximumAmount: "10000",
+      },
       bestBeforeDate: "",
       price: "0",
       locationId: product.location_id,
       shoppingLocationId: "",
-      stockLabelType: stockLabelType,
+      stockLabelType: grocyAsStockLabelType(product.default_stock_label_type),
       note: undefined,
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: schema });
+      return parseWithZod(formData, { schema: ProductInventorySchema });
     },
 
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
-
-  const [amountValue, setAmountValue] = useState<string>("1");
 
   return (
     <FormProvider context={form.context}>
@@ -88,19 +73,14 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
         className="pt-2p pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
-        <input {...getInputProps(fields.productId, { type: "hidden" })} value={product.id} />
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
+        <input {...getInputProps(fields.base.getFieldset().productId, { type: "hidden" })} />
+        <input {...getInputProps(fields.base.getFieldset().barcode, { type: "hidden" })} />
 
         <FieldSet>
           <Legend className="text-inventory">Inventory</Legend>
 
           <FormRow comment="amount">
-            <AmountPlusUnitSelectionAdd
-              product={product}
-              amountValue={amountValue}
-              setAmountValue={setAmountValue}
-              title="New stock amount *"
-            />
+            <AmountPlusUnitSelectionAdd product={product} title="New stock amount *" />
           </FormRow>
 
           {product.default_best_before_days > -1 && (

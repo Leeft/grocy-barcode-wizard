@@ -1,13 +1,17 @@
 import Barcode from "@/lib/barcode";
 import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
-import { fetchProductStock, fetchQuantityUnitConversionsResolved, findProductInGrocy } from "@/lib/grocy";
+import {
+  fetchProductStock,
+  fetchQuantityUnitConversionsResolved,
+  fetchQuantityUnits,
+  findProductInGrocy,
+} from "@/lib/grocy";
 import { ExistingProductForm } from "@/ui/forms/existing-product-form";
 import { prisma } from "@/lib/prisma";
 import GrocyProductProvider from "@/providers/grocy-product-context";
-import ProductStockProvider from "@/providers/product-stock-context";
-import { Product } from "@/interfaces/grocy";
-import QuantityUnitConversionResolvedProvider from "@/providers/quantity-unit-conversion-resolved-context";
+import { Error400, Product } from "@/interfaces/grocy";
+import { AmountPlusUnitProvider } from "@/providers/amount-plus-unit-context";
 
 export default async function ScanLayout({
   params,
@@ -36,7 +40,7 @@ export default async function ScanLayout({
 
   const grocyProductPromise = findProductInGrocy(barcodeObject);
 
-  type ProductOrError = Product | { error_message: string } | object;
+  type ProductOrError = Product | Error400 | object;
 
   async function tryFindProductInGrocy() {
     try {
@@ -57,13 +61,15 @@ export default async function ScanLayout({
   return (
     <>
       <GrocyProductProvider promise={grocyProductPromise}>
-        <ProductStockProvider promise={fetchProductStock(id)}>
-          <QuantityUnitConversionResolvedProvider promise={fetchQuantityUnitConversionsResolved(id)}>
-            <BarcodeScannerApp slug={barcode} />
-            {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}
-            {children}
-          </QuantityUnitConversionResolvedProvider>
-        </ProductStockProvider>
+        <AmountPlusUnitProvider
+          stockEntryPromise={fetchProductStock(id)}
+          quantityUnitsPromise={fetchQuantityUnits()}
+          resolvedQUConversionPromise={fetchQuantityUnitConversionsResolved(id)}
+        >
+          <BarcodeScannerApp slug={barcode} />
+          {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}
+          {children}
+        </AmountPlusUnitProvider>
       </GrocyProductProvider>
     </>
   );
