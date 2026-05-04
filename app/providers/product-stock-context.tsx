@@ -1,16 +1,19 @@
 "use client";
 
 import { StockEntry } from "@/interfaces/grocy";
-import { createContext } from "react";
+import React, { createContext } from "react";
 
-export const ProductStockContext = createContext<Promise<StockEntry[]> | null>(null);
+export type ProductStockPromise = Promise<StockEntry[]>;
 
-export default function ProductStockProvider({
-  children,
-  promise,
-}: {
+interface ContainerProps {
   children: React.ReactNode;
-  promise: Promise<StockEntry[]> | null;
-}) {
-  return <ProductStockContext value={promise}>{children}</ProductStockContext>;
+  promise: ProductStockPromise;
 }
+
+const ProductStockContext = createContext<ProductStockPromise | null>(null);
+
+const ProductStockProvider = ({ children, promise }: ContainerProps) => {
+  return <ProductStockContext value={promise}>{children}</ProductStockContext>;
+};
+
+export { ProductStockContext, ProductStockProvider };
