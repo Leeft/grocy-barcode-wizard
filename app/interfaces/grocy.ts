@@ -20,6 +20,17 @@ export type Product = components["schemas"]["Product"] & {
   stock_amount_aggregated?: number;
 };
 
+export type Error400 = components["schemas"]["Error400"];
+export type Error500 = components["schemas"]["Error500"];
+
+// (arrays of StockLogEntry)
+// 200 status of /stock/products/{productId}/add
+// 200 status of /stock/products/{productId}/consume
+// 200 status of /stock/products/{productId}/transfer
+// 200 status of /stock/products/{productId}/inventory
+// 200 status of /stock/products/{productId}/open
+export type StockLogEntry = components["schemas"]["StockLogEntry"];
+
 // CREATE TABLE products (
 //         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 //         name TEXT NOT NULL UNIQUE,
@@ -146,3 +157,38 @@ export const labelTypeToGrocy = (labelType: StockLabelType): 0 | 1 | 2 => {
       return 2;
   }
 };
+
+export function grocyAsPurchasePriceType(value?: number): PurchasePriceType {
+  switch (value) {
+    default:
+    case 1:
+      return PurchasePriceType.UNSPECIFIED;
+    case 2:
+      return PurchasePriceType.UNIT_PRICE;
+    case 3:
+      return PurchasePriceType.TOTAL_PRICE;
+  }
+}
+
+export function grocyAsStockLabelType(value?: number): StockLabelType {
+  switch (value) {
+    default:
+    case 0:
+      return StockLabelType.NO_LABEL;
+    case 1:
+      return StockLabelType.SINGLE_LABEL;
+    case 2:
+      return StockLabelType.LABEL_PER_UNIT;
+  }
+}
+
+export function grocyAsDueType(value?: number): DueDateType {
+  switch (value) {
+    default:
+      return DueDateType.NO_EXPIRY;
+    case 1:
+      return DueDateType.BEST_BEFORE;
+    case 2:
+      return DueDateType.EXPIRY_DATE;
+  }
+}
