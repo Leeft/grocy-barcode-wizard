@@ -142,7 +142,7 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
             <ActionFormStockEntryId
               field={fields.stockEntryId}
               product={product}
-              stock={stock}
+              stock={stockAtLocation}
               setAmountValue={setAmountValue}
             />
           </FormRow>
