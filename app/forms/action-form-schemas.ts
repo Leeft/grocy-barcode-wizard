@@ -233,7 +233,7 @@ export const ProductShopSchema = z.object({
   base: BaseFields,
   amount: AmountAndUnit,
 
-  listId: z.number().gt(0, "Must be a valid list id"),
+  listId: z.number().gt(0, "Must be a valid shopping list"),
 
   note: z.string().trim().optional(),
 });

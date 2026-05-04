@@ -25,6 +25,11 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
     return { value: list.id.toString(), label: list.name };
   });
 
+  shoppingListOptions.unshift({
+    value: "0",
+    label: "Pick ...",
+  });
+
   const [form, fields] = useForm({
     lastResult,
 

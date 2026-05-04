@@ -13,7 +13,11 @@ export function ActionFormNote({
   return (
     <FormColumn className="w-full md:w-110">
       <div className={`flex`}>
-        <FormLabel htmlFor={field.name} title="Note" className="relative top-[-8] mb-0!" />
+        <FormLabel
+          htmlFor={field.name}
+          title={multiLine ? "Notes" : "Note"}
+          className="relative top-[-8] mb-0!"
+        />
       </div>
       <FormField>
         {multiLine ? (
