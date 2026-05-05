@@ -58,9 +58,7 @@ export function ProductOpenForm({
     (se) => !fields.stockEntryId.value || fields.stockEntryId.value === se.stock_id,
   );
 
-  const [amountValue, setAmountValue] = useState<string>(
-    sumStock({ stock: filteredStock, stockId: fields.stockEntryId.value }).toString(),
-  );
+  const [amountValue, setAmountValue] = useState<string>("1");
 
   return (
     <FormProvider context={form.context}>
@@ -97,6 +95,7 @@ export function ProductOpenForm({
               product={product}
               stock={unopenedStock}
               setAmountValue={setAmountValue}
+              amountToSet={"1"}
             />
           </FormRow>
 

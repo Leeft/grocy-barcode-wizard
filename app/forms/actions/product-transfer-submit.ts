@@ -25,14 +25,6 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
 
   const data = submission.value;
 
-    const body = {
-      amount: data.amount.amountShadow,
-      location_id_from: data.locationIdFrom,
-      location_id_to: data.locationIdTo,
-      stock_entry_id: data.stockEntryId,
-    };
-  console.log(data, body);
-
   const { data: res } = await grocyClient.POST("/stock/products/{productId}/transfer", {
     params: { path: { productId: data.base.productId } },
     body: {
@@ -42,8 +34,7 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
       stock_entry_id: data.stockEntryId,
     },
   });
-  console.log("res is", res);
-  // Revalidate the cache for the invoices page and redirect the user.
+
   revalidatePath(`/scan/${barcode}`);
   redirect(`/scan/${barcode}`);
 }

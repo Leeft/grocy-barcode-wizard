@@ -10,11 +10,13 @@ export function ActionFormStockEntryId({
   product,
   stock,
   field,
+  amountToSet,
   setAmountValue,
 }: {
   product: Product;
   stock: StockEntry[];
   field: FieldMetadata<unknown>;
+  amountToSet?: string;
   setAmountValue: Dispatch<SetStateAction<string>>;
 }) {
   const seen: Record<string, number> = {};
@@ -49,7 +51,11 @@ export function ActionFormStockEntryId({
           options={stockOptions}
           className="w-full"
           onChange={(e) => {
-            setAmountValue(sumStock({ stock: stock, stockId: e.currentTarget.value }).toString());
+            if (amountToSet) {
+              setAmountValue(amountToSet);
+            } else {
+              setAmountValue(sumStock({ stock: stock, stockId: e.currentTarget.value }).toString());
+            }
           }}
         />
       </FormField>
