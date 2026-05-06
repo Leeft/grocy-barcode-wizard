@@ -11,6 +11,7 @@ export async function GET(req: Request) {
     start(controller) {
       // Flip the client status to 'connected' immediately
       controller.enqueue(encoder.encode(": ok\n\n"));
+      console.log("Client connected to SSE");
 
       const productHandler = (data: SerialisedBarcode) => {
         try {
