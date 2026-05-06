@@ -10,6 +10,7 @@
     "lint:fix": "eslint --fix",
     "generate": "prisma generate",
     "pushdb": "prisma db push",
+    "seeddb": "prisma db seed",
     "studio": "prisma studio"
   },
   "pnpm": {
