@@ -109,9 +109,16 @@ export const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
   }
 };
 
-export const toActionState = (
-  message: string,
-  status: "success" | "error",
-): ActionState => {
+export const toActionState = (message: string, status: "success" | "error"): ActionState => {
   return { message, status };
 };
+
+export function isEnvironmentConfigured(): boolean {
+  return process.env.GROCY_URL &&
+    process.env.GROCY_API_URL &&
+    process.env.GROCY_API_KEY &&
+    process.env.OPENFOODFACTS_BASE_URL &&
+    process.env.DATABASE_URL
+    ? true
+    : false;
+}

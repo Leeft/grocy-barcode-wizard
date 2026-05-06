@@ -60,6 +60,9 @@ export type PendingProducts = Awaited<ReturnType<typeof getPendingProducts>>;
 
 export async function countPendingProducts() {
   "use server";
+  if (process.env.DATABASE_URL === undefined) {
+    return 0;
+  }
 
   return await prisma.product.count({
     where: {

@@ -6,6 +6,7 @@ import UserProvider from "@/providers/user-context";
 import { getUser } from "./lib/user-db";
 import { countPendingProducts } from "./lib/product-db";
 import toast, { Toaster } from "react-hot-toast";
+import { isEnvironmentConfigured } from "./lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,11 +64,11 @@ export default function RootLayout({
                     },
                     error: {
                       duration: 10000,
-                    },                    
+                    },
                   }}
                 />
               </div>
-              <Navbar promise={countPendingProducts()} />
+              {isEnvironmentConfigured() && <Navbar promise={countPendingProducts()} />}
               {children}
             </UserProvider>
           </main>

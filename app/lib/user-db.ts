@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { NotFoundError } from "@/lib/errors";
+import { env } from "prisma/config";
 
 //
 
@@ -9,6 +10,17 @@ export async function getUser(userId: number) {
   "use server";
 
   if (userId === undefined) throw new Error("No userId given");
+
+  if (!process.env.DATABASE_URL) {
+    return {
+      id: userId,
+      username: "nodb",
+      name: "No DB",
+      email: "nodb@example.com",
+      created: new Date(),
+      settings: undefined,
+    };
+  }
 
   const model = await prisma.user.findUnique({
     where: { id: userId },
@@ -30,6 +42,17 @@ export async function getApiKeys(userId: number) {
   "use server";
 
   if (userId === undefined) throw new Error("No userId given");
+
+  if (!process.env.DATABASE_URL) {
+    return [
+      {
+        id: 1,
+        userId: userId,
+        apiKey: "nodb",
+        created: new Date(),
+      },
+    ];
+  }
 
   const model = await prisma.userApiKey.findMany({
     where: { userId: userId },
