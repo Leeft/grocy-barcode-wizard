@@ -16,26 +16,12 @@ import { cache } from "react";
 import Barcode from "@/lib/barcode";
 
 export const baseUrl = process.env.GROCY_API_URL;
-
-if (baseUrl === undefined) {
-  throw new Error("GROCY_API_URL is not configured");
-}
-
 export const apiKey = process.env.GROCY_API_KEY;
-
-if (apiKey === undefined) {
-  throw new Error("GROCY_API_KEY is not configured");
-}
-
 export const grocyUrl = process.env.GROCY_URL;
-
-if (grocyUrl === undefined) {
-  throw new Error("GROCY_URL is not configured");
-}
 
 const myMiddleware: Middleware = {
   async onRequest({ request /*options*/ }) {
-    request.headers.set("GROCY-API-KEY", apiKey);
+    request.headers.set("GROCY-API-KEY", apiKey!);
     request.headers.set("Accept", "application/json");
     return request;
   },

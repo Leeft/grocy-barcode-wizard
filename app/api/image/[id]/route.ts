@@ -1,11 +1,8 @@
 import { getProductPhoto } from "@/lib/product-db";
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (
-  req: NextRequest,
-  { params }: { params: { id: string } },
-): Promise<NextResponse> => {
-  const { id } = await params;
+export async function GET(_req: NextRequest, ctx: RouteContext<'/api/image/[id]'>) {
+  const { id } = await ctx.params
 
   if (id !== null && id !== undefined) {
     try {

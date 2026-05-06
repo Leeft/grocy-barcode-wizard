@@ -50,7 +50,6 @@ export function ProductTransferForm({ code, product }: { code: string; product: 
 
     onValidate({ formData }) {
       const r = parseWithZod(formData, { schema: ProductTransferSchema });
-      console.log("onvalidate", r);
       return r;
     },
 
