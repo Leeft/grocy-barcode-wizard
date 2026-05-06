@@ -12,9 +12,13 @@ import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { dateToISODate } from "@/lib/utils";
 import { clsx } from "clsx";
 import { flushSync } from "react-dom";
-import { Clipboard } from "lucide-react";
 import { GetApiKeys } from "@/lib/user-db";
 import { UserApiKey } from "@/generated/prisma/browser";
+import dynamic from "next/dynamic";
+
+const CopyToClipboardButton = dynamic(() => import('@/ui/forms/settings-form-clipboard'), {
+  ssr: false,
+});
 
 export function SettingsForm({
   settings,
@@ -28,8 +32,6 @@ export function SettingsForm({
 
   const data = use(settings);
   const apiKeyData = use(apiKeysPromise);
-
-  console.log(apiKeyData);
 
   const [form, fields] = useForm({
     lastResult,
@@ -98,15 +100,6 @@ export function SettingsForm({
     });
     setDirty(true);
   };
-
-  async function setClipboard(text: string) {
-    const type = "text/plain";
-    const clipboardItemData = {
-      [type]: text,
-    };
-    const clipboardItem = new ClipboardItem(clipboardItemData);
-    await navigator.clipboard.write([clipboardItem]);
-  }
 
   return (
     <FormProvider context={form.context}>
@@ -214,22 +207,7 @@ export function SettingsForm({
                                   ? dateToISODate(new Date(entry.created.value!))
                                   : "-"}
                               </div>
-                              <div className="flex w-auto shrink">
-                                <button
-                                  className={
-                                    "cursor-pointer rounded-lg border px-3 disabled:cursor-default disabled:opacity-50"
-                                  }
-                                  disabled={entry.delete.value === "on"}
-                                  title="Copy API key to clipboard"
-                                  onClick={(e) => {
-                                    setClipboard(entry.apiKey.value!);
-                                    e.preventDefault();
-                                  }}
-                                >
-                                  <Clipboard className="w-3" />
-                                </button>
-                              </div>
-
+                              <CopyToClipboardButton value={entry.apiKey.value!} />
                               <div className="flex w-auto shrink">
                                 <button
                                   className={
