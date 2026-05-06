@@ -15,6 +15,8 @@ import ProductProvider from "@/providers/product-context";
 import ShoppingLocationProvider from "@/providers/shopping-location-context";
 import GrocyConfigProvider from "@/providers/grocy-config-context";
 
+export const dynamic = 'force-dynamic';
+
 export default function ScanLayout({
   children,
 }: Readonly<{
