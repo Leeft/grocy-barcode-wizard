@@ -15,8 +15,12 @@ import { flushSync } from "react-dom";
 import { GetApiKeys } from "@/lib/user-db";
 import { UserApiKey } from "@/generated/prisma/browser";
 import dynamic from "next/dynamic";
+import TooltipWrapper from "../tooltip-wrapper";
+import { toast } from "react-hot-toast";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 
-const CopyToClipboardButton = dynamic(() => import('@/ui/forms/settings-form-clipboard'), {
+const CopyToClipboardButton = dynamic(() => import("@/ui/forms/settings-form-clipboard"), {
   ssr: false,
 });
 
@@ -27,7 +31,17 @@ export function SettingsForm({
   settings: Promise<GetSettings>;
   apiKeys: Promise<GetApiKeys>;
 }) {
-  const [lastResult, action, submitPending] = useActionState(settingsSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      settingsSubmit,
+      createToastCallbacks({
+        loadingMessage: "Saving settings ...",
+      }),
+    ),
+    undefined,
+  );
+
+  //const [lastResult, action, submitPending] = useActionState(settingsSubmit, undefined);
   const [dirty, setDirty] = useState<boolean>(false);
 
   const data = use(settings);
@@ -84,7 +98,7 @@ export function SettingsForm({
   }
 
   const appendKey = () => {
-    const currentValue = fields.apiKeys.value;
+    const currentValue = fields.apiKeys.value ?? [];
     const newEntry = [
       {
         apiKey: makeId(),
@@ -92,7 +106,7 @@ export function SettingsForm({
       },
     ];
     // @ts-expect-error Not quite sure how to type these correctly
-    const newValue = currentValue?.concat(newEntry);
+    const newValue = currentValue.concat(newEntry);
     form.update({
       name: fields.apiKeys.name,
       // @ts-expect-error Not quite sure how to type these correctly
@@ -151,7 +165,14 @@ export function SettingsForm({
           </FormRow>
 
           <fieldset {...getFieldsetProps(fields.apiKeys)} className="mb-5 rounded-lg border px-4">
-            <legend className="px-2">API keys</legend>
+            <legend className="px-2">
+              API keys{" "}
+              <TooltipWrapper id="api-keys-explanation" className="mr-3 pr-4">
+                These API keys (you need just one, more is entirely optional) authenticate requests made to
+                the API provided by this program, and need to be used to authenticate the script or program
+                you use to send your barcodes to this program.
+              </TooltipWrapper>
+            </legend>
 
             <FormRow comment="API keys">
               <FormColumn>
@@ -226,6 +247,7 @@ export function SettingsForm({
                           </div>
                         );
                       })}
+                      {apiKeys.length === 0 && <div className="text-alert font-bold">Add an API key</div>}
                     </div>
 
                     <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { Clipboard } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 export default function CopyToClipboardButton({ value }: { value: string }) {
   async function setClipboard(text: string) {
@@ -10,6 +11,7 @@ export default function CopyToClipboardButton({ value }: { value: string }) {
     };
     const clipboardItem = new ClipboardItem(clipboardItemData);
     await navigator.clipboard.write([clipboardItem]);
+    toast.success("Copied API key to clipboard");
   }
 
   return (

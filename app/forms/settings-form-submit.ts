@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { SettingsFormSchema } from "./settings-form-schema";
+import { toActionState } from "@/lib/utils";
 
 export async function settingsSubmit(prevstate: unknown, formData: FormData) {
   const submission = parseWithZod(formData, { schema: SettingsFormSchema });
 
   if (submission.status !== "success") {
     console.log("Settings submit error:", submission);
+        return toActionState("Submission error", "error");
     return submission.reply();
   }
 

@@ -4,12 +4,13 @@ import { Tooltip } from "react-tooltip";
 
 interface TextWrapperProps {
   id: string;
+  className?: string;
   children: ReactNode;
 }
 
-const TooltipWrapper: React.FC<TextWrapperProps> = ({ id, children }) => {
+const TooltipWrapper: React.FC<TextWrapperProps> = ({ id, children, className }) => {
   return (
-    <div className="static inline-block h-1.25 w-1.25">
+    <div className={`static inline-block h-1.25 w-1.25 ${className}`}>
       <span className="h-1.25 w-1.25" onClick={(e) => e.preventDefault()}>
         <a
           className="relative top-0 inline-block w-10 cursor-help pl-1"
