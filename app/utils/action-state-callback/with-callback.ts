@@ -14,10 +14,10 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
   fn: (...args: Args) => Promise<T>,
   callbacks: Callbacks<T, R>,
 ): ((...args: Args) => Promise<T>) => {
-  return async (...args: Args) => {
-    const router = useRouter();
-    const pathname = usePathname();
+  const router = useRouter();
+  const pathname = usePathname();
 
+  return async (...args: Args) => {
     const promise = fn(...args);
 
     const reference = callbacks.onStart?.();
