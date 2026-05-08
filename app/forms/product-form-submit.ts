@@ -77,8 +77,6 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
     },
   });
 
-  console.log("queued product is", queuedProduct);
-
   if (data.imageData != "" && data.imageData !== undefined) {
     const file = dataURLtoFile(data.imageData, "filename-not-used-yet");
     const arr = new Uint8Array(await file.arrayBuffer());
