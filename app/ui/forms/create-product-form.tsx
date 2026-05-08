@@ -37,6 +37,7 @@ export function CreateProductForm({ code }: { code: string }) {
       dueDaysAfterOpen: "0",
       dueDaysAfterFreezing: "0",
       dueDaysAfterThawing: "0",
+      notes: undefined,
     },
 
     onValidate({ formData }) {
@@ -64,6 +65,7 @@ export function CreateProductForm({ code }: { code: string }) {
         <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
         <input {...getInputProps(fields.intent, { type: "hidden" })} value="create" />
         <div id={form.errorId}>{form.errors}</div>
+
         <div className="flex flex-col gap-y-5">
           <FormRow comment="Page header">
             <FormColumn className="flex-auto">

@@ -43,11 +43,13 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
         if (submissionErrors[key]) errors.push(`${key}: ` + submissionErrors[key].join("; ") + "\n");
       });
       return toActionState("Form validation errors: " + errors.join("\n"), "error");
-    }    
+    }
     return toActionState("Could not process submission", "error");
   }
 
   const data = submission.value;
+
+  //console.log( 'data is', data );
 
   function expiresOrNull<Type>(value: Type) {
     return data.dueDateType !== DueDateType.NO_EXPIRY ? value : null;
@@ -74,6 +76,7 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
       quantity: data.quantity,
       purchasePriceType: data.purchasePriceType,
       purchasePrice: data.purchasePrice ? data.purchasePrice.toString() : "0",
+      notes: data.notes,
     },
   });
 
@@ -112,7 +115,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
 
   const data = submission.value;
 
-  // console.log("submit success:", data);
+  //console.log("submit success:", data);
 
   function expiresOrNull<Type>(value: Type) {
     return data.dueDateType !== DueDateType.NO_EXPIRY ? value : null;
@@ -165,6 +168,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
       purchaseConversionFactor: data.purchaseConversionFactor.toString(),
       consumeConversionFactor: data.consumeConversionFactor.toString(),
       priceConversionFactor: data.priceConversionFactor.toString(),
+      notes: data.notes,
     },
   });
 

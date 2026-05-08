@@ -86,6 +86,7 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
     purchasePrice: data.purchasePrice,
     quantity: data.quantity,
     submitMode: "createInGrocy",
+    notes: data.notes,
 
     energyCalculationHelper: 0,
     energyCalculatorOptions: "PER100G",

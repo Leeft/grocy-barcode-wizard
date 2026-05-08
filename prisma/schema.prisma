@@ -61,6 +61,7 @@ model Product {
   dueDaysAfterThawing           Int?
   productPhoto                  ProductPhoto?
   quantity                      Int               @default(1)
+  notes                         String?
   // Additional capture fields
   productGroup                  Int?
   parentProductId               Int?

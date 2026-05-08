@@ -86,6 +86,8 @@ export const CreateProductFormSchema = z
 
     quantity: z.number().gte(1, "Must be 1 or greater"),
 
+    notes: z.string().max(1024, { error: "Please keep the notes under 1024 characters" }).optional(),
+
     imageData: z.string().optional(),
     imageType: z.string().optional(),
     imageName: z.string().optional(),

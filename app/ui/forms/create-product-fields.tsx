@@ -342,6 +342,7 @@ export default function CreateProductFields({
           </FormField>
           <FormErrors id={fields.purchasePriceType.errorId} errors={fields.purchasePriceType.errors} />
         </FormColumn>
+
         <FormColumn className="w-40">
           <FormLabel htmlFor={fields.purchasePrice.name} title="Purchase price"></FormLabel>
           <FormField>
@@ -358,8 +359,9 @@ export default function CreateProductFields({
           </FormField>
           <FormErrors id={fields.purchasePrice.errorId} errors={fields.purchasePrice.errors} />
         </FormColumn>
+
         <FormColumn className="w-30">
-          <FormLabel htmlFor={fields.quantity.name} title="Quantity to add"></FormLabel>
+          <FormLabel htmlFor={fields.quantity.name} title="Quantity to add" />
           <FormField>
             <input
               defaultValue={"1"}
@@ -370,6 +372,22 @@ export default function CreateProductFields({
             />
           </FormField>
           <FormErrors id={fields.quantity.errorId} errors={fields.quantity.errors} />
+        </FormColumn>
+      </FormRow>
+
+      <FormRow comment="Notes">
+        <FormColumn className="w-full md:w-110">
+          <FormLabel htmlFor={fields.notes.name} title="Notes" />
+          <FormField>
+            <textarea
+              {...getInputProps(fields.notes, {
+                type: "text",
+              })}
+              className={clsx(inputCommonStyles, "w-full", "placeholder:text-slate-500")}
+              placeholder="e.g. write down the energy per unit for this product"
+            />
+          </FormField>
+          <FormErrors id={fields.notes.errorId} errors={fields.notes.errors} />
         </FormColumn>
       </FormRow>
     </>

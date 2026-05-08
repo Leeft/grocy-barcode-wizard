@@ -1,4 +1,4 @@
-import { getPendingProducts, PendingProducts } from "@/lib/product-db";
+import { getPendingProducts, GetProduct, PendingProducts } from "@/lib/product-db";
 import { QueuedProductInfoButton } from "@/ui/product/queue/queued-product-info-button";
 
 export default async function ListQueuedProducts() {
@@ -6,7 +6,7 @@ export default async function ListQueuedProducts() {
 
   return (
     <ul className="py-2">
-      {products.map((product) => (
+      {products.map((product: GetProduct) => (
         <li key={`product-row-${product.id}`} suppressHydrationWarning>
           <QueuedProductInfoButton product={product} />
         </li>
