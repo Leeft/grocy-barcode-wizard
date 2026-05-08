@@ -3,7 +3,7 @@
 import React, { use } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Barcode, Rows3, Settings } from "lucide-react";
+import { Barcode, Rows3, Settings } from "lucide-react";
 import { CountPendingProducts } from "@/lib/product-db";
 
 export default function Navbar({ promise }: { promise: Promise<CountPendingProducts> }) {
@@ -12,9 +12,6 @@ export default function Navbar({ promise }: { promise: Promise<CountPendingProdu
   return (
     <nav className="mb-3 text-slate-500 md:mb-6">
       <div className="flex flex-wrap gap-x-0.5 pt-2 text-xs font-bold tracking-tight uppercase md:gap-x-2 md:text-lg md:tracking-normal">
-        <NavigationElement href="/">
-          <House size="15" className={iconClassName} /> Home
-        </NavigationElement>
         <NavigationElement href="/scan">
           <Barcode size="15" className={iconClassName} /> Scan
         </NavigationElement>
@@ -47,8 +44,8 @@ function NavigationElement({
       prefetch={false}
       href={href}
       className={
-        `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 ` +
-        (active ? "text-menu-active" : "")
+        `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 no-underline ` +
+        (active ? "text-menu-active" : "text-menu-inactive")
       }
     >
       {children}

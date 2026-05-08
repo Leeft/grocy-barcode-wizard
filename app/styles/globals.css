@@ -4,6 +4,7 @@
 
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 /* Force dark mode */
 /* @custom-variant dark (&:where(.dark, .dark *)); */
@@ -58,6 +59,9 @@
   --color-stock-buttons-border: var(--color-yellow-300);
 
   --color-menu-active: var(--color-amber-200);
+  --color-menu-inactive: var(--color-slate-500);
+
+  --color-footer: var(--color-menu-inactive);
 
   --color-laser-line: var(--color-red-700);
 
@@ -84,6 +88,18 @@
   --color-update-queue-button: var(--color-teal-200);
   --color-create-product-button: var(--color-orange-300);
   --color-queue-product-button-text: var(--color-white);
+}
+
+@layer base {
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  h3 {
+    font-size: var(--text-lg);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
