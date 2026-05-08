@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { SettingsFormSchema } from "./settings-form-schema";
@@ -12,8 +11,8 @@ export async function settingsSubmit(prevstate: unknown, formData: FormData) {
 
   if (submission.status !== "success") {
     console.log("Settings submit error:", submission);
-        return toActionState("Submission error", "error");
-    return submission.reply();
+    return toActionState("Submission error", "error");
+    //return submission.reply();
   }
 
   const data = submission.value;
@@ -57,5 +56,5 @@ export async function settingsSubmit(prevstate: unknown, formData: FormData) {
   });
 
   revalidatePath("/settings");
-  redirect("/settings");
+  return toActionState("Settings saved", "success");
 }

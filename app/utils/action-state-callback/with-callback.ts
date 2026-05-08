@@ -1,4 +1,7 @@
+"use client";
+
 import { ActionState } from "@/interfaces";
+import { usePathname, useRouter } from "next/navigation";
 
 type Callbacks<T, R = unknown> = {
   onStart?: () => R;
@@ -12,6 +15,9 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
   callbacks: Callbacks<T, R>,
 ): ((...args: Args) => Promise<T>) => {
   return async (...args: Args) => {
+    const router = useRouter();
+    const pathname = usePathname();
+
     const promise = fn(...args);
 
     const reference = callbacks.onStart?.();
@@ -24,6 +30,8 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
 
     if (result?.status === "success") {
       callbacks.onSuccess?.(result);
+      // eslint-disable-next-line Can't type this without going to internal react types
+      router.replace(pathname as any);
     }
 
     if (result?.status === "error") {

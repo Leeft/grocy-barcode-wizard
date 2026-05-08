@@ -30,15 +30,15 @@ import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormStockLabelType } from "./components/action-form-stock-label-type";
 import { ActionFormNote } from "./components/action-form-note";
 import { ProductAddSchema } from "../action-form-schemas";
-import { withCallbacks } from "@/interfaces";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
   const [lastResult, action, submitPending] = useActionState(
     withCallbacks(
       productAddSubmit,
       createToastCallbacks({
-        loadingMessage: "Purchasing stock in Grocy ...",
+        loadingMessage: "Queuing product capture ...",
       }),
     ),
     undefined,

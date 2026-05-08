@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
-import { dataURLtoFile, dateToISODate } from "@/lib/utils";
+import { dataURLtoFile, dateToISODate, toActionState } from "@/lib/utils";
 import { CreateProductFormSchema, EditProductFormSchema } from "@/forms/product-form-schema";
 import { apiKey, baseUrl, grocyClient } from "@/lib/grocy";
 import {
@@ -35,7 +35,16 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
   const submission = parseWithZod(formData, { schema: CreateProductFormSchema });
 
   if (submission.status !== "success") {
-    return submission.reply();
+    const submissionErrors = submission.error;
+    if (submissionErrors !== undefined && submissionErrors !== null) {
+      const keys = Object.keys(submissionErrors);
+      const errors: string[] = [];
+      keys.forEach((key) => {
+        if (submissionErrors[key]) errors.push(`${key}: ` + submissionErrors[key].join("; ") + "\n");
+      });
+      return toActionState("Form validation errors: " + errors.join("\n"), "error");
+    }    
+    return toActionState("Could not process submission", "error");
   }
 
   const data = submission.value;
@@ -78,7 +87,7 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
         userId: 1, // TODO: Actual users
         productId: queuedProduct.id,
         filename: `capture-${queuedProduct.id}-${Date.now()}.png`,
-        tiletype: data.imageType,
+        filetype: data.imageType,
         data: arr,
         grocyFileGroup: "productpictures",
         lastChanged: Math.floor(Date.now() / 1000),
@@ -91,9 +100,8 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
     data: { productId: queuedProduct.id },
   });
 
-  // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath(`/scan/[barcode]`, "page");
-  redirect(`/scan/${data.barcode}`);
+  revalidatePath(`/scan/${data.barcode}`);
+  return toActionState("Product capture queued", "success");
 }
 
 export async function productUpdateSubmit(prevstate: unknown, formData: FormData) {

@@ -12,9 +12,19 @@ import CreateProductFields from "@/ui/forms/create-product-fields";
 import { ProductFormSchema } from "@/forms/product-form-schema";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { clsx } from "clsx";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 
 export function CreateProductForm({ code }: { code: string }) {
-  const [lastResult, action, submitPending] = useActionState(productCreateSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productCreateSubmit,
+      createToastCallbacks({
+        loadingMessage: "Creating product in Grocy ...",
+      }),
+    ),
+    undefined,
+  );
 
   const [form, fields] = useForm({
     lastResult,

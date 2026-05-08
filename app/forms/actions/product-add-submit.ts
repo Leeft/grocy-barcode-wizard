@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { grocyClient } from "@/lib/grocy";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
@@ -67,6 +66,6 @@ export async function productAddSubmit(prevstate: unknown, formData: FormData) {
     return toActionState("Grocy returned an error: " + result.error_message, "error");
   } else {
     revalidatePath(`/scan/${barcode}`);
-    redirect(`/scan/${barcode}`);
+    toActionState("Product created", "success");
   }
 }
