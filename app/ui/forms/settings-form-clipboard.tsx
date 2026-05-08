@@ -9,7 +9,7 @@ export default function CopyToClipboardButton({ value }: { value: string }) {
     const clipboardItemData = {
       [type]: text,
     };
-    const clipboardItem = new ClipboardItem(clipboardItemData);
+    const clipboardItem = new window.ClipboardItem(clipboardItemData);
     await navigator.clipboard.write([clipboardItem]);
     toast.success("Copied API key to clipboard");
   }
