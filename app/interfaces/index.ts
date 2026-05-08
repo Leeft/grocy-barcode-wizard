@@ -14,28 +14,26 @@ export interface SerialisedBarcode {
   queuedProductId?: number;
 }
 
-export const allBarcodeTypes = [
-  "product",
-  "grocy-product",
-  "grocy-recipe",
-  "grocy-battery",
-  "bbuddy-operation",
-  "bbuddy-quantity",
-  "sho-operation",
-] as const;
+export enum ProductBarcodeTypes {
+  PRODUCT = "product",
+  GROCY_PRODUCT = "grocy-product",
+};
 
-export const specialBarcodeTypes = [
-  "grocy-recipe",
-  "bbuddy-operation",
-  "bbuddy-quantity",
-  "sho-operation",
-] as const;
+export enum SpecialBarcodeTypes {
+  GROCY_RECIPE = "grocy-recipe",
+  GROCY_BATTERY = "grocy-battery",
+  BBUDDY_OPERATION = "bbuddy-operation",
+  BBUDDY_QUANTITY = "bbuddy-quantity",
+  SHO_OPERATION = "sho-operation",
+  QR_URI = "qr-uri",
+  QR_WIFI = "qr-wifi",
+  QR_VCARD = "qr-vcard",
+  QR_COMMUNICATION = "qr-communication",
+  QR_VEVENT = "qr-vevent",
+  QR_OTHER = "qr-other",
+};
 
-export const productOnlyBarcodeTypes = ["product", "grocy-product"] as const;
-
-export type BarcodeAnyType = (typeof allBarcodeTypes)[number];
-export type BarcodeSpecialType = (typeof specialBarcodeTypes)[number];
-export type BarcodeProductType = (typeof productOnlyBarcodeTypes)[number];
+export type AllBarcodeTypes = ProductBarcodeTypes | SpecialBarcodeTypes;
 
 export type ActionState =
   | {

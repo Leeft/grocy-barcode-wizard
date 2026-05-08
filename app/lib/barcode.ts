@@ -1,18 +1,11 @@
-import { SerialisedBarcode } from "@/interfaces";
-import {
-  BarcodeAnyType,
-  BarcodeProductType,
-  BarcodeSpecialType,
-  productOnlyBarcodeTypes,
-  specialBarcodeTypes,
-} from "@/interfaces";
+import { AllBarcodeTypes, ProductBarcodeTypes, SerialisedBarcode, SpecialBarcodeTypes } from "@/interfaces";
 
 let nextId: number = 1;
 
 export default class Barcode {
   #id: number; // immutable; uniqueness not at all guaranteed atm
   #barcode: string; // immutable
-  #type: BarcodeAnyType; // immutable
+  #type: AllBarcodeTypes; // immutable
   name?: string;
   quantity?: number;
   grocyProductId?: number; // If a product is found in grocy, this is its id
@@ -111,27 +104,7 @@ export default class Barcode {
   }
 }
 
-function parseProductBarcode(maybeProductBarcode: string): BarcodeProductType {
-  const barcode = productOnlyBarcodeTypes.find(
-    (validName) => validName === maybeProductBarcode,
-  );
-  if (barcode) {
-    return barcode;
-  }
-  throw new Error("That is not a product barcode.");
-}
-
-function parseSpecialBarcode(maybeProductBarcode: string): BarcodeSpecialType {
-  const barcode = specialBarcodeTypes.find(
-    (validName) => validName === maybeProductBarcode,
-  );
-  if (barcode) {
-    return barcode;
-  }
-  throw new Error("That is not a special barcode.");
-}
-
-export function barcodeToType(barcode: string): BarcodeAnyType {
+export function barcodeToType(barcode: string): AllBarcodeTypes {
   if (barcode.length < 5) {
     throw new Error("barcode is impossibly short");
   }
@@ -147,31 +120,38 @@ export function barcodeToType(barcode: string): BarcodeAnyType {
     throw new Error("barcode contains whitespace");
   }
 
+  if (/^https?:\/\//i.test(barcode)) return SpecialBarcodeTypes.QR_URI;
+  if (/^WIFI:/i.test(barcode)) return SpecialBarcodeTypes.QR_WIFI;
+  if (/^(BEGIN:VCARD|MECARD:)/i.test(barcode)) return SpecialBarcodeTypes.QR_VCARD;
+  if (/^(mailto|matmsg|tel|smsto|sms):/i.test(barcode)) return SpecialBarcodeTypes.QR_COMMUNICATION;
+  if (/^BEGIN:VEVENT/i.test(barcode)) return SpecialBarcodeTypes.QR_VEVENT;
+  if (/^\[/i.test(barcode)) return SpecialBarcodeTypes.QR_OTHER;
+
   if (/^(SHO)[:-](C|CS|CA|P|O|I|AS)$/i.test(barcode)) {
-    return "sho-operation";
+    return SpecialBarcodeTypes.SHO_OPERATION;
   }
 
   if (/^BBUDDY[:-]q[:-]/i.test(barcode)) {
-    return "bbuddy-quantity";
+    return SpecialBarcodeTypes.BBUDDY_QUANTITY;
   }
 
   if (/^(BBUDDY)[:-](C|CS|CA|P|O|I|AS)$/i.test(barcode)) {
-    return "bbuddy-operation";
+    return SpecialBarcodeTypes.BBUDDY_OPERATION;
   }
 
   if (/^(GRCY)[:]R[:].*$/i.test(barcode)) {
-    return "grocy-recipe";
+    return SpecialBarcodeTypes.GROCY_RECIPE;
   }
 
   if (/^(GRCY)[:]P[:].*$/i.test(barcode)) {
-    return "grocy-product";
+    return ProductBarcodeTypes.GROCY_PRODUCT;
   }
 
   if (/^(GRCY)[:]B[:].*$/i.test(barcode)) {
-    return "grocy-battery";
+    return SpecialBarcodeTypes.GROCY_BATTERY;
   }
 
-  return "product";
+  return ProductBarcodeTypes.PRODUCT;
 }
 
 // function isAnyBarcode(barcode: string): boolean {
@@ -186,23 +166,21 @@ export function barcodeToType(barcode: string): BarcodeAnyType {
 // }
 
 function isSpecialBarcode(barcode: string): boolean {
-  const inferredType: BarcodeAnyType = barcodeToType(barcode);
-  try {
-    parseSpecialBarcode(inferredType);
+  const inferredType: AllBarcodeTypes = barcodeToType(barcode);
+  const found = Object.values(SpecialBarcodeTypes).find((type: string) => type === inferredType);
+  if (found) {
     return true;
-  } catch {
-    return false;
   }
+  return false;
 }
 
 function isProductBarcode(barcode: string): boolean {
-  const inferredType: BarcodeAnyType = barcodeToType(barcode);
-  try {
-    parseProductBarcode(inferredType);
+  const inferredType: AllBarcodeTypes = barcodeToType(barcode);
+  const found = Object.values(ProductBarcodeTypes).find((type: string) => type === inferredType);
+  if (found) {
     return true;
-  } catch {
-    return false;
   }
+  return false;
 }
 
 function grocyProductNumber(barcode: string): number | null {
