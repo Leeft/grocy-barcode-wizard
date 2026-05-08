@@ -5,11 +5,11 @@ export default function ConfigError() {
   return (
     <>
       <h1 className="mt-3 mb-5 inline-block text-lg font-bold text-slate-400 uppercase">
-        Configuration missing
+        Configuration view
       </h1>
       <p className="mb-8">
         Since you landed here, it appears you have missing environment variable(s). Check and fix the
-        configured entries shown. You need to restart the server afterwards.
+        configured entries shown. You need to restart the server or container afterwards.
       </p>
       <div className="flex flex-col gap-5">
         <HaveEnvironment name="GROCY_URL" showValue={true} />
@@ -29,14 +29,14 @@ function HaveEnvironment({ name, showValue }: { name: string; showValue?: boolea
   }
 
   return (
-    <div className="my-2 flex">
+    <div className="my-1 flex">
       <span className="mx-5">
         <code>env.{name}</code>:{" "}
-        <span
+        <code
           className={value !== undefined && value !== null ? "text-status-connected" : "text-status-error"}
         >
           {value ?? "unset/undefined"}
-        </span>
+        </code>
       </span>
     </div>
   );
