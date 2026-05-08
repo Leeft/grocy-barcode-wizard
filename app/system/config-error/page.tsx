@@ -1,7 +1,7 @@
-import { isEnvironmentConfigured } from "@/lib/utils";
-import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
-export default function ConfigError() {
+export default async function ConfigError() {
+  await connection();
   return (
     <>
       <h1 className="mt-3 mb-5 inline-block text-lg font-bold text-slate-400 uppercase">
