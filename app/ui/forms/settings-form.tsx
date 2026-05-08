@@ -156,7 +156,16 @@ export function SettingsForm({
               <div className="flex flex-col leading-7">
                 <FormField>
                   <FormCheckbox fieldInfo={fields.playSoundOnScan} onChange={() => setDirty(true)}>
-                    Play a sound when a barcode is scanned
+                    Play a sound when a barcode is accepted by the scan mode{" "}
+                    <TooltipWrapper id="playmode-clarification">
+                      The sound plays only when the barcode is recognised as a product barcode, and the client
+                      is connected with the "SCAN mode" active (as indicated by the SCAN menu option being
+                      highlighted).
+                      <br />
+                      <br />
+                      Barcodes received while the client is not displaying a scan mode page will not be
+                      accepted and processed, and no sound will play.
+                    </TooltipWrapper>
                   </FormCheckbox>
                 </FormField>
                 <FormErrors id={fields.playSoundOnScan.errorId} errors={fields.playSoundOnScan.errors} />
