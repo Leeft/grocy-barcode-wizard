@@ -69,6 +69,13 @@ export async function countPendingProducts() {
       grocyProductId: {
         equals: null,
       },
+      barcodes: {
+        some: {
+          queued: {
+            equals: true,
+          },
+        },
+      },      
     },
   });
 }
