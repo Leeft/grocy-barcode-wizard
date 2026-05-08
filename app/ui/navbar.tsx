@@ -10,8 +10,8 @@ export default function Navbar({ promise }: { promise: Promise<CountPendingProdu
   const iconClassName = "relative top-[-2] inline";
   const count = use(promise);
   return (
-    <nav className="mb-3 md:mb-6 text-slate-500">
-      <div className="flex flex-wrap gap-x-0.5 md:gap-x-2 pt-2 text-xs font-bold uppercase md:text-lg tracking-tight md:tracking-normal">
+    <nav className="mb-3 text-slate-500 md:mb-6">
+      <div className="flex flex-wrap gap-x-0.5 pt-2 text-xs font-bold tracking-tight uppercase md:gap-x-2 md:text-lg md:tracking-normal">
         <NavigationElement href="/">
           <House size="15" className={iconClassName} /> Home
         </NavigationElement>
@@ -19,7 +19,8 @@ export default function Navbar({ promise }: { promise: Promise<CountPendingProdu
           <Barcode size="15" className={iconClassName} /> Scan
         </NavigationElement>
         <NavigationElement href="/queue">
-          <Rows3 size="15" className={iconClassName} /> Queue <span className="brightness-150">({count})</span>
+          <Rows3 size="15" className={iconClassName} /> Queue{" "}
+          <span className="brightness-150">({count})</span>
         </NavigationElement>
         <NavigationElement href="/settings">
           <Settings size="15" className={iconClassName} /> Settings
@@ -43,6 +44,7 @@ function NavigationElement({
 
   return (
     <Link
+      prefetch={false}
       href={href}
       className={
         `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 ` +

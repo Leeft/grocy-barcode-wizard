@@ -16,6 +16,7 @@ export function ActionFormCancel({
   return (
     <FormColumn className="pt-5.5">
       <Link
+        prefetch={false}
         href={`/scan/${code}`}
         onClick={onClick}
         className={clsx(

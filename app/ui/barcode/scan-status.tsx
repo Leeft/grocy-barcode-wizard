@@ -1,8 +1,15 @@
 "use client";
 
 import QRCode from "@/components/qrcode";
+import { Libre_Barcode_39 } from "next/font/google";
 import Barcode from "@/lib/barcode";
 import { ConnectionStatus } from "@/ui/barcode/scanner-app";
+
+const libreBarcode39 = Libre_Barcode_39({
+  weight: '400',
+  preload: false,
+  fallback: ['system-ui', 'arial'],
+});
 
 export default function BarcodeScanStatus({
   connectionStatus,
@@ -37,7 +44,9 @@ function VisualBarcode({ barcode }: { barcode: Barcode }) {
       <div className="relative inline-block">
         {/* The Visual Barcode */}
         {barcode.type === "product" ? (
-          <div className="font-barcode md:text-6x1 text-3xl leading-none tracking-normal text-slate-200">
+          <div
+            className={`${libreBarcode39.className} md:text-6x1 text-slate-200} text-3xl leading-none tracking-normal`}
+          >
             {`*${barcode.barcode}*`}
           </div>
         ) : (

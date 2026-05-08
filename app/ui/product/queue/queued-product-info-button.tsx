@@ -52,6 +52,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
 
   return (
     <Link
+      prefetch={false}
       href={`/queue/${product.barcodes[0]!.barcode}`}
       className="my-3 block w-full cursor-pointer rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-left text-slate-300 hover:bg-slate-600"
       title={`Process queued product “${product.name}”`}

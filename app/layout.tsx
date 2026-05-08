@@ -5,7 +5,7 @@ import Navbar from "@/ui/navbar";
 import UserProvider from "@/providers/user-context";
 import { getUser } from "./lib/user-db";
 import { countPendingProducts } from "./lib/product-db";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { isEnvironmentConfigured } from "./lib/utils";
 
 const geistSans = Geist({
@@ -25,9 +25,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   initialScale: 1,
-  // width: 860,
   width: "device-width",
-  //viewportFit: 'cover',
 };
 
 export default function RootLayout({

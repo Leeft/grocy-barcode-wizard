@@ -129,6 +129,7 @@ export const ActionLink: React.FC<ActionLinkProps> = ({
   return (
     <Link
       {...rest}
+      prefetch={false}
       href={(disabled ? "#" : href) as UrlObject | __next_route_internal_types__.RouteImpl<RouteType>}
       className={classes}
       onClick={(e) => {
