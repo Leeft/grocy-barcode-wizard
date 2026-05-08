@@ -19,7 +19,6 @@
   "dependencies": {
     "@conform-to/react": "1.19.0",
     "@conform-to/zod": "1.19.0",
-    "@heroicons/react": "^2.2.0",
     "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@shivantra/react-web-camera": "^1.2.0",
