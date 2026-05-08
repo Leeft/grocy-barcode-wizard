@@ -11,6 +11,9 @@ export default async function ListQueuedProducts() {
           <QueuedProductInfoButton product={product} />
         </li>
       ))}
+      {products.length === 0 && (
+        <li className="text-inactive text-base">The product capture queue is empty.</li>
+      )}
     </ul>
   );
 }
