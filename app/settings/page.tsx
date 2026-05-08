@@ -4,7 +4,7 @@ import { SettingsForm } from "@/ui/forms/settings-form";
 import { connection } from "next/server";
 
 export default async function Settings() {
-  await connection()
+  await connection();
   return (
     <div>
       <SettingsForm settings={getSettings(1)} apiKeys={getApiKeys(1)} />

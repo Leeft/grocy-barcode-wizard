@@ -2,10 +2,6 @@ import { isEnvironmentConfigured } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
 export default function ConfigError() {
-  if (isEnvironmentConfigured()) {
-    redirect("/");
-  }
-
   return (
     <>
       <h1 className="mt-3 mb-5 inline-block text-lg font-bold text-slate-400 uppercase">
