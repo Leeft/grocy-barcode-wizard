@@ -217,6 +217,9 @@ function ButtonDisableCamera({
       onClick={() => {
         setEnabled(false);
         scrollIntoView(ref);
+        if (cameraHandler !== null) {
+          cameraHandler.current?.stop();
+        }
       }}
       title="Disable camera"
       type="button"
