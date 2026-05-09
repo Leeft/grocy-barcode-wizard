@@ -36,9 +36,21 @@ const openFoodFactsNotFoundDecoder = JsonDecoder.object<OpenFoodFactsNotFoundRes
 
 export async function findProductInOpenFoodFacts(barcode: Barcode) {
   const startTime = performance.now();
-  const i_promise = await (await new ExternalLookup().lookupOpenFoodFacts(barcode)).json();
+  const response = await new ExternalLookup().lookupOpenFoodFacts(barcode);
+  if (response === undefined || response.status === 404) return;
 
-  openFoodFactsNotFoundDecoder.decodePromise(i_promise).then((result) => {
+  let parseOk = false;
+  let json;
+  try {
+    json = await response.json();
+    parseOk = true;
+  } catch (err: unknown) {
+    console.log("Can't parse OFF response; status was: ", response.statusText, err);
+  }
+
+  if (!parseOk) return;
+
+  openFoodFactsNotFoundDecoder.decodePromise(json).then((result) => {
     if (result.status !== 0) {
       openFoodFactsDecoder
         .decodePromise(result)
