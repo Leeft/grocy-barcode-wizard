@@ -11,7 +11,7 @@ export default function Navbar({ promise }: { promise: Promise<CountPendingProdu
   const count = use(promise);
   return (
     <nav className="mb-3 text-slate-500 md:mb-6">
-      <div className="flex flex-wrap gap-x-0.5 pt-2 text-xs font-bold tracking-tight uppercase md:gap-x-2 md:text-lg md:tracking-normal">
+      <div className="flex flex-wrap gap-x-0.5 pt-2 text-base font-bold tracking-normal uppercase sm:text-lg md:gap-x-2 lg:text-xl">
         <NavigationElement href="/scan">
           <Barcode size="15" className={iconClassName} /> Scan
         </NavigationElement>
@@ -44,7 +44,7 @@ function NavigationElement({
       prefetch={false}
       href={href}
       className={
-        `cursor-pointer rounded-sm px-2 text-nowrap hover:bg-slate-500 hover:text-slate-200 no-underline ` +
+        `cursor-pointer rounded-sm px-2 text-nowrap no-underline hover:bg-slate-500 hover:text-slate-200 ` +
         (active ? "text-menu-active" : "text-menu-inactive")
       }
     >

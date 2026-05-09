@@ -73,12 +73,19 @@ export default function RootLayout({
                 <main id="main" className="mb-auto h-full flex-auto basis-full">
                   {children}
                 </main>
-                <footer className="text-footer h-6 brightness-150">
-                  Grocy Barcode Wizard &mdash; created by Lianna{" "}
-                  <a target="_blank" href="https://github.com/Leeft/grocy-barcode-wizard">
-                    <GitHub className={`fill-footer ml-6 inline size-7 pr-2`} />
-                    github.com
-                  </a>
+                <footer className="text-footer flex w-full flex-row flex-wrap gap-x-5 gap-y-1 tracking-tight brightness-150">
+                  <div className="shrink leading-loose">Grocy Barcode Wizard</div>
+                  <div className="shrink leading-loose">Created by Lianna</div>
+                  <div className="shrink pt-[0.5]">
+                    <a
+                      target="_blank"
+                      className="inline-block"
+                      href="https://github.com/Leeft/grocy-barcode-wizard"
+                    >
+                      <GitHub className={`fill-footer inline size-7 pr-2`} />
+                      github.com
+                    </a>
+                  </div>
                 </footer>
               </div>
             </UserProvider>

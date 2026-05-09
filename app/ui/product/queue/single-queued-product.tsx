@@ -5,9 +5,9 @@ export default async function SingleQueuedProduct({ product }: { product: GetPro
   return (
     <>
       <div className="flex flex-col gap-y-3 pb-10">
-        <h1 className="text-1xl mt-4 mb-1 pl-4 font-bold text-slate-200 uppercase">
+        <h1 className="text-lg mt-4 mb-1 pl-4 font-bold text-slate-200 uppercase">
           Initial product capture for{" "}
-          <code className="text-bold text-base">{product.barcodes[0]?.barcode}</code>
+          <code className="text-bold text-1xl">{product.barcodes[0]?.barcode}</code>
         </h1>
         <QueuedProductInfoButton product={product} />
       </div>
