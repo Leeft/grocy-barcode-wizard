@@ -40,7 +40,7 @@ import { ArrowLeftFromLine } from "lucide-react";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { ProductFormSchema } from "@/forms/product-form-schema";
+import { editProductFormSchema } from "@/forms/product-form-schema";
 
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
@@ -100,13 +100,16 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
 export function EditProductForm({ code, product }: { code: string; product: Promise<GetProduct> }) {
   const [lastResult, action, submitPending] = useActionState(productUpdateSubmit, undefined);
 
+  const products = use(useContext(ProductContext) as Promise<Product[]>);
+  const productNames: string[] = products.map((pr) => pr.name).filter((name) => name !== undefined);
+
   const [form, fields] = useForm({
     lastResult,
 
     defaultValue: defaultsForForm(code, product),
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: ProductFormSchema });
+      return parseWithZod(formData, { schema: editProductFormSchema(productNames) });
     },
 
     shouldValidate: "onBlur",
@@ -139,7 +142,6 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   }
 
   const units = use(useContext(QuantityUnitContext) as Promise<QuantityUnit[]>);
-  const products = use(useContext(ProductContext) as Promise<Product[]>);
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
   const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
   const productGroups = use(useContext(ProductGroupContext) as Promise<ProductGroup[]>);

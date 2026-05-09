@@ -6,8 +6,8 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
 import { dataURLtoFile, dateToISODate, toActionState } from "@/lib/utils";
-import { CreateProductFormSchema, EditProductFormSchema } from "@/forms/product-form-schema";
-import { apiKey, baseUrl, grocyClient } from "@/lib/grocy";
+import { createProductFormSchema, editProductFormSchema } from "@/forms/product-form-schema";
+import { apiKey, baseUrl, fetchProducts, grocyClient } from "@/lib/grocy";
 import {
   dueDateTypeToGrocy,
   labelTypeToGrocy,
@@ -32,7 +32,10 @@ function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
 }
 
 export async function productCreateSubmit(prevstate: unknown, formData: FormData) {
-  const submission = parseWithZod(formData, { schema: CreateProductFormSchema });
+  const products = await fetchProducts();
+  const productNames: string[] = products.map(pr => pr.name).filter(name => name !== undefined);
+
+  const submission = parseWithZod(formData, { schema: createProductFormSchema( productNames ) });
 
   if (submission.status !== "success") {
     const submissionErrors = submission.error;
@@ -106,7 +109,10 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
 }
 
 export async function productUpdateSubmit(prevstate: unknown, formData: FormData) {
-  const submission = parseWithZod(formData, { schema: EditProductFormSchema });
+  const products = await fetchProducts();
+  const productNames: string[] = products.map(pr => pr.name).filter(name => name !== undefined);
+
+  const submission = parseWithZod(formData, { schema: editProductFormSchema(productNames) });
   // Send the submission back to the client if the status is not successful
   if (submission.status !== "success") {
     console.log("submission error:", submission);

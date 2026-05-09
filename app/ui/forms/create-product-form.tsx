@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { use, useActionState, useContext, useState } from "react";
 import { productCreateSubmit } from "@/forms/product-form-submit";
 import { Button } from "@/ui/button";
 import { CameraApp } from "@/ui/camera-app";
@@ -9,27 +9,30 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { FormColumn, FormRow } from "@/ui/forms/form-utils";
 import CreateProductFields from "@/ui/forms/create-product-fields";
-import { ProductFormSchema } from "@/forms/product-form-schema";
+import { createProductFormSchema } from "@/forms/product-form-schema";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { clsx } from "clsx";
 import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { ProductContext } from "@/providers/product-context";
+import { Product } from "@/interfaces/grocy";
 
 export function CreateProductForm({ code }: { code: string }) {
   const [lastResult, action, submitPending] = useActionState(
     withCallbacks(
       productCreateSubmit,
       createToastCallbacks({
-        loadingMessage: "Creating product in Grocy ...",
+        loadingMessage: "Queueing product ...",
       }),
     ),
     undefined,
   );
 
+  const products = use(useContext(ProductContext) as Promise<Product[]>);
+  const productNames: string[] = products.map((pr) => pr.name).filter((name) => name !== undefined);
+
   const [form, fields] = useForm({
     lastResult,
-
-    id: `create-${code}`,
 
     defaultValue: {
       unitAmount: "1.0",
@@ -41,10 +44,9 @@ export function CreateProductForm({ code }: { code: string }) {
     },
 
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: ProductFormSchema });
+      return parseWithZod(formData, { schema: createProductFormSchema(productNames) });
     },
 
-    // Validate the form on blur event triggered
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });

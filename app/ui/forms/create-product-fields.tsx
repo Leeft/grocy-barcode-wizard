@@ -96,6 +96,7 @@ export default function CreateProductFields({
             <input
               {...getInputProps(fields.name, { type: "text" })}
               placeholder="Name of the product to create"
+              autoComplete="off"
               className={clsx(inputCommonStyles, "w-full")}
             />
           </FormField>
