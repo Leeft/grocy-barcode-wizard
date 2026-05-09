@@ -6,6 +6,8 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+@import "react-image-crop/dist/ReactCrop.css";
+
 /* Force dark mode */
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 
@@ -46,6 +48,8 @@
   --color-switch-camera: var(--color-blue-600);
   --color-rotate-image: var(--color-amber-600);
   --color-discard-image: var(--color-red-600);
+  --color-toggle-cropping: var(--color-teal-500);
+  --color-confirm-crop: var(--color-green-400);
 
   /* Others ... */
 

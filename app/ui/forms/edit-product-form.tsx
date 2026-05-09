@@ -39,6 +39,8 @@ import Grocy from "@/components/icons/grocy";
 import { ArrowLeftFromLine } from "lucide-react";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
+import { parseWithZod } from "@conform-to/zod/v4";
+import { ProductFormSchema } from "@/forms/product-form-schema";
 
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
@@ -101,18 +103,14 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
   const [form, fields] = useForm({
     lastResult,
 
-    id: `update-${code}`,
-
     defaultValue: defaultsForForm(code, product),
 
-    // Reuse the validation logic on the client
-    // onValidate({ formData }) {
-    //   return parseWithZod(formData, { schema: ProductFormSchema });
-    // },
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: ProductFormSchema });
+    },
 
-    // Validate the form on blur event triggered
-    // shouldValidate: "onBlur",
-    // shouldRevalidate: "onInput",
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
   });
 
   const [submitMode, setSubmitMode] = useState<"createInGrocy" | "updateOnly">("createInGrocy");
