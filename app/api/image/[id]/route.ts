@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext<'/api/image/[id]'
         status: 200,
         headers: new Headers({
           // this optional header triggers a download in the browser
-          "content-disposition": `attachment; filename=${photo.filename}`,
+          //"content-disposition": `attachment; filename=${photo.filename}`,
           "content-type": "image/png",
           "content-length": photo.data.length + "",
           "cache-control": "no-cache",
