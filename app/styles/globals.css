@@ -94,7 +94,7 @@
   --color-queue-product-button-text: var(--color-white);
 }
 
-@layer base {
+/* @layer base {
   h1 {
     font-size: var(--text-2xl);
   }
@@ -104,7 +104,7 @@
   h3 {
     font-size: var(--text-lg);
   }
-}
+} */
 
 @media (prefers-color-scheme: dark) {
   :root {
