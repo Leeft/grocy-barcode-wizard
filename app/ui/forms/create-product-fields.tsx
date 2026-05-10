@@ -94,10 +94,10 @@ export default function CreateProductFields({
     <>
       <FormRow comment="Add barcode to product link">
         <FormColumn>
-          or:{" "}
+              <span className="hidden sm:inline-block">or:</span>
           <Link
             href={`/scan/${encodeURIComponent(fields.barcode.value)}/add-to-product` as Route<string>}
-            className="rounded-lg border border-dashed px-4 py-2 ml-3 underline underline-offset-4"
+            className="rounded-lg border border-dashed px-4 py-2 ml-0 sm:ml-3 underline underline-offset-4 inline-block"
           >
             <ArrowRight className="inline size-6 pr-1.5" />
             Add barcode <code>{fields.barcode.value}</code> to existing product

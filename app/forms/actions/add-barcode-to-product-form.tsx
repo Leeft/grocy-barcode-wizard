@@ -99,12 +99,12 @@ export function AddBarcodeToProductForm({ code }: { code: string }) {
 
           <FormRow comment="Add barcode to product link">
             <FormColumn>
-              or:{" "}
+              <span className="hidden sm:inline-block">or:</span>
               <Link
                 href={
                   `/scan/${encodeURIComponent(fields.base.getFieldset().barcode.value!)}` as Route<string>
                 }
-                className="ml-3 rounded-lg border border-dashed px-4 py-2 underline underline-offset-4"
+                className="ml-0 sm:ml-3 rounded-lg border border-dashed px-4 py-2 underline underline-offset-4 inline-block"
               >
                 <ArrowRight className="inline size-6 pr-1.5" />
                 Create new product for this barcode

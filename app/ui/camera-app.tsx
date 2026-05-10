@@ -652,7 +652,7 @@ function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
   return (
     <div key={`captured-image-container`} className="relative">
       {args.cropEnabled ? (
-        <ReactCrop crop={args.crop} onChange={(c) => args.setCrop(c)}>
+        <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img ref={args.imageRef} key={`captured-image`} src={args.data} alt="Captured image from camera" />
         </ReactCrop>
@@ -682,7 +682,7 @@ function BackgroundSavedImage({
   return (
     <div key={`captured-image-${photoId}-container`} className="relative">
       {args.cropEnabled ? (
-        <ReactCrop crop={args.crop} onChange={(c) => args.setCrop(c)}>
+        <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={args.imageRef}
