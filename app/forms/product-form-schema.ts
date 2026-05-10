@@ -180,9 +180,7 @@ export const createProductFormSchema = ( productNames: string[] ) => {
     .refine(
       ({ name }) => {
         const found = productNames.find( pn => pn.toLocaleLowerCase() === name.toLocaleLowerCase() );
-        const res = ( found === undefined );
-        console.log( name, "was", ( res ) ? "not found" : "found", "in", productNames );
-        return res;
+        return ( found === undefined );
       },
       {
         message: "Product name exists in Grocy. It must be unique.",
