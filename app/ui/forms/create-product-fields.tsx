@@ -37,6 +37,9 @@ import {
   QuantityUnit,
 } from "@/interfaces/grocy";
 import { dateToISODate } from "@/lib/utils";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Route } from "next";
 
 export default function CreateProductFields({
   formId,
@@ -89,6 +92,19 @@ export default function CreateProductFields({
 
   return (
     <>
+      <FormRow comment="Add barcode to product link">
+        <FormColumn>
+          or:{" "}
+          <Link
+            href={`/scan/${encodeURIComponent(fields.barcode.value)}/add-to-product` as Route<string>}
+            className="rounded-lg border border-dashed px-4 py-2 ml-3 underline underline-offset-4"
+          >
+            <ArrowRight className="inline size-6 pr-1.5" />
+            Add barcode <code>{fields.barcode.value}</code> to existing product
+          </Link>
+        </FormColumn>
+      </FormRow>
+
       <FormRow comment="Product name">
         <FormColumn>
           <FormLabel htmlFor={fields.name.name} title="Product name *" />

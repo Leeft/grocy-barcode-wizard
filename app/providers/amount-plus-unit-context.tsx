@@ -28,19 +28,19 @@ interface ContainerProps {
   children: React.ReactNode;
   stockEntryPromise: StockEntriesPromise;
   quantityUnitsPromise: QuantityUnitsPromise;
-  resolvedQUConversionPromise: QuantityUnitsConversionPromise;
+  resolvedQuantityUnitsConversionPromise: QuantityUnitsConversionPromise;
 }
 
 const AmountPlusUnitProvider = ({
   children,
   stockEntryPromise,
   quantityUnitsPromise,
-  resolvedQUConversionPromise,
+  resolvedQuantityUnitsConversionPromise,
 }: ContainerProps) => {
   const object = {
     stockEntryPromise: stockEntryPromise,
     quantityUnitsPromise: quantityUnitsPromise,
-    resolvedQuantityUnitsConversionPromise: resolvedQUConversionPromise,
+    resolvedQuantityUnitsConversionPromise: resolvedQuantityUnitsConversionPromise,
   };
   return <AmountPlusUnitContext value={object}>{children}</AmountPlusUnitContext>;
 };

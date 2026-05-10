@@ -3,7 +3,7 @@ import BarcodeScannerApp from "@/ui/barcode/scanner-app";
 import { ensureBarcodeExists } from "@/lib/barcode-db";
 import {
   fetchProductStock,
-  fetchQuantityUnitConversionsResolved,
+  fetchAllQuantityUnitConversionsResolved,
   fetchQuantityUnits,
   findProductInGrocy,
 } from "@/lib/grocy";
@@ -64,7 +64,7 @@ export default async function ScanLayout({
         <AmountPlusUnitProvider
           stockEntryPromise={fetchProductStock(id)}
           quantityUnitsPromise={fetchQuantityUnits()}
-          resolvedQUConversionPromise={fetchQuantityUnitConversionsResolved(id)}
+          resolvedQuantityUnitsConversionPromise={fetchAllQuantityUnitConversionsResolved()}
         >
           <BarcodeScannerApp slug={barcode} />
           {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}

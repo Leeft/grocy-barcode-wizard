@@ -4,7 +4,7 @@ import { addYears } from "@/lib/utils";
 
 const BaseFields = z.object({
   barcode: z.string().trim(),
-  productId: z.number().gt(0, "Must be a valid productId"),
+  productId: z.number().gt(0, "Selection must be a valid product"),
 });
 
 const AmountAndUnit = z
@@ -286,3 +286,23 @@ export const ProductTransferSchema = z.object({
 // });
 
 export type ProductTransferType = z.infer<typeof ProductTransferSchema>;
+
+//
+
+export const AddBarcodeToProductSchema = z.object({
+  base: BaseFields,
+  amount: AmountAndUnit,
+
+  shoppingLocationId: z
+    .number("Shopping location choice is invalid")
+    .gte(0, { message: "Shopping location choice is invalid" })
+    .optional(),
+
+  note: z
+    .string({ message: "Please keep the note under 128 characters" })
+    .trim()
+    .max(128, "Please keep the note under 128 characters") // Grocy can handle much longer though
+    .optional(),
+});
+
+export type AddBarcodeToProductType = z.infer<typeof AddBarcodeToProductSchema>;

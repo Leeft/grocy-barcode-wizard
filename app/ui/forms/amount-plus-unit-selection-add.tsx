@@ -28,7 +28,9 @@ export function AmountPlusUnitSelectionAdd({
   const multi = useGetAmountPlusUnitObject();
 
   const unitsLookup = toLookup(use(multi.quantityUnitsPromise));
-  const conversions = use(multi.resolvedQuantityUnitsConversionPromise);
+  const conversions = use(multi.resolvedQuantityUnitsConversionPromise).filter(
+    (qu) => qu.product_id === product.id,
+  );
 
   const options = buildOptions({
     conversions: conversions,
@@ -97,7 +99,7 @@ export function AmountPlusUnitSelectionAdd({
               })}
               min={0}
               step={1}
-              max={Number(fieldMaxAmount.value)}
+              max={Number(fieldMaxAmount.value ?? '10000')}
               className={clsx(inputCommonStyles, "w-full")}
               placeholder="Amount"
               value={amountValue}
