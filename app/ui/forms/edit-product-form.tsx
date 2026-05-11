@@ -13,9 +13,8 @@ import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
 import { GetProduct } from "@/lib/product-db";
 import clsx from "clsx";
-import { energyCalculatorOptions, inputCommonStyles } from "@/lib/product-form-shared";
+import { inputCommonStyles } from "@/lib/product-form-shared";
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
-import CustomisableSelect from "@/ui/customisable-select";
 import {
   FormContainer,
   FormCheckbox,
@@ -36,7 +35,6 @@ import CreateProductFields from "./create-product-fields";
 import { ProductDropdown } from "../product/product-dropdown";
 import { ProductContext } from "@/providers/product-context";
 import Grocy from "@/components/icons/grocy";
-import { ArrowLeftFromLine } from "lucide-react";
 import { UnitForAmount } from "@/components/unit-for-amount";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
@@ -593,47 +591,6 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
                   className={clsx(inputCommonStyles)}
                 />
                 &nbsp;
-              </FormField>
-              <FormErrors id={fields.energy.errorId} errors={fields.energy.errors} />
-            </FormColumn>
-            <FormColumn className="w-6 pt-9">
-              <ArrowLeftFromLine className="opacity-20" />
-            </FormColumn>
-            <FormColumn className="w-30 opacity-20">
-              <div className={`${unitTaggedLabelClass} mb-2 h-5`}>
-                <FormLabel
-                  htmlFor={fields.energyCalculationHelper.name}
-                  title="Calculator"
-                  className="relative top-[-8]"
-                />
-              </div>
-              <FormField>
-                <input
-                  {...getInputProps(fields.energyCalculationHelper, { type: "number" })}
-                  min={0}
-                  step={0.001}
-                  placeholder={`Energy helper`}
-                  className={clsx(inputCommonStyles, "w-full")}
-                />
-              </FormField>
-              <FormErrors id={fields.energy.errorId} errors={fields.energy.errors} />
-            </FormColumn>
-            <FormColumn className="w-40 opacity-20">
-              <div className={`${unitTaggedLabelClass} mb-2 h-5`}>
-                <FormLabel
-                  htmlFor={fields.energyCalculatorOptions.name}
-                  title=""
-                  className="relative top-[-8]"
-                />
-              </div>
-              <FormField>
-                <CustomisableSelect
-                  {...getInputProps(fields.energyCalculatorOptions, {
-                    type: "hidden",
-                  })}
-                  options={energyCalculatorOptions}
-                  className="w-40"
-                />
               </FormField>
               <FormErrors id={fields.energy.errorId} errors={fields.energy.errors} />
             </FormColumn>
