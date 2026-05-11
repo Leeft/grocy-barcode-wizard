@@ -7,6 +7,10 @@ export default class ExternalLookup {
       return;
     }
 
+    if ( process.env.OPENFOODFACTS_BASE_URL === undefined ) {
+      return;
+    }
+
     console.log(`Doing OFF lookup for ${uriBarcode}`);
     
     return fetch(`${process.env.OPENFOODFACTS_BASE_URL}/api/v2/product/${uriBarcode}?product_type=all`, {

@@ -117,7 +117,6 @@ export function isEnvironmentConfigured(): boolean {
   return process.env.GROCY_URL &&
     process.env.GROCY_API_URL &&
     process.env.GROCY_API_KEY &&
-    process.env.OPENFOODFACTS_BASE_URL &&
     process.env.DATABASE_URL
     ? true
     : false;
