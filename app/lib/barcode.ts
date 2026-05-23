@@ -28,7 +28,7 @@ export default class Barcode {
     scannedAt?: Date;
   }) {
     this.#id = nextId += 1;
-    this.#barcode = barcode.trim();
+    this.#barcode = decodeURIComponent(barcode).trim();
 
     if (name !== undefined) this.name = name.trim();
     if (grocyProductId !== undefined) this.grocyProductId = grocyProductId;
@@ -183,9 +183,25 @@ function isProductBarcode(barcode: string): boolean {
   return false;
 }
 
+export function stripBarcode(barcode: string): string {
+  const parts = /^(GRCY:P:[0-9]+)(:[^:]+)?$/i.exec( barcode );
+  if ( parts !== null && parts[1] !== undefined ) {
+    return  parts[1];
+  }
+  return barcode;
+}
+
+export function stockIdFromBarcode(barcode: string): string | undefined {
+  const parts = /^(GRCY:P:[0-9]+)(:([^:]+))?$/i.exec( barcode );
+  if ( parts !== null && parts[3] !== undefined ) {
+    return parts[3];
+  }
+  return;
+}
+
 function grocyProductNumber(barcode: string): number | null {
   try {
-    const matched_grcy = barcode.match(/^GRCY:P:([0-9]+)$/i);
+    const matched_grcy = stripBarcode(barcode).match(/^GRCY:P:([0-9]+)$/i);
     if (
       matched_grcy !== null &&
       matched_grcy.length > 0 &&

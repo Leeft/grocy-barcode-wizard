@@ -13,7 +13,7 @@ import {
   StockEntry,
 } from "@/interfaces/grocy";
 import { cache } from "react";
-import Barcode from "@/lib/barcode";
+import Barcode, { stripBarcode } from "@/lib/barcode";
 
 export const baseUrl = process.env.GROCY_API_URL;
 export const apiKey = process.env.GROCY_API_KEY;
@@ -229,6 +229,8 @@ export const fetchProductStock = cache(async (productId: number) => {
 });
 
 export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
+  const strippedCode = stripBarcode(barcode.code);
+
   // GRCY:P:* codes contain a product number and potentially other data
   // but for most purposes they'll be treated as a "regular" product
   // barcode, sent to the products data stream. They just need a
@@ -240,7 +242,7 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
     const { data, error } = await grocyClient.GET("/objects/{entity}", {
       params: {
         path: { entity: "product_barcodes" },
-        query: { order: "product_id:desc", "query[]": [`barcode=${barcode.code}`] },
+        query: { order: "product_id:desc", "query[]": [`barcode=${strippedCode}`] },
       },
     });
     if (error !== undefined) {

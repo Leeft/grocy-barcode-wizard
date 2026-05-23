@@ -6,16 +6,17 @@ import ActionShortcuts from "@/ui/barcode/action-shortcuts";
 import { StockOverview } from "@/ui/barcode/stock-overview";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
 import SingleQueuedProduct from "@/ui/product/queue/single-queued-product";
+import { ProductBarcodeTypes } from "@/interfaces";
 
 export default async function BarcodeScannedPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
 
   const barcodeObject = new Barcode({
-    barcode: barcode,
+    barcode: decodeURIComponent(barcode),
     scannedAt: new Date(),
   });
 
-  const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcode);
+  const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcodeObject.code);
   if (products[0]) {
     barcodeObject.queuedProductId = products[0].id;
     barcodeObject.name = products[0].name;
@@ -51,16 +52,16 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     }
   }
 
-  if (grocyProduct === undefined) {
-    return <CreateProductForm code={barcode} />;
+  if (grocyProduct === undefined && barcodeObject.type === ProductBarcodeTypes.PRODUCT) {
+    return <CreateProductForm code={barcodeObject.code} />;
   }
 
   return (
     <>
       {grocyProduct !== undefined && grocyProduct.active === 1 && (
         <>
-          <ActionShortcuts code={barcode} />
-          <StockOverview code={barcode} />
+          <ActionShortcuts code={barcodeObject.code} />
+          <StockOverview code={barcodeObject.code} />
         </>
       )}
     </>

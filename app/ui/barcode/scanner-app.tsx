@@ -17,6 +17,10 @@ export default function BarcodeScannerApp({ slug }: { slug?: string }) {
   const router = useRouter();
   const user = use(useContext(UserContext) as Promise<GetUser>);
 
+  if ( slug !== undefined ) {
+    slug = decodeURIComponent( slug );
+  }
+
   const debug = false;
 
   useEffect(() => {

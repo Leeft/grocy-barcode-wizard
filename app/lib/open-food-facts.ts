@@ -3,10 +3,11 @@ import {
   OpenFoodFactsProduct,
   OpenFoodFactsResult,
 } from "@/interfaces/json-objects";
-import Barcode from "./barcode";
+import Barcode from "@/lib/barcode";
 import * as JsonDecoder from "ts.data.json";
 import ExternalLookup from "@/lib/external-lookup";
 import { globalEvents } from "./events";
+import { ProductBarcodeTypes } from "@/interfaces";
 
 const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
   {
@@ -35,8 +36,13 @@ const openFoodFactsNotFoundDecoder = JsonDecoder.object<OpenFoodFactsNotFoundRes
 );
 
 export async function findProductInOpenFoodFacts(barcode: Barcode) {
+  if ( barcode.type !== ProductBarcodeTypes.PRODUCT ) {
+    return;
+  }
+
   const startTime = performance.now();
-  const response = await new ExternalLookup().lookupOpenFoodFacts(barcode);
+
+  const response = await new ExternalLookup().lookupOpenFoodFacts(barcode.code);
   if (response === undefined || response.status === 404) return;
 
   let parseOk = false;

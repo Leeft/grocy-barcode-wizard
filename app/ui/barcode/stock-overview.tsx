@@ -16,6 +16,7 @@ import { LocationContext } from "@/providers/location-context";
 import { StockEntrySummary } from "../stock-entry-summary";
 import { clsx } from "clsx";
 import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
+import { stockIdFromBarcode } from "@/lib/barcode";
 
 export function StockOverview({ code }: { code: string }) {
   const multi = useGetAmountPlusUnitObject();
@@ -44,8 +45,11 @@ export function StockOverview({ code }: { code: string }) {
 function StockEntryRow({ barcode, se, product }: { barcode: string; se: StockEntry; product: Product }) {
   const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
 
-  //const [showTransferOptions, setShowTransferOptions] = useState<boolean>(false);
-  const [collapsed, setCollapsed] = useState<boolean>(true);
+  const stockId = stockIdFromBarcode(barcode);
+
+  const [collapsed, setCollapsed] = useState<boolean>(
+    stockId === undefined || stockId !== se.stock_id ? true : false,
+  );
 
   return (
     <form>

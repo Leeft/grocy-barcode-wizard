@@ -47,6 +47,8 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const data = use(product);
 
+  code = decodeURIComponent( code );
+
   const defaultValue = {
     intent: "update",
     id: data.id,

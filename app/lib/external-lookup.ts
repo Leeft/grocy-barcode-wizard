@@ -1,8 +1,9 @@
+import { ProductBarcodeTypes } from "@/interfaces";
 import Barcode from "@/lib/barcode";
 
 export default class ExternalLookup {
-  async lookupOpenFoodFacts(barcode: Barcode) {
-    const uriBarcode = encodeURIComponent(barcode.code.trim());
+  async lookupOpenFoodFacts(barcode: string) {
+    const uriBarcode = encodeURIComponent(barcode.trim());
     if ( uriBarcode.length < 8 ) {
       return;
     }

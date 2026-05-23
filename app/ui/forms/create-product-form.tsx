@@ -18,6 +18,9 @@ import { ProductContext } from "@/providers/product-context";
 import { Product } from "@/interfaces/grocy";
 
 export function CreateProductForm({ code }: { code: string }) {
+
+  code = decodeURIComponent(code);
+
   const [lastResult, action, submitPending] = useActionState(
     withCallbacks(
       productCreateSubmit,

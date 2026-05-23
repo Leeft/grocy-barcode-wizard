@@ -50,17 +50,17 @@ export async function GET(req: NextRequest) {
   }
 
   if (req.nextUrl.searchParams.get("barcode")) {
-    const code = req.nextUrl.searchParams.get("barcode");
+    const code = decodeURIComponent(req.nextUrl.searchParams.get("barcode")!);
     if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("add")) {
-    const code = req.nextUrl.searchParams.get("add");
+    const code = decodeURIComponent(req.nextUrl.searchParams.get("add")!);
     if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
   if (req.nextUrl.searchParams.get("text")) {
-    const code = req.nextUrl.searchParams.get("text");
+    const code = decodeURIComponent(req.nextUrl.searchParams.get("text")!);
     if (code !== undefined && code !== null) return processReceivedBarcode(code);
   }
 
