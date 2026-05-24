@@ -11,6 +11,7 @@ import {
   ShoppingList,
   ShoppingLocation,
   StockEntry,
+  Recipe,
 } from "@/interfaces/grocy";
 import { cache } from "react";
 import Barcode, { stripBarcode } from "@/lib/barcode";
@@ -283,4 +284,28 @@ export async function findProductInGrocy(barcode: Barcode): Promise<Product> {
   }
 
   return Promise.reject({ error_message: "Could not find product in grocy by id or barcode" });
+}
+
+export async function getRecipe(barcode: Barcode): Promise<Recipe> {
+  if (!barcode.isRecipeBarcode()) {
+    return Promise.reject("Barcode is not a recipe barcode");
+  }
+
+  const parts = /^(GRCY:R:([0-9]+))(:[^:]+)?$/i.exec(barcode.code);
+  if (parts === null || parts[2] === undefined || parts[2] === null || !parts[2]) {
+    return Promise.reject("Could not get recipe id from barcode");
+  }
+
+  const recipeId = Number(parts[2]);
+
+  const { data, error } = await grocyClient.GET("/objects/{entity}/{objectId}", {
+    params: {
+      path: { entity: "recipes", objectId: recipeId },
+    },
+  });
+  if (error !== undefined) {
+    console.error("Could not fetch recipe from grocy:", error);
+  }
+  console.log("data", data, "error", error);
+  return Promise.resolve(data as Recipe);
 }
