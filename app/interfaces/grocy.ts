@@ -20,6 +20,20 @@ export type Product = components["schemas"]["Product"] & {
   stock_amount_aggregated?: number;
 };
 
+export type Recipe = {
+  id: number;
+  name: string;
+  description: string;
+  row_created_timestamp?: string;
+  picture_file_name?: string;
+  base_servings?: number;
+  desired_servings?: number;
+  not_check_shoppinglist: 0 | 1;
+  type?: string;
+  product_id?: number;
+  userfields?: Record<string, never>;
+};
+
 export type Error400 = components["schemas"]["Error400"];
 export type Error500 = components["schemas"]["Error500"];
 
