@@ -95,6 +95,14 @@ export default class Barcode {
     return isProductBarcode(this.barcode);
   }
 
+  isBatteryBarcode(): boolean {
+    return isBatteryBarcode(this.barcode);
+  }
+
+  isRecipeBarcode(): boolean {
+    return isRecipeBarcode(this.barcode);
+  }
+
   grocyProductNumber(): number | null {
     return grocyProductNumber(this.barcode);
   }
@@ -181,6 +189,14 @@ function isProductBarcode(barcode: string): boolean {
     return true;
   }
   return false;
+}
+
+export function isBatteryBarcode(barcode: string): boolean {
+  return barcodeToType(barcode) === SpecialBarcodeTypes.GROCY_BATTERY;
+}
+
+export function isRecipeBarcode(barcode: string): boolean {
+  return barcodeToType(barcode) === SpecialBarcodeTypes.GROCY_RECIPE;
 }
 
 export function stripBarcode(barcode: string): string {
