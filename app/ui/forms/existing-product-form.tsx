@@ -1,4 +1,3 @@
-import Grocy from "@/components/icons/grocy";
 import { Product } from "@/interfaces/grocy";
 import {
   baseUrl,
@@ -7,10 +6,10 @@ import {
   fetchProducts,
   fetchQuantityUnits,
   fetchShoppingLocations,
-  grocyUrl,
 } from "@/lib/grocy";
 import { pluralUnit, toLookup } from "@/lib/utils";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
+import GrocyProductLink from "@/ui/grocy-product-link";
 
 export async function ExistingProductForm({ product }: { product: Product }) {
   return (
@@ -119,20 +118,5 @@ export async function ExistingProductInfo({ product }: { product: Product }) {
         </dd>
       </dl>
     </>
-  );
-}
-
-function GrocyProductLink({ productId, children }: { productId: number; children: React.ReactNode }) {
-  return (
-    <div className="static mb-[-16]">
-      <a
-        href={`${grocyUrl}/product/${productId}`}
-        target="_bcw_grocy"
-        title="Link to the product in Grocy"
-        className="static mb-[-2] inline-flex underline! decoration-dashed underline-offset-3"
-      >
-        <Grocy className="relative top-0 ml-[-3] w-6 fill-[#4b7daa] stroke-[#467baa] pr-2 pl-0" /> {children}
-      </a>
-    </div>
   );
 }
