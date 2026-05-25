@@ -1,12 +1,15 @@
 import Barcode from "@/lib/barcode";
 import { getCapturedProductsByBarcode, CapturedProductsByBarcode, getProduct } from "@/lib/product-db";
-import { findProductInGrocy } from "@/lib/grocy";
+import { findProductInGrocy, getRecipe, getBattery } from "@/lib/grocy";
 import { Product } from "@/interfaces/grocy";
 import ActionShortcuts from "@/ui/barcode/action-shortcuts";
 import { StockOverview } from "@/ui/barcode/stock-overview";
 import { CreateProductForm } from "@/ui/forms/create-product-form";
 import SingleQueuedProduct from "@/ui/product/queue/single-queued-product";
 import { ProductBarcodeTypes } from "@/interfaces";
+import Recipe from "@/ui/recipe";
+import { redirect } from "next/navigation";
+import { Route } from "next";
 
 export default async function BarcodeScannedPage({ params }: { params: Promise<{ barcode: string }> }) {
   const { barcode } = await params;
@@ -15,6 +18,20 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     barcode: decodeURIComponent(barcode).trim(),
     scannedAt: new Date(),
   });
+
+  if (barcodeObject.isRecipeBarcode()) {
+    const recipe = await getRecipe(barcodeObject);
+    if (recipe) {
+      return <Recipe recipe={recipe} />;
+    }
+  }
+
+  if (barcodeObject.isBatteryBarcode()) {
+    const battery = await getBattery(barcodeObject);
+    if (battery) {
+      redirect(`/scan/${encodeURIComponent(barcode)}/battery` as Route<string>);
+    }
+  }
 
   const products: CapturedProductsByBarcode = await getCapturedProductsByBarcode(barcodeObject.code);
   if (products[0]) {

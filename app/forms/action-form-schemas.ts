@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
-import { addYears } from "@/lib/utils";
+import { addYears, addMonths } from "@/lib/utils";
 
 const BaseFields = z.object({
   barcode: z.string().trim(),
@@ -306,3 +306,18 @@ export const AddBarcodeToProductSchema = z.object({
 });
 
 export type AddBarcodeToProductType = z.infer<typeof AddBarcodeToProductSchema>;
+
+//
+
+export const BatteryChargeTrackingSchema = z
+  .object({
+    barcode: z.string(),
+    batteryId: z.number(),
+
+    chargeDate: z
+      .date({ error: "Not a valid date" })
+      .min(addMonths(new Date(), -1), { error: "Date is too far in the past" })
+      .max(addMonths(new Date(), 1), { error: "Date is too far in the future" }),
+  });
+
+export type BatteryChargeTrackingType = z.infer<typeof BatteryChargeTrackingSchema>;

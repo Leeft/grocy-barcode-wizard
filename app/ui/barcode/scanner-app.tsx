@@ -19,20 +19,7 @@ export default function BarcodeScannerApp({ code }: { code?: string }) {
   const router = useRouter();
   const user = use(useContext(UserContext) as Promise<GetUser>);
 
-  if ( slug !== undefined ) {
-    slug = decodeURIComponent( slug );
-  }
-
   const debug = false;
-
-  useEffect(() => {
-    if (slug !== undefined && (!barcode || barcode.barcode != slug)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBarcode(new Barcode({ barcode: slug, scannedAt: new Date() }));
-    } else if (slug === null || slug === undefined) {
-      setBarcode(null);
-    }
-  }, [slug, barcode]);
 
   useEffect(() => {
     const es = new EventSource("/api/product-barcode-stream");

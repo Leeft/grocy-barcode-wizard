@@ -12,6 +12,8 @@ import {
   ShoppingLocation,
   StockEntry,
   Recipe,
+  Battery,
+  BatteryDetailsResponse,
 } from "@/interfaces/grocy";
 import { cache } from "react";
 import Barcode, { stripBarcode } from "@/lib/barcode";
@@ -308,4 +310,45 @@ export async function getRecipe(barcode: Barcode): Promise<Recipe> {
   }
 
   return Promise.resolve(data as Recipe);
+}
+
+export async function getBattery(barcode: Barcode): Promise<Battery> {
+console.log( "getBattery for", barcode )
+
+  if (!barcode.isBatteryBarcode()) {
+    return Promise.reject("Barcode is not a battery barcode");
+  }
+
+  const parts = /^(GRCY:B:([0-9]+))(:[^:]+)?$/i.exec(barcode.code);
+  if (parts === null || parts[2] === undefined || parts[2] === null || !parts[2]) {
+    return Promise.reject("Could not get battery id from barcode");
+  }
+
+  return fetchBattery(Number(parts[2]));
+}
+
+export async function fetchBattery(batteryId: number): Promise<Battery> {
+  const { data, error } = await grocyClient.GET("/objects/{entity}/{objectId}", {
+    params: {
+      path: { entity: "batteries", objectId: batteryId },
+    },
+  });
+  if (error !== undefined) {
+    console.error("Could not fetch battery from grocy:", error);
+  }
+
+  return Promise.resolve(data as Battery);
+}
+
+export async function getBatteryDetails(batteryId: number): Promise<BatteryDetailsResponse> {
+  const { data, error } = await grocyClient.GET("/batteries/{batteryId}", {
+    params: {
+      path: { batteryId: batteryId },
+    },
+  });
+  if (error !== undefined) {
+    console.error("Could not fetch battery details from grocy:", error);
+  }
+
+  return Promise.resolve(data as BatteryDetailsResponse);
 }

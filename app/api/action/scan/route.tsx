@@ -136,8 +136,14 @@ async function processReceivedBarcode(code: string) {
       barcode.quantity = quantity;
     }
 
-    globalEvents.emit("special-barcode-stream", barcode);
-    return bbuddySuccessResponse(`Special barcode processed. Barcode: ${barcode.code}`);
+    if (barcode.isBatteryBarcode() || barcode.isRecipeBarcode()) {
+      // Exception: some special barcodes can be processed through the scanner app
+      globalEvents.emit("product-barcode-stream", barcode);
+      return bbuddySuccessResponse(`Battery/recipe barcode processed. Barcode: ${barcode.code}`);
+    } else {
+      globalEvents.emit("special-barcode-stream", barcode);
+      return bbuddySuccessResponse(`Special barcode processed. Barcode: ${barcode.code}`);
+    }
   }
 
   // It might already exist in the database as a queued product, find that.

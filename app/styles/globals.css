@@ -86,6 +86,7 @@
   --color-inventory: #f4b7ff;
   --color-shopping-list: #f2e078;
   --color-transfer: #f4e7ff;
+  --color-track-battery: var(--color-yellow-200);
 
   /* capture forms buttons */
   --color-queue-product-button: var(--color-teal-200);
@@ -261,7 +262,7 @@ select.customisable {
   }
 }
 
-dl.product-info {
+dl.product-info, dl.recipe-info, dl.battery-info {
   display: grid;
   grid-gap: 4px 16px;
   grid-template-columns: max-content;
@@ -273,6 +274,22 @@ dl.product-info {
   & dd {
     margin: 0;
     grid-column-start: 2;
+  }
+}
+
+.recipe-description {
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  h3 {
+    font-size: var(--text-lg);
+  }
+  a {
+    text-decoration: underline;
+    color: turquoise;
   }
 }
 

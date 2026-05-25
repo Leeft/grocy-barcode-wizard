@@ -88,6 +88,8 @@ export type ShoppingLocation = components["schemas"]["ShoppingLocation"];
 export type StockEntry = components["schemas"]["StockEntry"];
 export type ProductDetailsResponse = components["schemas"]["ProductDetailsResponse"];
 export type ProductBarcode = components["schemas"]["ProductBarcode"];
+export type Battery = components["schemas"]["Battery"];
+export type BatteryDetailsResponse = components["schemas"]["BatteryDetailsResponse"];
 
 export type QuantityUnitConversion = {
   id: number;
