@@ -12,7 +12,7 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
   const { barcode } = await params;
 
   const barcodeObject = new Barcode({
-    barcode: decodeURIComponent(barcode),
+    barcode: decodeURIComponent(barcode).trim(),
     scannedAt: new Date(),
   });
 
@@ -43,9 +43,9 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
     }
 
     if (
-      // @ts-expect-error Can't really make TS here at all
+      // @ts-expect-error Can't really make TS happy here at all
       err.error_message !== undefined &&
-      // @ts-expect-error Can't really make TS here at all
+      // @ts-expect-error Can't really make TS happy here at all
       err.error_message !== "Could not find product in grocy by id or barcode"
     ) {
       console.log("Product promise did not resolve:", err);

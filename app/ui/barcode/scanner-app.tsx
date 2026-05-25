@@ -9,8 +9,10 @@ import { GetUser } from "@/lib/user-db";
 
 export type ConnectionStatus = "connecting" | "connected" | "error";
 
-export default function BarcodeScannerApp({ slug }: { slug?: string }) {
-  const [barcode, setBarcode] = useState<Barcode | null>(null);
+export default function BarcodeScannerApp({ code }: { code?: string }) {
+  const [barcode, setBarcode] = useState<Barcode | null>(
+    code !== undefined ? new Barcode({ barcode: decodeURIComponent(code) }) : null,
+  );
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [retryCount, setRetryCount] = useState(0);
   const [redirect, setRedirect] = useState(false);

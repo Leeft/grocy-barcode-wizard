@@ -4,7 +4,7 @@ import React, { Suspense } from "react";
 export default async function Page({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <BarcodeScannerApp slug={undefined} />
+      <BarcodeScannerApp />
       <Suspense>{children}</Suspense>
     </>
   );

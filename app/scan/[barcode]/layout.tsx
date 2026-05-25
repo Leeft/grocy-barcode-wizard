@@ -54,7 +54,12 @@ export default async function ScanLayout({
     return (val as Product).id !== undefined;
   }
 
-  const grocyProduct: ProductOrError = await tryFindProductInGrocy();
+  let grocyProduct: ProductOrError = {
+    error_message: "Not a product barcode",
+  };
+  if (barcodeObject.isProductBarcode()) {
+    grocyProduct = await tryFindProductInGrocy();
+  }
 
   const id: number = isProduct(grocyProduct) && grocyProduct.id !== undefined ? grocyProduct.id : 0;
 
@@ -66,7 +71,7 @@ export default async function ScanLayout({
           quantityUnitsPromise={fetchQuantityUnits()}
           resolvedQuantityUnitsConversionPromise={fetchAllQuantityUnitConversionsResolved()}
         >
-          <BarcodeScannerApp slug={barcode} />
+          <BarcodeScannerApp code={barcode} />
           {grocyProduct !== undefined && <ExistingProductForm product={grocyProduct as Product} />}
           {children}
         </AmountPlusUnitProvider>

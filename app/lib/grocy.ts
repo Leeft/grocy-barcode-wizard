@@ -306,6 +306,6 @@ export async function getRecipe(barcode: Barcode): Promise<Recipe> {
   if (error !== undefined) {
     console.error("Could not fetch recipe from grocy:", error);
   }
-  console.log("data", data, "error", error);
+
   return Promise.resolve(data as Recipe);
 }

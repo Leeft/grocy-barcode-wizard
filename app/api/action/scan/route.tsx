@@ -120,7 +120,7 @@ async function processReceivedBarcode(code: string) {
   let barcode: Barcode;
 
   try {
-    barcode = new Barcode({ barcode: code, scannedAt: new Date() });
+    barcode = new Barcode({ barcode: decodeURIComponent(code), scannedAt: new Date() });
   } catch (err) {
     return bbuddyErrorResponse(400, `No valid barcode supplied: ${err}`);
   }
