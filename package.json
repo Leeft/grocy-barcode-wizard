@@ -33,7 +33,7 @@
     "react-hot-toast": "^2.6.0",
     "react-image-crop": "^11.0.10",
     "react-qrcode-logo": "^4.1.0",
-    "react-tooltip": "^6.0.0",
+    "react-tooltip": "^6.0.5",
     "sqlite3": "^6.0.1",
     "ts.data.json": "^3.3.0",
     "tsx": "^4.22.4",
