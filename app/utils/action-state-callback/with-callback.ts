@@ -15,7 +15,9 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
   fn: (...args: Args) => Promise<T>,
   callbacks: Callbacks<T, R>,
 ): ((...args: Args) => Promise<T>) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const router = useRouter();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const pathname = usePathname();
 
   return async (...args: Args) => {

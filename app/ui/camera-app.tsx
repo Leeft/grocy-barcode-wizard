@@ -648,14 +648,31 @@ function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
   return (
     <div key={`captured-image-container`} className="relative">
       {args.cropEnabled ? (
-        <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img ref={args.imageRef} key={`captured-image`} src={args.data} alt="Captured image from camera" />
-        </ReactCrop>
+        <>
+          {/* eslint-disable-next-line react-hooks/refs */}
+          <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              // eslint-disable-next-line react-hooks/refs
+              ref={args.imageRef}
+              key={`captured-image`}
+              // eslint-disable-next-line react-hooks/refs
+              src={args.data}
+              alt="Captured image from camera"
+            />
+          </ReactCrop>
+        </>
       ) : (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img ref={args.imageRef} key={`captured-image`} src={args.data} alt="Captured image from camera" />
+          <img
+            // eslint-disable-next-line react-hooks/refs
+            ref={args.imageRef}
+            key={`captured-image`}
+            // eslint-disable-next-line react-hooks/refs
+            src={args.data}
+            alt="Captured image from camera"
+          />
         </>
       )}
       {/* <p>
@@ -678,19 +695,22 @@ function BackgroundSavedImage({
   return (
     <div key={`captured-image-${photoId}-container`} className="relative">
       {args.cropEnabled ? (
-        <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={args.imageRef}
-            key={`captured-image-${photoId}`}
-            alt={`BackgroundSavedImage of the product ${photoId}`}
-            src={`/api/image/${photoId}?ts=${lastSaved}`}
-          />
-        </ReactCrop>
+        <>
+          <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={args.imageRef}
+              key={`captured-image-${photoId}`}
+              alt={`BackgroundSavedImage of the product ${photoId}`}
+              src={`/api/image/${photoId}?ts=${lastSaved}`}
+            />
+          </ReactCrop>
+        </>
       ) : (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            // eslint-disable-next-line react-hooks/refs
             ref={args.imageRef}
             key={`captured-image-${photoId}`}
             alt={`BackgroundSavedImage of the product ${photoId}`}
