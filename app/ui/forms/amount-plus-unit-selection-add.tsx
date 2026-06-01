@@ -37,14 +37,14 @@ export function AmountPlusUnitSelectionAdd({
     units: unitsLookup,
   }) as CustomisableSelectOptionArray;
 
-  const [availableStockSelectedUnit, setAvailableStockSelectedUnit] = useState<number>(
-    amountToStockUnit({
-      conversions: conversions,
-      amount: 10000,
-      unit: Number(product.qu_id_stock),
-      targetUnit: Number(fieldQuantityUnitId.value ?? product.qu_id_stock),
-    }),
-  );
+  // const [availableStockSelectedUnit, setAvailableStockSelectedUnit] = useState<number>(
+  //   amountToStockUnit({
+  //     conversions: conversions,
+  //     amount: 10000,
+  //     unit: Number(product.qu_id_stock),
+  //     targetUnit: Number(fieldQuantityUnitId.value ?? product.qu_id_stock),
+  //   }),
+  // );
 
   const [conversionUnit, setConversionUnit] = useState<number>(product.qu_id_stock!);
 
@@ -107,14 +107,14 @@ export function AmountPlusUnitSelectionAdd({
               onFocus={(e) => e.currentTarget.select()}
               onChange={(e) => {
                 setAmountValue(e.currentTarget.value);
-                setAvailableStockSelectedUnit(
-                  amountToStockUnit({
-                    conversions: conversions,
-                    amount: 10000,
-                    unit: Number(product.qu_id_stock),
-                    targetUnit: Number(fieldQuantityUnitId.value),
-                  }),
-                );
+                // setAvailableStockSelectedUnit(
+                //   amountToStockUnit({
+                //     conversions: conversions,
+                //     amount: 10000,
+                //     unit: Number(product.qu_id_stock),
+                //     targetUnit: Number(fieldQuantityUnitId.value),
+                //   }),
+                // );
               }}
               required
             />
@@ -132,14 +132,14 @@ export function AmountPlusUnitSelectionAdd({
               className="w-full"
               onChange={(e) => {
                 setConversionUnit(Number(e.target.value));
-                setAvailableStockSelectedUnit(
-                  amountToStockUnit({
-                    conversions: conversions,
-                    amount: 10000,
-                    unit: Number(product.qu_id_stock),
-                    targetUnit: Number(fieldQuantityUnitId.value),
-                  }),
-                );
+                // setAvailableStockSelectedUnit(
+                //   amountToStockUnit({
+                //     conversions: conversions,
+                //     amount: 10000,
+                //     unit: Number(product.qu_id_stock),
+                //     targetUnit: Number(fieldQuantityUnitId.value),
+                //   }),
+                // );
               }}
             />{" "}
           </FormField>

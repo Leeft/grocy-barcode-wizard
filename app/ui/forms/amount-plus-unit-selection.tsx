@@ -30,6 +30,7 @@ export function AmountPlusUnitSelection({
   autoFocus?: boolean;
   amountValue: string;
   setAmountValue: Dispatch<SetStateAction<string>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   compoundField: any;
 }) {
   const [, form] = useField("amount");

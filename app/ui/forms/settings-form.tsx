@@ -16,7 +16,6 @@ import { GetApiKeys } from "@/lib/user-db";
 import { UserApiKey } from "@/generated/prisma/browser";
 import dynamic from "next/dynamic";
 import TooltipWrapper from "../tooltip-wrapper";
-import { toast } from "react-hot-toast";
 import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 
@@ -159,8 +158,8 @@ export function SettingsForm({
                     Play a sound when a barcode is accepted by the scan mode{" "}
                     <TooltipWrapper id="playmode-clarification">
                       The sound plays only when the barcode is recognised as a product barcode, and the client
-                      is connected with the "SCAN mode" active (as indicated by the SCAN menu option being
-                      highlighted).
+                      is connected with the &ldquo;SCAN mode&rdquo; active (as indicated by the SCAN menu
+                      option being highlighted).
                       <br />
                       <br />
                       Barcodes received while the client is not displaying a scan mode page will not be

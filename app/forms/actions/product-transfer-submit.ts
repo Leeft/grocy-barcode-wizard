@@ -25,7 +25,7 @@ export async function productTransferSubmit(prevstate: unknown, formData: FormDa
 
   const data = submission.value;
 
-  const { data: res } = await grocyClient.POST("/stock/products/{productId}/transfer", {
+  await grocyClient.POST("/stock/products/{productId}/transfer", {
     params: { path: { productId: data.base.productId } },
     body: {
       amount: data.amount.amountShadow,

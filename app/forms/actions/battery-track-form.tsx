@@ -15,7 +15,7 @@ import { Battery } from "@/interfaces/grocy";
 export function BatteryTrackForm({ code, battery }: { code: string; battery: Battery }) {
   const [lastResult, action, submitPending] = useActionState(batteryTrackSubmit, undefined);
 
-  let date = new Date();
+  const date = new Date();
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 
   const [form, fields] = useForm({

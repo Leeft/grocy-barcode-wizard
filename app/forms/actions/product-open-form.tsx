@@ -5,7 +5,6 @@ import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { FormRow } from "@/ui/forms/form-utils";
 import { Product, StockEntry } from "@/interfaces/grocy";
-import { sumStock } from "@/lib/utils";
 import { productOpenSubmit } from "@/forms/actions/product-open-submit";
 import { FieldSet, Legend } from "@/ui/forms/fieldset";
 import { AmountPlusUnitSelection } from "@/ui/forms/amount-plus-unit-selection";

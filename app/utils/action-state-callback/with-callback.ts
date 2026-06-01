@@ -1,6 +1,7 @@
 "use client";
 
 import { ActionState } from "@/interfaces";
+import { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 
 type Callbacks<T, R = unknown> = {
@@ -30,8 +31,7 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
 
     if (result?.status === "success") {
       callbacks.onSuccess?.(result);
-      // eslint-disable-next-line Can't type this without going to internal react types
-      router.replace(pathname as any);
+      router.replace(pathname as Route<string>);
     }
 
     if (result?.status === "error") {

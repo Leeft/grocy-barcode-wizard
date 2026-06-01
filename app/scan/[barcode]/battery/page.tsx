@@ -6,8 +6,6 @@ import Battery from "@/ui/battery";
 export default async function BatteryPage(props: PageProps<"/scan/[barcode]/battery">) {
   const { barcode } = await props.params;
 
-  const query = await props.searchParams;
-
   const barcodeObject = new Barcode({
     barcode: decodeURIComponent(barcode).trim(),
     name: "",

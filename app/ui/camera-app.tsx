@@ -22,8 +22,6 @@ import { deleteProductPhoto, GetProductPhoto } from "@/lib/product-db";
 import { GetUser } from "@/lib/user-db";
 import { UserContext } from "@/providers/user-context";
 import ReactCrop, { convertToPixelCrop, PixelCrop, type Crop } from "react-image-crop";
-import { flushSync } from "react-dom";
-import { createTSPlugin } from "next/dist/server/next-typescript";
 
 const buttonClassCommon = clsx(
   "flex-row",
@@ -175,8 +173,6 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
     </div>
   );
 }
-
-const TO_RADIANS = Math.PI / 180;
 
 export async function cropToCanvas(
   source: HTMLImageElement,

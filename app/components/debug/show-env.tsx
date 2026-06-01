@@ -1,5 +1,5 @@
 export default function ShowEnv() {
-  let env: Record<string, unknown> = {};
+  const env: Record<string, unknown> = {};
   const keys = Object.keys(process.env);
   keys.sort().forEach((key) => {
     if (/^[A-Z][A-Z_-]+$/.test(key)) {

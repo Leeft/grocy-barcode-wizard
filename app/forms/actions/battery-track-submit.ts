@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { fetchBattery, grocyClient } from "@/lib/grocy";
+import { grocyClient } from "@/lib/grocy";
 import { BatteryChargeTrackingSchema } from "../action-form-schemas";
 
 export async function batteryTrackSubmit(prevstate: unknown, formData: FormData) {
@@ -20,7 +20,7 @@ export async function batteryTrackSubmit(prevstate: unknown, formData: FormData)
     return;
   }
 
-  const battery = await fetchBattery(batteryId);
+  //const battery = await fetchBattery(batteryId);
 
   const submission = parseWithZod(formData, { schema: BatteryChargeTrackingSchema });
 

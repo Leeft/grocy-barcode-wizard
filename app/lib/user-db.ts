@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { NotFoundError } from "@/lib/errors";
-import { env } from "prisma/config";
 
 //
 

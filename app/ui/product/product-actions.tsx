@@ -11,8 +11,8 @@ export default function BarcodeActions({
   className?: string;
   editing: boolean;
 }) {
-  const logoWidth: number = 135 * 0.75;
-  const logoHeight: number = 135 * 0.45;
+  // const logoWidth: number = 135 * 0.75;
+  // const logoHeight: number = 135 * 0.45;
 
   if (code === undefined || editing) {
     return <></>;
