@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@conform-to/react':
-        specifier: 1.19.0
-        version: 1.19.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: ^1.19.3
+        version: 1.19.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@conform-to/zod':
-        specifier: 1.19.0
-        version: 1.19.0(zod@4.3.6)
+        specifier: ^1.19.3
+        version: 1.19.3(zod@4.3.6)
       '@prisma/adapter-better-sqlite3':
         specifier: ^7.8.0
         version: 7.8.0
@@ -182,17 +182,17 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@conform-to/dom@1.19.0':
-    resolution: {integrity: sha512-2qegTdMy3ZT+SzzD8YyUWupAEhLl3X248bhrbhXdRsWjFdGSnTz12YB9j/f1MZ27A1LnmijKYiz2mgMdlblPAA==}
+  '@conform-to/dom@1.19.3':
+    resolution: {integrity: sha512-ugNx4nMiSSEkIepo5rKxUW1I1Iab3ZFuRjNYw2b2zb7BSQJfDq4DwbywaAd55qS/8PVGp1n5G2O6orDHWPWWqA==}
 
-  '@conform-to/react@1.19.0':
-    resolution: {integrity: sha512-xK6+d2hHhiypLOpXIGLw9tD57N0GJFtmHBceaumS45tSV5Hr/bRiz1kioymJJrUUwV0bT+f1sTmHQZD6YJDOiw==}
+  '@conform-to/react@1.19.3':
+    resolution: {integrity: sha512-qIqvGzoVHQarRSH7r73yBQ3fLYdafhNQcItZt1dT7GK/VMB0A5eJ8fgylcY1zb5CEeZrvACC9zpmcLMqOD2nkA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@conform-to/zod@1.19.0':
-    resolution: {integrity: sha512-kqwuubmJPcyDlf3gXLWjKsWhTiox4ICL/eXLFZONjnEAOHGP1sUvfhvuYwJpH0PJu82kgz9JZG5iuVOcZGsygw==}
+  '@conform-to/zod@1.19.3':
+    resolution: {integrity: sha512-tlHywfz6W6bYnhmi8ajM1+ZLYjywLJVXteU4wvjc6QM0JT1g61cf4BaQqdDhKaAKl7DzqbZxi/riyMtz9HxyCQ==}
     peerDependencies:
       zod: ^3.21.0 || ^4.0.0
 
@@ -3069,17 +3069,17 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@conform-to/dom@1.19.0': {}
+  '@conform-to/dom@1.19.3': {}
 
-  '@conform-to/react@1.19.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@conform-to/react@1.19.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
-      '@conform-to/dom': 1.19.0
+      '@conform-to/dom': 1.19.3
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
 
-  '@conform-to/zod@1.19.0(zod@4.3.6)':
+  '@conform-to/zod@1.19.3(zod@4.3.6)':
     dependencies:
-      '@conform-to/dom': 1.19.0
+      '@conform-to/dom': 1.19.3
       zod: 4.3.6
 
   '@electric-sql/pglite-socket@0.1.1(@electric-sql/pglite@0.4.1)':
