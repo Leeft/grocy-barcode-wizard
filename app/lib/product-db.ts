@@ -120,7 +120,7 @@ export async function getProductPhoto(id: number) {
     where: { id: id },
   });
 
-  if (model === null) throw new NotFoundError("Product photo not found");
+  if (model === null && id > 0) throw new NotFoundError("Product photo not found");
 
   return model;
 }

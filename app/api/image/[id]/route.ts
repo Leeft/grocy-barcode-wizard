@@ -1,12 +1,20 @@
 import { getProductPhoto } from "@/lib/product-db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(_req: NextRequest, ctx: RouteContext<'/api/image/[id]'>) {
-  const { id } = await ctx.params
+export async function GET(_req: NextRequest, ctx: RouteContext<"/api/image/[id]">) {
+  const { id } = await ctx.params;
 
   if (id !== null && id !== undefined) {
     try {
       const photo = await getProductPhoto(Number(id));
+      if (photo === null) {
+        return NextResponse.json(
+          {
+            error: "Photo not found",
+          },
+          { status: 404 },
+        );
+      }
       return new NextResponse(photo.data, {
         status: 200,
         headers: new Headers({
@@ -34,4 +42,4 @@ export async function GET(_req: NextRequest, ctx: RouteContext<'/api/image/[id]'
     },
     { status: 400 },
   );
-};
+}
