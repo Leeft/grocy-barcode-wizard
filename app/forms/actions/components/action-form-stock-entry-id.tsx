@@ -42,7 +42,7 @@ export function ActionFormStockEntryId({
 
   return (
     <FormColumn className="w-full">
-      <FormLabel htmlFor={field.name} title="Specific stock entry" className="relative top-[-8] mb-0!" />
+      <FormLabel htmlFor={field.id} title="Specific stock entry" className="relative top-[-8] mb-0!" />
       <FormField className="flex flex-row gap-x-2">
         <CustomisableSelect
           {...getInputProps(field, {

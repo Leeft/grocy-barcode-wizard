@@ -116,7 +116,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                 <div className={`flex`}>
                   <div>
                     <FormLabel
-                      htmlFor={fields.price.name}
+                      htmlFor={fields.price.id}
                       title="Price"
                       className="relative top-[-8] mb-0!"
                     />
@@ -175,7 +175,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <FormColumn className="w-full flex-none">
                 <div className="w-64">
                   <FormLabel
-                    htmlFor={fields.bestBeforeDate.name}
+                    htmlFor={fields.bestBeforeDate.id}
                     title={product.due_type === 1 ? "Best before *" : "Expires at *"}
                   ></FormLabel>
                   <FormField>
@@ -198,7 +198,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
                 <FormLabel
-                  htmlFor={fields.shoppingLocationId.name}
+                  htmlFor={fields.shoppingLocationId.id}
                   title={`Shop`}
                   className="inline-block"
                 ></FormLabel>
@@ -222,7 +222,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
                 <FormLabel
-                  htmlFor={fields.locationId.name}
+                  htmlFor={fields.locationId.id}
                   title={`Location`}
                   className="inline-block"
                 ></FormLabel>

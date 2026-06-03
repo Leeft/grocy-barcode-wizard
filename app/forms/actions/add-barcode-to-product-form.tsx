@@ -158,7 +158,7 @@ export function AddBarcodeToProductForm({ code }: { code: string }) {
                   <FormColumn className="w-full">
                     <div className="w-full md:w-110">
                       <FormLabel
-                        htmlFor={fields.shoppingLocationId.name}
+                        htmlFor={fields.shoppingLocationId.id}
                         title={`Shop`}
                         className="inline-block mt-0!"
                       ></FormLabel>

@@ -66,7 +66,7 @@ export function AmountPlusUnitSelectionAdd({
         <div className="w-ful md:max-w-110">
           <div className={`flex`}>
             <div className="grow">
-              <FormLabel htmlFor={fieldAmount.name} title={title} className="relative top-[-8] mb-0!" />
+              <FormLabel htmlFor={fieldAmount.id} title={title} className="relative top-[-8] mb-0!" />
             </div>
             <div className="inline-flex">
               <UnitForAmount

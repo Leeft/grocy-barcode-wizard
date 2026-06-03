@@ -94,10 +94,10 @@ export default function CreateProductFields({
     <>
       <FormRow comment="Add barcode to product link">
         <FormColumn>
-              <span className="hidden sm:inline-block">or:</span>
+          <span className="hidden sm:inline-block">or:</span>
           <Link
             href={`/scan/${encodeURIComponent(fields.barcode.value)}/add-to-product` as Route<string>}
-            className="rounded-lg border border-dashed px-4 py-2 ml-0 sm:ml-3 underline underline-offset-4 inline-block"
+            className="ml-0 inline-block rounded-lg border border-dashed px-4 py-2 underline underline-offset-4 sm:ml-3"
           >
             <ArrowRight className="inline size-6 pr-1.5" />
             Add barcode <code>{fields.barcode.value}</code> to existing product
@@ -107,7 +107,7 @@ export default function CreateProductFields({
 
       <FormRow comment="Product name">
         <FormColumn>
-          <FormLabel htmlFor={fields.name.name} title="Product name *" />
+          <FormLabel htmlFor={fields.name.id} title="Product name *" />
           <FormField>
             <input
               {...getInputProps(fields.name, { type: "text" })}
@@ -136,7 +136,7 @@ export default function CreateProductFields({
 
       <FormRow className="flex-wrap" comment="Unit system configuration">
         <FormColumn className="w-50" comment="Unit system">
-          <FormLabel htmlFor="unitSystem" title="Stock unit system *" className="inline-block">
+          <FormLabel htmlFor={fields.unitSystem.id} title="Stock unit system *" className="inline-block">
             <WeightModeTooltip />
           </FormLabel>
           <FormField>
@@ -157,7 +157,7 @@ export default function CreateProductFields({
         {fields.unitSystem.value !== "ABSTRACT" ? (
           <FormColumn className="w-34" comment="Unit amount">
             <FormLabel
-              htmlFor={fields.unitAmount.name}
+              htmlFor={fields.unitAmount.id}
               title={ModeToQuantityTitle(fields.unitSystem?.value)}
               className="text-stock-unit inline-block"
             >
@@ -188,7 +188,7 @@ export default function CreateProductFields({
 
         <FormColumn className="min-w-50" comment="Unit id">
           <FormLabel
-            htmlFor={fields.unitId.name}
+            htmlFor={fields.unitId.id}
             title={ModeToUnitTitle(fields.unitSystem?.value)}
             className={`text-stock-unit! text-sm!`}
           ></FormLabel>
@@ -228,7 +228,7 @@ export default function CreateProductFields({
 
       <FormRow comment="Initial product location">
         <FormColumn className="w-80">
-          <FormLabel htmlFor={fields.defaultLocationId.name} title="Initial product location *"></FormLabel>
+          <FormLabel htmlFor={fields.defaultLocationId.id} title="Initial product location *"></FormLabel>
           <FormField>
             <LocationDropdown
               {...getInputProps(fields.defaultLocationId, {
@@ -246,7 +246,7 @@ export default function CreateProductFields({
 
       <FormRow comment="Due date type and expiry" className="gap-y-5">
         <FormColumn className="flex-none">
-          <FormLabel htmlFor={fields.dueDateType.name} title="Due date type *"></FormLabel>
+          <FormLabel htmlFor={fields.dueDateType.id} title="Due date type *"></FormLabel>
           <FormField>
             <CustomisableSelect
               {...getInputProps(fields.dueDateType, { type: "hidden" })}
@@ -261,7 +261,7 @@ export default function CreateProductFields({
           <>
             <FormColumn className="flex-none">
               <FormLabel
-                htmlFor={fields.dueOrExpiryDate.name}
+                htmlFor={fields.dueOrExpiryDate.id}
                 title={
                   fields.dueOrExpiryDate.value === DueDateType.BEST_BEFORE ? "Best before *" : "Expires at *"
                 }
@@ -287,7 +287,7 @@ export default function CreateProductFields({
               <FormErrors id={fields.dueOrExpiryDate.errorId} errors={fields.dueOrExpiryDate.errors} />
             </FormColumn>
             <FormColumn className="flex-none">
-              <FormLabel htmlFor={fields.packagingDate.name} title="Packaging date" className="inline-block">
+              <FormLabel htmlFor={fields.packagingDate.id} title="Packaging date" className="inline-block">
                 <PackagingDateTooltip />
               </FormLabel>
               <FormField>
@@ -347,7 +347,7 @@ export default function CreateProductFields({
 
       <FormRow comment="Purchase price type">
         <FormColumn className="w-38">
-          <FormLabel htmlFor={fields.purchasePriceType.name} title="Purchase price type"></FormLabel>
+          <FormLabel htmlFor={fields.purchasePriceType.id} title="Purchase price type"></FormLabel>
           <FormField>
             <CustomisableSelect
               {...getInputProps(fields.purchasePriceType, {
@@ -361,7 +361,7 @@ export default function CreateProductFields({
         </FormColumn>
 
         <FormColumn className="w-40">
-          <FormLabel htmlFor={fields.purchasePrice.name} title="Purchase price"></FormLabel>
+          <FormLabel htmlFor={fields.purchasePrice.id} title="Purchase price"></FormLabel>
           <FormField>
             <input
               defaultValue={"0"}
@@ -378,7 +378,7 @@ export default function CreateProductFields({
         </FormColumn>
 
         <FormColumn className="w-30">
-          <FormLabel htmlFor={fields.quantity.name} title="Quantity to add" />
+          <FormLabel htmlFor={fields.quantity.id} title="Quantity to add" />
           <FormField>
             <input
               defaultValue={"1"}
@@ -394,7 +394,7 @@ export default function CreateProductFields({
 
       <FormRow comment="Notes">
         <FormColumn className="w-full md:w-110">
-          <FormLabel htmlFor={fields.notes.name} title="Notes" />
+          <FormLabel htmlFor={fields.notes.id} title="Notes" />
           <FormField>
             <textarea
               {...getInputProps(fields.notes, {

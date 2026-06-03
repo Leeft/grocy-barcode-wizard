@@ -181,7 +181,7 @@ export function DueDaysColumn({
   return (
     <FormColumn className={className}>
       <FormLabel
-        htmlFor={fieldInfo.name}
+        htmlFor={fieldInfo.id}
         className={clsx("block w-full align-bottom text-xs text-wrap", labelClassName)}
         title={title}
       />

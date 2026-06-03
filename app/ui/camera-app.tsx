@@ -294,7 +294,7 @@ function ButtonUpload({
   return (
     <div>
       <label
-        htmlFor={name}
+        htmlFor={id ?? name}
         title="Click to select file for upload"
         className={clsx(
           "block",

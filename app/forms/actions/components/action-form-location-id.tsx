@@ -31,7 +31,7 @@ export function ActionFormLocationId({
   return (
     <FormColumn className="w-full">
       <div className="w-full md:w-110">
-        <FormLabel htmlFor={field.name} title={title} className="inline-block"></FormLabel>
+        <FormLabel htmlFor={field.id} title={title} className="inline-block"></FormLabel>
         <FormField>
           <LocationDropdown
             {...getInputProps(field, {

@@ -80,7 +80,7 @@ export function ProductShopForm({ code, product }: { code: string; product: Prod
           <FormRow comment="shopping list entry">
             <FormColumn className="w-full">
               <FormLabel
-                htmlFor={fields.listId.name}
+                htmlFor={fields.listId.id}
                 title="Shopping list entry"
                 className="relative top-[-8] mb-0!"
               />

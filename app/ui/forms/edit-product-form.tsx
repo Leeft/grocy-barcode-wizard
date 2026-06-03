@@ -218,7 +218,7 @@ export function EditProductForm({
           <FormRowGroup comment="Default quantity unit for purchase *">
             <FormRow>
               <FormLabel
-                htmlFor={fields.defaultQuantityUnitPurchase.name}
+                htmlFor={fields.defaultQuantityUnitPurchase.id}
                 title="Default quantity unit purchase *"
               ></FormLabel>
             </FormRow>
@@ -250,7 +250,7 @@ export function EditProductForm({
           <FormRowGroup comment="By default, “consume” will consume this quantity: ...">
             <FormRow>
               <FormLabel
-                htmlFor={fields.quickConsumeAmount.name}
+                htmlFor={fields.quickConsumeAmount.id}
                 className="w-full flex-col"
                 title="By default, “consume” will consume this quantity: *"
               />
@@ -299,7 +299,7 @@ export function EditProductForm({
 
           <FormRowGroup comment="Quantity unit for prices">
             <FormRow>
-              <FormLabel htmlFor={fields.quantityUnitPrices.name} title="Quantity unit for prices *" />
+              <FormLabel htmlFor={fields.quantityUnitPrices.id} title="Quantity unit for prices *" />
             </FormRow>
             <FormRow comment="Quantity unit for prices">
               <FormColumn className="w-37">
@@ -367,7 +367,7 @@ export function EditProductForm({
           <FormRow comment="Product group">
             <FormColumn className="w-full">
               <FormLabel
-                htmlFor={fields.productGroup.name}
+                htmlFor={fields.productGroup.id}
                 title="Product group"
                 className="w-full md:w-110"
               ></FormLabel>
@@ -386,7 +386,7 @@ export function EditProductForm({
           <FormRow comment="Parent product">
             <FormColumn className="w-full">
               <FormLabel
-                htmlFor={fields.parentProductId.name}
+                htmlFor={fields.parentProductId.id}
                 title="Parent product"
                 className="w-full"
               ></FormLabel>
@@ -405,7 +405,7 @@ export function EditProductForm({
           <FormRow comment='Default "Consume" location'>
             <FormColumn className="w-full">
               <FormLabel
-                htmlFor={fields.defaultConsumeLocationId.name}
+                htmlFor={fields.defaultConsumeLocationId.id}
                 title={`Default “consume” location`}
                 className="inline-block"
               >
@@ -533,7 +533,7 @@ export function EditProductForm({
                     <FormColumn className="grow">
                       <div className={`${unitTaggedLabelClass} mb-2 h-5`}>
                         <FormLabel
-                          htmlFor={fields.tareWeight.name}
+                          htmlFor={fields.tareWeight.id}
                           title="Tare weight"
                           className="relative top-[-8]"
                         ></FormLabel>
@@ -574,7 +574,7 @@ export function EditProductForm({
           <FormRow comment="Energy">
             <FormColumn className="w-60">
               <div className={`${unitTaggedLabelClass} mb-2 h-5`}>
-                <FormLabel htmlFor={fields.energy.name} title="Energy" className="relative top-[-8]" />
+                <FormLabel htmlFor={fields.energy.id} title="Energy" className="relative top-[-8]" />
                 <div className="grow text-right text-nowrap text-slate-400">
                   <div
                     title="This value is obtained from Grocy, you can change it there"
@@ -611,7 +611,7 @@ export function EditProductForm({
                 <FormColumn className="grow">
                   <div className={`${unitTaggedLabelClass} mb-2 h-5`}>
                     <FormLabel
-                      htmlFor={fields.quickOpenAmount.name}
+                      htmlFor={fields.quickOpenAmount.id}
                       title="Quick open amount"
                       className="relative top-[-8]"
                     />

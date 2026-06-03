@@ -88,7 +88,7 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
               <FormColumn className="w-full flex-none">
                 <div className="w-64">
                   <FormLabel
-                    htmlFor={fields.bestBeforeDate.name}
+                    htmlFor={fields.bestBeforeDate.id}
                     title={product.due_type === 1 ? "Best before *" : "Expires at *"}
                   ></FormLabel>
                   <FormField>
@@ -109,7 +109,7 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
 
           <FormRow comment="price">
             <FormColumn className="w-full">
-              <FormLabel htmlFor={fields.price.name} title="Price" className="relative top-[-8] mb-0!" />
+              <FormLabel htmlFor={fields.price.id} title="Price" className="relative top-[-8] mb-0!" />
               <FormField className="flex flex-row gap-x-2">
                 <input
                   {...getInputProps(fields.price, {
@@ -131,7 +131,7 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
                 <FormLabel
-                  htmlFor={fields.shoppingLocationId.name}
+                  htmlFor={fields.shoppingLocationId.id}
                   title={`Shop`}
                   className="inline-block"
                 ></FormLabel>
@@ -155,7 +155,7 @@ export function ProductInventoryForm({ code, product }: { code: string; product:
             <FormColumn className="w-full">
               <div className="w-full md:w-110">
                 <FormLabel
-                  htmlFor={fields.locationId.name}
+                  htmlFor={fields.locationId.id}
                   title={`Location *`}
                   className="inline-block"
                 ></FormLabel>

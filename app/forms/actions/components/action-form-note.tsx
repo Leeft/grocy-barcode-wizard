@@ -14,7 +14,7 @@ export function ActionFormNote({
     <FormColumn className="w-full md:w-110">
       <div className={`flex`}>
         <FormLabel
-          htmlFor={field.name}
+          htmlFor={field.id}
           title={multiLine ? "Notes" : "Note"}
           className="relative top-[-8] mb-0!"
         />

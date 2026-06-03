@@ -56,7 +56,7 @@ export function BatteryTrackForm({ code, battery }: { code: string; battery: Bat
           <FormRow comment="Charge date">
             <FormColumn className="w-full flex-none">
               <div className="w-64">
-                <FormLabel htmlFor={fields.chargeDate.name} title="Charge date and time *"></FormLabel>
+                <FormLabel htmlFor={fields.chargeDate.id} title="Charge date and time *"></FormLabel>
                 <FormField>
                   <input
                     {...getInputProps(fields.chargeDate, {
