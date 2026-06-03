@@ -71,7 +71,7 @@ export const QuantityUnitsDropdown: React.FC<QuantityUnitsDropdownProps> = ({
         unitSystem: unitSystem,
         allOptions: allOptions,
       })}
-      value={selectedOption}
+      defaultValue={selectedOption}
       onChange={(e) => {
         if (setSelectedOption) setSelectedOption(e.target.value);
         if (onChange) {

@@ -16,9 +16,9 @@ import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 import { ProductContext } from "@/providers/product-context";
 import { Product } from "@/interfaces/grocy";
+import { UnitSystem } from "@/generated/prisma/browser";
 
 export function CreateProductForm({ code }: { code: string }) {
-
   code = decodeURIComponent(code);
 
   const [lastResult, action, submitPending] = useActionState(
@@ -38,7 +38,10 @@ export function CreateProductForm({ code }: { code: string }) {
     lastResult,
 
     defaultValue: {
+      barcode: code,
+      unitSystem: UnitSystem.WEIGHT,
       unitAmount: "1.0",
+      unitId: "",
       dueDays: "0",
       dueDaysAfterOpen: "0",
       dueDaysAfterFreezing: "0",
@@ -67,7 +70,7 @@ export function CreateProductForm({ code }: { code: string }) {
         className="pb-25"
         aria-describedby={form.errors ? form.errorId : undefined}
       >
-        <input {...getInputProps(fields.barcode, { type: "hidden" })} value={code} />
+        <input {...getInputProps(fields.barcode, { type: "hidden" })} defaultValue={code} />
         <input {...getInputProps(fields.intent, { type: "hidden" })} value="create" />
         <div id={form.errorId}>{form.errors}</div>
 

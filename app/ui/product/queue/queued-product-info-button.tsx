@@ -115,7 +115,7 @@ export async function QueuedProductInfoButton({ product }: { product: GetProduct
             )}
           </div>
           <Suspense>
-            {photo && (
+            {photo && photo.data !== undefined && photo.data.toBase64 && (
               <div className="flex-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
