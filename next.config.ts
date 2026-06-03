@@ -5,9 +5,11 @@ module.exports = {
     root: path.join(__dirname, '..'),
   },
   typedRoutes: true,  
+  output: "standalone",
   experimental: {
+    proxyClientMaxBodySize: '20mb',
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '25mb',
     },
   },  
 }
