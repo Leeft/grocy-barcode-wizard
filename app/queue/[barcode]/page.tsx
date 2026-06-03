@@ -1,5 +1,5 @@
 import Barcode from "@/lib/barcode";
-import { getProduct, getCapturedProductsByBarcode, CapturedProductsByBarcode } from "@/lib/product-db";
+import { getProduct, getCapturedProductsByBarcode, CapturedProductsByBarcode, getProductPhoto } from "@/lib/product-db";
 import { EditProductForm } from "@/ui/forms/edit-product-form";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -32,9 +32,13 @@ export default async function QueuedEntryPage({ params }: { params: Promise<{ ba
     // have to capture the essentials for this product.
     const product = getProduct(barcodeObject.queuedProductId);
 
+    const awaitedProduct = await product;
+
+    const productPhoto = getProductPhoto(awaitedProduct.productPhoto ? awaitedProduct.productPhoto.id : 0);
+
     return (
       <Suspense>
-        <EditProductForm code={barcode} product={product} />
+        <EditProductForm code={barcode} product={product} photo={productPhoto} />
       </Suspense>
     );
   }

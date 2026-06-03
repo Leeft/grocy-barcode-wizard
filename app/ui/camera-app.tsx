@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Dispatch, SetStateAction, use, useContext, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, SyntheticEvent, use, useContext, useRef, useState } from "react";
 import { WebCamera, WebCameraHandler } from "@shivantra/react-web-camera";
 import { fileToBase64 } from "file64";
 import {
@@ -18,10 +18,13 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { OneOffSound, OneOffSoundHandler } from "./one-off-sound";
-import { deleteProductPhoto, GetProductPhoto } from "@/lib/product-db";
+import { deleteProductPhoto } from "@/lib/product-db";
 import { GetUser } from "@/lib/user-db";
 import { UserContext } from "@/providers/user-context";
 import ReactCrop, { convertToPixelCrop, PixelCrop, type Crop } from "react-image-crop";
+import { AnyProductPhoto, GrocyPicture, UnsavedPhoto } from "@/interfaces";
+import { ProductPhoto } from "@/generated/prisma/client";
+import { apiKey, baseUrl } from "@/lib/grocy";
 
 const buttonClassCommon = clsx(
   "flex-row",
@@ -42,22 +45,34 @@ type CommonButtonArguments = {
   imageRef: React.RefObject<HTMLImageElement | null>;
   appRef: React.RefObject<HTMLDivElement | null>;
   shutterHandler: React.RefObject<OneOffSoundHandler | null>;
-  crop: Crop;
+  crop: Crop | undefined;
   cropEnabled: boolean;
+  photo: AnyProductPhoto | undefined;
+  setPhoto: Dispatch<SetStateAction<AnyProductPhoto | undefined>>;
   setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
-  setType: Dispatch<SetStateAction<string>>;
-  setName: Dispatch<SetStateAction<string>>;
-  setData: Dispatch<SetStateAction<string>>;
   setCrop: Dispatch<SetStateAction<Crop>>;
   setCropEnabled: Dispatch<SetStateAction<boolean>>;
-  data: string;
-  type: string;
-  name: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function CameraApp({ photo: _photo }: { photo?: any }) {
-  const [photo /*, setPhoto*/] = useState<GetProductPhoto | undefined>(_photo ?? undefined);
+function isGrocyPhoto(photo: AnyProductPhoto | undefined): photo is GrocyPicture {
+  return photo !== undefined && (photo as GrocyPicture).fileName !== undefined;
+}
+
+function isDatabasePhoto(photo: AnyProductPhoto | undefined): photo is ProductPhoto {
+  return photo !== undefined && (photo as ProductPhoto).id !== undefined;
+}
+
+function isUnsavedPhoto(photo: AnyProductPhoto | undefined): photo is UnsavedPhoto {
+  return (
+    photo !== undefined &&
+    (photo as UnsavedPhoto).type !== undefined &&
+    (photo as UnsavedPhoto).name !== undefined &&
+    (photo as UnsavedPhoto).data !== undefined
+  );
+}
+
+export function CameraApp({ photo: existingPhoto }: { photo?: AnyProductPhoto }) {
+  const [photo, setPhoto] = useState<AnyProductPhoto | undefined>(existingPhoto);
 
   const user = use(useContext(UserContext) as Promise<GetUser>);
 
@@ -70,16 +85,9 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
     user.settings?.openCameraByDefault ?? false,
   );
 
-  // eslint-disable-next-line react-hooks/purity
-  const [lastSaved, setLastSaved] = useState<number>(photo?.lastChanged ?? Math.floor(Date.now() / 1000));
-  const [photoId, setPhotoId] = useState<number | undefined>(photo !== undefined ? photo.id : undefined);
   const [enableCropping, setCropping] = useState<boolean>(false);
-  const [data, setData] = useState<string>("");
-  const [type, setType] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [crop, setCrop] = useState<Crop>({ unit: "%", x: 0, y: 0, width: 100, height: 100 });
+  const [crop, setCrop] = useState<Crop>({ unit: "%", x: 20, y: 20, width: 60, height: 60 });
 
-  const haveImage: boolean = data !== "" || (photoId !== undefined && photoId > 0);
   const commonArguments: CommonButtonArguments = {
     cameraHandler: cameraHandler,
     imageRef: imageRef,
@@ -88,60 +96,44 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
     crop: crop,
     cropEnabled: enableCropping,
     setCameraIsEnabled: setCameraIsEnabled,
-    setType: setType,
-    setName: setName,
-    setData: setData,
+    setPhoto: setPhoto,
     setCrop: setCrop,
     setCropEnabled: setCropping,
-    data: data ? data : `/api/image/${photoId}`,
-    type: type,
-    name: name,
+    photo: photo,
   };
 
   return (
-    <div className="relative py-4">
-      <input type="hidden" name="imageData" value={data} />
-      <input type="hidden" name="imageType" value={type} />
-      <input type="hidden" name="imageName" value={name} />
+    <div className="relative py-4 select-none">
+      <input type="hidden" name="imageData" value={isUnsavedPhoto(photo) ? photo.data : ""} />
+      <input type="hidden" name="imageType" value={isUnsavedPhoto(photo) ? photo.type : ""} />
+      <input type="hidden" name="imageName" value={isUnsavedPhoto(photo) ? photo.name : ""} />
 
       <OneOffSound src="/sound/shutter.mp3" ref={shutterHandler} />
+
       <div className="flex flex-wrap gap-5" ref={cameraAppRef as React.RefObject<HTMLDivElement | null>}>
         <Toolbar>
           <ButtonEnableCamera
             args={commonArguments}
-            enabled={cameraIsEnabled || data || photoId ? true : false}
+            enabled={cameraIsEnabled || photo !== undefined}
             disabled={enableCropping}
           />
 
-          <ButtonDisableCamera
-            args={commonArguments}
-            enabled={cameraIsEnabled && !data && !photoId}
-            disabled={enableCropping}
-          />
+          <ButtonDisableCamera args={commonArguments} enabled={cameraIsEnabled} disabled={enableCropping} />
 
-          <ButtonSnapshot
-            args={commonArguments}
-            enabled={cameraIsEnabled && !data && !photoId}
-            setLastSaved={setLastSaved}
-            disabled={enableCropping}
-          />
+          <ButtonSnapshot args={commonArguments} enabled={cameraIsEnabled} disabled={enableCropping} />
 
-          <ButtonSwitch
-            args={commonArguments}
-            enabled={cameraIsEnabled && !data && !photoId}
-            disabled={enableCropping}
-          />
+          <ButtonSwitch args={commonArguments} enabled={cameraIsEnabled} disabled={enableCropping} />
 
           <ButtonUpload args={commonArguments} disabled={enableCropping} />
 
-          {haveImage && (
+          {photo && (
             <>
               <ButtonRotateImageCounterclockwise args={commonArguments} disabled={enableCropping} />
               <ButtonRotateImageClockwise args={commonArguments} disabled={enableCropping} />
             </>
           )}
 
-          {haveImage && (
+          {photo && (
             <div className="flex flex-col gap-y-3">
               <ButtonToggleCrop args={commonArguments} />
               <ButtonConfirmCrop args={commonArguments} />
@@ -149,21 +141,22 @@ export function CameraApp({ photo: _photo }: { photo?: any }) {
           )}
 
           <ButtonDeleteImage
-            enabled={haveImage}
+            enabled={photo !== undefined}
             args={commonArguments}
-            photoId={photoId}
-            setPhotoId={setPhotoId}
+            setPhoto={setPhoto}
             disabled={enableCropping}
           />
         </Toolbar>
         <div className="relative">
           {(() => {
-            if (data !== undefined && data !== "") {
-              return <BackgroundCapturedImage args={commonArguments} />;
-            } else if (photoId !== undefined && photoId > 0) {
-              return <BackgroundSavedImage args={commonArguments} photoId={photoId} lastSaved={lastSaved} />;
-            } else if (cameraIsEnabled && cameraHandler) {
+            if (cameraIsEnabled && cameraHandler && photo === undefined) {
               return <BackgroundWebcam cameraHandler={cameraHandler} />;
+            } else if (isUnsavedPhoto(photo)) {
+              return <BackgroundCapturedImage args={commonArguments} />;
+            } else if (isDatabasePhoto(photo) || isGrocyPhoto(photo)) {
+              return <BackgroundDatabaseImage args={commonArguments} />;
+            } else if (isDatabasePhoto(photo) || isGrocyPhoto(photo)) {
+              return <BackgroundGrocyImage args={commonArguments} />;
             } else {
               return <BackgroundCameraInactive ref={cameraAppRef} setCameraIsEnabled={setCameraIsEnabled} />;
             }
@@ -324,12 +317,14 @@ function ButtonUpload({
           if (event.target.files !== null && event.target.files[0] !== undefined) {
             const file = event.target.files[0];
             if (file) {
-              args.setName(file.name);
-              args.setType(file.type);
               const reader = new FileReader();
               reader.addEventListener("load", () => {
                 if (reader.result) {
-                  args.setData(reader.result.toString());
+                  args.setPhoto({
+                    name: file.name,
+                    type: file.type,
+                    data: reader.result.toString(),
+                  });
                   console.log(`Loaded image of ${reader.result.toString().length} bytes`);
                   scrollIntoView(args.appRef);
                 }
@@ -346,12 +341,10 @@ function ButtonUpload({
 function ButtonSnapshot({
   args,
   enabled,
-  setLastSaved,
   disabled = false,
 }: {
   args: CommonButtonArguments;
   enabled: boolean;
-  setLastSaved: Dispatch<SetStateAction<number>>;
   disabled?: boolean;
 }) {
   if (args.cameraHandler === null || enabled === false) return <></>;
@@ -361,11 +354,12 @@ function ButtonSnapshot({
     const file = await args.cameraHandler.current?.capture();
     if (file) {
       args.shutterHandler.current?.play();
-      setLastSaved(Math.floor(Date.now() / 1000));
       const base64 = await fileToBase64(file);
-      args.setData(base64);
-      args.setName(file.name);
-      args.setType(file.type);
+      args.setPhoto({
+        name: file.name,
+        type: file.type,
+        data: base64,
+      });
     }
   }
 
@@ -427,11 +421,20 @@ function ButtonConfirmCrop({ args, disabled }: { args: CommonButtonArguments; di
   const [busy, setBusy] = useState<boolean>(false);
 
   if (!args.cropEnabled) return <></>;
+  if (args.crop === undefined) return <></>;
+  const crop = args.crop as Crop;
+
+  let filename = `missing-image-name=${Date.now()}.jpg`;
+  if (isUnsavedPhoto(args.photo)) {
+    filename = args.photo.name;
+  } else if (isDatabasePhoto(args.photo)) {
+    filename = args.photo.filename;
+  }
 
   async function applyCrop() {
     const image = args.imageRef!.current;
-    if (!image || !args.crop) {
-      console.log("image", image, "crop", args.crop);
+    if (!image || !crop) {
+      //console.log("image", image, "crop", args.crop);
       throw new Error("Crop canvas does not exist");
     }
 
@@ -442,24 +445,40 @@ function ButtonConfirmCrop({ args, disabled }: { args: CommonButtonArguments; di
       const target = document.createElement("canvas");
       const ctx = target.getContext("2d");
       if (ctx !== null) {
-        const scaleX = image.naturalWidth / image.width;
-        const scaleY = image.naturalHeight / image.height;
-        target.width = args.crop.width * scaleX;
-        target.height = args.crop.height * scaleY;
+        const width = image.naturalWidth;
+        const height = image.naturalHeight;
+        target.width = (crop.width / 100) * width;
+        target.height = (crop.height / 100) * height;
         // console.log(
-        //   `original is ${image.naturalWidth} x ${image.naturalHeight}, crop is ${args.crop.width} x ${args.crop.height} => ${target.width} x${target.height} `,
+        //   `original is ${image.naturalWidth} x ${image.naturalHeight}, crop is ${crop.width} x ${crop.height} => ${target.width} x ${target.height} `,
         // );
-        const pixelCrop = convertToPixelCrop(args.crop, args.crop.width, args.crop.height);
-        cropToCanvas(sourceImage, target, pixelCrop, scaleX, scaleY);
-        args.setData(target.toDataURL("image/jpeg", 0.85));
-        args.setType("image/jpeg");
+
+        const pixelCrop = convertToPixelCrop(crop, width, height);
+        // console.log(`pixel crop is`, pixelCrop);
+        cropToCanvas(sourceImage, target, pixelCrop, 1, 1);
+
+        filename.replace(/[.](png|webp|gif|bmp|jpeg)$/i, ".jpg");
+        args.setPhoto({
+          name: filename,
+          type: "image/jpeg",
+          data: target.toDataURL("image/jpeg", 0.85),
+        });
+
         args.setCropEnabled(false);
-        args.setCrop({ unit: "%", x: 0, y: 0, width: 100, height: 100 });
+        args.setCrop({ unit: "%", x: 20, y: 20, width: 60, height: 60 });
         scrollIntoView(args.appRef);
       }
       setBusy(false);
     };
-    sourceImage.src = args.data;
+
+    if (isUnsavedPhoto(args.photo)) {
+      sourceImage.src = args.photo.data;
+    } else if (isDatabasePhoto(args.photo)) {
+      console.log("image is", args.photo);
+      sourceImage.src = `data:${args.photo.filetype};base64,` + args.photo.data.toBase64();
+    } else {
+      throw new Error("not yet implemented");
+    }
   }
 
   return (
@@ -486,9 +505,17 @@ function ButtonRotateImageCounterclockwise({
 }) {
   const [busy, setBusy] = useState<boolean>(false);
 
-  if (args.data === undefined || args.data === "") return <></>;
+  if (!isUnsavedPhoto(args.photo) && !isDatabasePhoto(args.photo)) return <></>;
 
-  async function handleRotateLeft() {
+  let filename = `missing-image-name=${Date.now()}.png`;
+  if (isUnsavedPhoto(args.photo)) {
+    filename = args.photo.name;
+  } else if (isDatabasePhoto(args.photo)) {
+    filename = args.photo.filename;
+  }
+
+  async function handleRotateCounterClockwise(photo: AnyProductPhoto) {
+    if (!isUnsavedPhoto(photo) && !isDatabasePhoto(photo)) return;
     setBusy(true);
     const img = new Image();
     img.onload = () => {
@@ -500,18 +527,28 @@ function ButtonRotateImageCounterclockwise({
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((-90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        args.setData(canvas.toDataURL("image/png"));
-        args.setType("image/png");
+        args.setPhoto({
+          name: filename,
+          type: "image/png",
+          data: canvas.toDataURL("image/png"),
+        });
         scrollIntoView(args.appRef);
       }
       setBusy(false);
     };
-    img.src = args.data;
+    if (isUnsavedPhoto(photo)) {
+      img.src = photo.data;
+    } else if (isDatabasePhoto(photo)) {
+      console.log("image is", args.photo);
+      img.src = `data:${photo.filetype};base64,` + photo.data.toBase64();
+    } else {
+      throw new Error("not yet implemented");
+    }
   }
 
   return (
     <button
-      onClick={() => handleRotateLeft()}
+      onClick={() => handleRotateCounterClockwise(args.photo!)}
       className={clsx(buttonClassCommon, "bg-rotate-image")}
       disabled={disabled}
       title="Rotate 90 degrees counterclockwise"
@@ -533,9 +570,17 @@ function ButtonRotateImageClockwise({
 }) {
   const [busy, setBusy] = useState<boolean>(false);
 
-  if (args.data === undefined || args.data === "") return <></>;
+  if (!isUnsavedPhoto(args.photo) && !isDatabasePhoto(args.photo)) return <></>;
 
-  async function handleRotateLeft(data: string) {
+  let filename = `missing-image-name=${Date.now()}.png`;
+  if (isUnsavedPhoto(args.photo)) {
+    filename = args.photo.name;
+  } else if (isDatabasePhoto(args.photo)) {
+    filename = args.photo.filename;
+  }
+
+  async function handleRotateClockwise(photo: AnyProductPhoto) {
+    if (photo === undefined) return;
     setBusy(true);
     const img = new Image();
     img.onload = () => {
@@ -547,18 +592,27 @@ function ButtonRotateImageClockwise({
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((90 * Math.PI) / 180);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        args.setData(canvas.toDataURL("image/png"));
-        args.setType("image/png");
+        args.setPhoto({
+          name: filename,
+          type: "image/png",
+          data: canvas.toDataURL("image/png"),
+        });
         scrollIntoView(args.appRef);
       }
       setBusy(false);
     };
-    img.src = data;
+    if (isUnsavedPhoto(photo)) {
+      img.src = photo.data;
+    } else if (isDatabasePhoto(photo)) {
+      img.src = `data:${photo.filetype};base64,` + photo.data.toBase64();
+    } else {
+      throw new Error("not yet implemented");
+    }
   }
 
   return (
     <button
-      onClick={() => handleRotateLeft(args.data)}
+      onClick={() => handleRotateClockwise(args.photo!)}
       className={clsx(buttonClassCommon, "bg-rotate-image")}
       disabled={disabled}
       title="Rotate 90 degrees clockwise"
@@ -580,46 +634,75 @@ function LoaderIfBusy({
   reverse?: boolean;
   children: React.ReactNode;
 }) {
-  if (busy)
+  if (busy) {
     return <LoaderCircle size="28" className={`${reverse ? "spinner-ccw" : "spinner"} relative top-2.5`} />;
+  }
   return <>{children}</>;
 }
 
 function ButtonDeleteImage({
   args,
-  photoId,
-  setPhotoId,
+  setPhoto,
   enabled = false,
   disabled = false,
 }: {
   args: CommonButtonArguments;
-  photoId: number | undefined;
-  setPhotoId: Dispatch<SetStateAction<number | undefined>>;
+  setPhoto: Dispatch<SetStateAction<AnyProductPhoto | undefined>>;
   enabled?: boolean;
   disabled?: boolean;
 }) {
-  if ((args.data === undefined || args.data === "") && !photoId) return <></>;
-  if (!enabled) return <></>;
+  if (args.photo === undefined || !enabled) return <></>;
 
-  async function handleDelete(id: number | undefined) {
-    if (id === undefined) {
-      args.setData("");
+  async function handleDelete(photo: AnyProductPhoto) {
+    if (photo === undefined) {
       return;
     }
 
-    if (await deleteProductPhoto(id)) {
-      args.setData("");
-      setPhotoId(undefined);
+    if (isUnsavedPhoto(photo)) {
+      setPhoto(undefined);
       scrollIntoView(args.appRef);
+      return;
+    }
+
+    if (isDatabasePhoto(photo) && (await deleteProductPhoto(photo.id))) {
+      args.setPhoto(undefined);
+      setPhoto(undefined);
+      scrollIntoView(args.appRef);
+      return;
+    }
+
+    if (isGrocyPhoto(photo)) {
+      const response = await fetch(
+        new Request(`${baseUrl}files/${photo.type}/${btoa(photo.fileName)}`, {
+          method: "DELETE",
+          headers: new Headers({
+            "Content-Type": "application/octet-stream",
+            Accept: "application/json",
+            "GROCY-API-KEY": apiKey!,
+          }),
+        }),
+      );
+      if (response.status === 204) {
+        console.log("deleted picture OK");
+        args.setPhoto(undefined);
+        scrollIntoView(args.appRef);
+      } else {
+        console.error(
+          "Error deleting picture from grocy:",
+          response.status,
+          response.statusText,
+          await response.text(),
+        );
+      }
     }
   }
 
   return (
     <button
       className={clsx(buttonClassCommon, "bg-discard-image")}
-      onClick={() => handleDelete(photoId)}
+      onClick={() => handleDelete(args.photo!)}
       disabled={disabled}
-      title={`${photoId !== undefined ? "Delete" : "Discard"} this image`}
+      title={`${isUnsavedPhoto(args.photo) ? "Discard" : "Delete"} this image`}
       type="button"
     >
       <Trash size="28" className="relative top-2.5" />
@@ -643,22 +726,37 @@ function BackgroundWebcam({ cameraHandler }: { cameraHandler: React.RefObject<We
 }
 
 function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
-  if (args.data === undefined || args.data === "") return <></>;
+  if (!isUnsavedPhoto(args.photo)) return <></>;
+
+  function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
+    if (args.photo !== undefined) {
+      const photo = { ...args.photo };
+      photo.width = width;
+      photo.height = height;
+      args.setPhoto(photo);
+    }
+  }
 
   return (
     <div key={`captured-image-container`} className="relative">
       {args.cropEnabled ? (
         <>
           {/* eslint-disable-next-line react-hooks/refs */}
-          <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
+          <ReactCrop
+            className="mx-3 sm:mx-0"
+            crop={args.crop}
+            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               // eslint-disable-next-line react-hooks/refs
               ref={args.imageRef}
               key={`captured-image`}
               // eslint-disable-next-line react-hooks/refs
-              src={args.data}
+              src={args.photo.data}
               alt="Captured image from camera"
+              onLoad={onImageLoad}
             />
           </ReactCrop>
         </>
@@ -670,39 +768,53 @@ function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
             ref={args.imageRef}
             key={`captured-image`}
             // eslint-disable-next-line react-hooks/refs
-            src={args.data}
+            src={args.photo.data}
             alt="Captured image from camera"
+            onLoad={onImageLoad}
           />
         </>
       )}
-      {/* <p>
-        Image size is {args.data.length} ({args.imageRef?.current?.width} x {args.imageRef?.current?.height})
-      </p>
-      <p>Crop is {JSON.stringify(args.crop, null, 2)}</p> */}
+      {false && args.photo !== undefined && (
+        <>
+          <p>
+            Image size is {args.photo!.width} x {args.photo!.height}
+          </p>
+          <p>Crop is {JSON.stringify(args.crop, null, 2)}</p>
+        </>
+      )}
     </div>
   );
 }
 
-function BackgroundSavedImage({
-  args,
-  photoId,
-  lastSaved,
-}: {
-  args: CommonButtonArguments;
-  photoId: number;
-  lastSaved: number;
-}) {
+function BackgroundDatabaseImage({ args }: { args: CommonButtonArguments }) {
+  if (!isDatabasePhoto(args.photo)) return <></>;
+
+  function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
+    if (args.photo !== undefined) {
+      const photo = { ...args.photo };
+      photo.width = width;
+      photo.height = height;
+      args.setPhoto(photo);
+    }
+  }
+
   return (
-    <div key={`captured-image-${photoId}-container`} className="relative">
+    <div key={`captured-image-${args.photo.id}-container`} className="relative">
       {args.cropEnabled ? (
         <>
-          <ReactCrop className="mx-3 sm:mx-0" crop={args.crop} onChange={(c) => args.setCrop(c)}>
+          <ReactCrop
+            className="mx-3 sm:mx-0"
+            crop={args.crop}
+            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               ref={args.imageRef}
-              key={`captured-image-${photoId}`}
-              alt={`BackgroundSavedImage of the product ${photoId}`}
-              src={`/api/image/${photoId}?ts=${lastSaved}`}
+              key={`captured-image-${args.photo.id}`}
+              alt={`BackgroundSavedImage of the product ${args.photo.id}`}
+              src={`/api/image/${args.photo.id}?ts=${args.photo.lastChanged}`}
+              onLoad={onImageLoad}
             />
           </ReactCrop>
         </>
@@ -712,16 +824,67 @@ function BackgroundSavedImage({
           <img
             // eslint-disable-next-line react-hooks/refs
             ref={args.imageRef}
-            key={`captured-image-${photoId}`}
-            alt={`BackgroundSavedImage of the product ${photoId}`}
-            src={`/api/image/${photoId}?ts=${lastSaved}`}
+            key={`captured-image-${args.photo.id}`}
+            alt={`BackgroundSavedImage of the product ${args.photo.id}`}
+            src={`/api/image/${args.photo.id}?ts=${args.photo.lastChanged}`}
+            onLoad={onImageLoad}
           />
         </>
       )}
-      {/* <p>
-        Image size is {args.data.length} ({args.imageRef?.current?.width} x {args.imageRef?.current?.height})
-      </p>
-      <p>Crop is {JSON.stringify(args.crop, null, 2)}</p> */}
+      {false && args.photo !== undefined && (
+        <>
+          <p>
+            Image size is {args.photo!.width} x {args.photo!.height}
+          </p>
+          <p>Crop is {JSON.stringify(args.crop, null, 2)}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function BackgroundGrocyImage({ args }: { args: CommonButtonArguments }) {
+  if (!isGrocyPhoto(args.photo)) return <></>;
+
+  function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
+    if (args.photo !== undefined) {
+      const photo = { ...args.photo };
+      photo.width = width;
+      photo.height = height;
+      args.setPhoto(photo);
+    }
+  }
+
+  return (
+    <div key={`grocy-image-container`} className="relative">
+      {args.cropEnabled ? (
+        <>
+          <ReactCrop
+            className="mx-3 sm:mx-0"
+            crop={args.crop}
+            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* <img
+              ref={args.imageRef}
+              key={`captured-image-${args.photo.id}`}
+              alt={`BackgroundSavedImage of the product ${args.photo.id}`}
+              src={`/api/image/${args.photo.id}?ts=${lastSaved}`}
+            /> */}
+          </ReactCrop>
+        </>
+      ) : (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
+            alt="Photo of the product as currently saved in Grocy"
+            src={baseUrl + "/files/productpictures/" + btoa(args.photo.fileName)}
+            onLoad={onImageLoad}
+          />
+        </>
+      )}
     </div>
   );
 }

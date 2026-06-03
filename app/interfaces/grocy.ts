@@ -39,6 +39,7 @@ export type Recipe = {
 
 export type Error400 = components["schemas"]["Error400"];
 export type Error500 = components["schemas"]["Error500"];
+export type FileGroups = components["schemas"]["FileGroups"];
 
 // (arrays of StockLogEntry)
 // 200 status of /stock/products/{productId}/add

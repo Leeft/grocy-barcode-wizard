@@ -1,4 +1,6 @@
+import { ProductPhoto } from "@/generated/prisma/client";
 import { SubmissionResult } from "@conform-to/react";
+import { FileGroups } from "./grocy";
 
 export interface Option {
   value: string;
@@ -17,7 +19,7 @@ export interface SerialisedBarcode {
 export enum ProductBarcodeTypes {
   PRODUCT = "product",
   GROCY_PRODUCT = "grocy-product",
-};
+}
 
 export enum SpecialBarcodeTypes {
   GROCY_RECIPE = "grocy-recipe",
@@ -31,7 +33,7 @@ export enum SpecialBarcodeTypes {
   QR_COMMUNICATION = "qr-communication",
   QR_VEVENT = "qr-vevent",
   QR_OTHER = "qr-other",
-};
+}
 
 export type AllBarcodeTypes = ProductBarcodeTypes | SpecialBarcodeTypes;
 
@@ -43,3 +45,22 @@ export type ActionState =
   | null // initial state
   | SubmissionResult<string[]>
   | undefined; // if server action does not return anything
+
+//
+
+export type GrocyPicture = {
+  type: FileGroups;
+  fileName: string;
+};
+
+// Freshly captured or uploaded image, not yet saved to database or grocy
+export type UnsavedPhoto = {
+  data: string;
+  type: string;
+  name: string;
+};
+
+export type AnyProductPhoto = (GrocyPicture | ProductPhoto | UnsavedPhoto) & {
+  width?: number;
+  height?: number;
+};

@@ -11,7 +11,7 @@ import { LocationDropdown } from "@/ui/product/location-dropdown";
 import { CameraApp } from "@/ui/camera-app";
 import { FormProvider, getInputProps, useForm } from "@conform-to/react";
 import TooltipWrapper from "@/ui/tooltip-wrapper";
-import { GetProduct } from "@/lib/product-db";
+import { GetProduct, GetProductPhoto } from "@/lib/product-db";
 import clsx from "clsx";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import { DueDateType, UnitSystem } from "@/generated/prisma/enums";
@@ -47,7 +47,7 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const data = use(product);
 
-  code = decodeURIComponent( code );
+  code = decodeURIComponent(code);
 
   const defaultValue = {
     intent: "update",
@@ -97,7 +97,15 @@ function defaultsForForm(code: string, product: Promise<GetProduct>) {
   return defaultValue;
 }
 
-export function EditProductForm({ code, product }: { code: string; product: Promise<GetProduct> }) {
+export function EditProductForm({
+  code,
+  product,
+  photo: productPhoto,
+}: {
+  code: string;
+  product: Promise<GetProduct>;
+  photo: Promise<GetProductPhoto>;
+}) {
   const [lastResult, action, submitPending] = useActionState(productUpdateSubmit, undefined);
 
   const products = use(useContext(ProductContext) as Promise<Product[]>);
@@ -148,8 +156,7 @@ export function EditProductForm({ code, product }: { code: string; product: Prom
 
   const locationsMap = toLookup(locations);
 
-  const awaitedProduct = use(product);
-  const photo = awaitedProduct.productPhoto;
+  const photo = use(productPhoto) || undefined;
 
   return (
     <FormProvider context={form.context}>
