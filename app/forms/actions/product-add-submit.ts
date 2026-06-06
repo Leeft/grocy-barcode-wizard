@@ -15,7 +15,7 @@ function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
 
 export async function productAddSubmit(prevstate: unknown, formData: FormData) {
   const productId = Number(formData.get("base.productId")?.valueOf());
-  const barcode = formData.get("base.barcode")?.valueOf();
+  const barcode = formData.get("base.barcode")?.valueOf() as string;
 
   if (productId === null || productId === undefined || !productId) {
     console.error("no productId from form?", productId, formData);
@@ -65,7 +65,7 @@ export async function productAddSubmit(prevstate: unknown, formData: FormData) {
     console.log("Got an error during submit:", result.error_message);
     return toActionState("Grocy returned an error: " + result.error_message, "error");
   } else {
-    revalidatePath(`/scan/${barcode}`);
-    toActionState("Product created", "success");
+    revalidatePath(`/scan/${encodeURIComponent(barcode)}`);
+    return toActionState(`${data.amount.amount} of product added`, "success");
   }
 }

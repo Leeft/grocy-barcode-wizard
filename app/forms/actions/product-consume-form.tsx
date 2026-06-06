@@ -19,6 +19,8 @@ import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ProductConsumeSchema } from "../action-form-schemas";
 import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductConsumeForm({
   code,
@@ -32,7 +34,16 @@ export function ProductConsumeForm({
   const multi = useGetAmountPlusUnitObject();
   const stock = use(multi.stockEntryPromise);
 
-  const [lastResult, action, submitPending] = useActionState(productConsumeSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productConsumeSubmit,
+      createToastCallbacks({
+        loadingMessage: "Consuming product ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   // Array of unique location_id's from the stock entries for this product
   const locationsFromStock = [

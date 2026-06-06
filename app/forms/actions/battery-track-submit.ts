@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { grocyClient } from "@/lib/grocy";
 import { BatteryChargeTrackingSchema } from "../action-form-schemas";
+import { toActionState } from "@/lib/utils";
 
 export async function batteryTrackSubmit(prevstate: unknown, formData: FormData) {
   const barcode = formData.get("barcode")?.valueOf();
@@ -12,12 +12,12 @@ export async function batteryTrackSubmit(prevstate: unknown, formData: FormData)
 
   if (barcode === null || barcode === undefined) {
     console.error("no barcode from form?", barcode);
-    return;
+    return toActionState("Submission error", "error");
   }
 
   if (batteryId === null || batteryId === undefined || !batteryId) {
     console.error("no batteryId from form?", batteryId, formData);
-    return;
+    return toActionState("Submission error", "error");
   }
 
   //const battery = await fetchBattery(batteryId);
@@ -25,9 +25,16 @@ export async function batteryTrackSubmit(prevstate: unknown, formData: FormData)
   const submission = parseWithZod(formData, { schema: BatteryChargeTrackingSchema });
 
   if (submission.status !== "success") {
-    const err = submission.error;
-    console.log("submission errors:", err);
-    return submission.reply();
+    const submissionErrors = submission.error;
+    if (submissionErrors !== undefined && submissionErrors !== null) {
+      const keys = Object.keys(submissionErrors);
+      const errors: string[] = [];
+      keys.forEach((key) => {
+        if (submissionErrors[key]) errors.push(`${key}: ` + submissionErrors[key].join("; ") + "\n");
+      });
+      return toActionState("Form validation errors: " + errors.join("\n"), "error");
+    }
+    return toActionState("Submission error", "error");
   }
 
   const data = submission.value;
@@ -44,11 +51,11 @@ export async function batteryTrackSubmit(prevstate: unknown, formData: FormData)
   // @ts-expect-error Shut up already
   if (error || tracked.error_message!) {
     console.log("Error updating charge tracking:", error);
-  } else {
-    console.log("Updated charge tracking:", tracked);
+    return toActionState("Grocy returned an error", "error");
 
+  } else {
     // Revalidate the cache for the invoices page and redirect the user.
     revalidatePath(`/scan/${encodeURIComponent(barcode.toString())}`);
-    redirect(`/scan/${encodeURIComponent(barcode.toString())}`);
+    return toActionState("Battery charge cycle recorded", "success");
   }
 }

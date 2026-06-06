@@ -11,9 +11,20 @@ import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { BatteryChargeTrackingSchema } from "@/forms/action-form-schemas";
 import { Battery } from "@/interfaces/grocy";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function BatteryTrackForm({ code, battery }: { code: string; battery: Battery }) {
-  const [lastResult, action, submitPending] = useActionState(batteryTrackSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      batteryTrackSubmit,
+      createToastCallbacks({
+        loadingMessage: "Tracking battery charge ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const date = new Date();
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());

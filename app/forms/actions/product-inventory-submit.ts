@@ -1,16 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { fetchProduct, grocyClient } from "@/lib/grocy";
 import { labelTypeToGrocy } from "@/interfaces/grocy";
 import { StockLabelType } from "@/generated/prisma/browser";
 import { ProductInventorySchema } from "../action-form-schemas";
+import { toActionState } from "@/lib/utils";
 
 export async function productInventorySubmit(prevstate: unknown, formData: FormData) {
   const productId = Number(formData.get("base.productId")?.valueOf());
-  const barcode = formData.get("base.barcode")?.valueOf();
+  const barcode = formData.get("base.barcode")?.valueOf() as string;
 
   if (productId === null || productId === undefined || !productId) {
     console.error("no productId from form?", productId, formData);
@@ -21,9 +21,16 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
   const submission = parseWithZod(formData, { schema: ProductInventorySchema });
 
   if (submission.status !== "success") {
-    const err = submission.error;
-    console.log("submission errors:", err);
-    return submission.reply();
+    const submissionErrors = submission.error;
+    if (submissionErrors !== undefined && submissionErrors !== null) {
+      const keys = Object.keys(submissionErrors);
+      const errors: string[] = [];
+      keys.forEach((key) => {
+        if (submissionErrors[key]) errors.push(`${key}: ` + submissionErrors[key].join("; ") + "\n");
+      });
+      return toActionState("Form validation errors: " + errors.join("\n"), "error");
+    }
+    return toActionState("Submission error", "error");
   }
 
   const data = submission.value;
@@ -47,11 +54,10 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
   // @ts-expect-error Shut up already
   if (error || inventoried.error_message!) {
     console.log("Error updating inventory:", error);
+    return toActionState("Grocy returned an error", "error");    
   } else {
-    console.log("Updated inventory:", inventoried);
+    revalidatePath(`/scan/${encodeURIComponent(barcode)}`);
+    return toActionState(`${data.amount.amountShadow} of product inventoried`, "success");
 
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath(`/scan/${barcode}`);
-    redirect(`/scan/${barcode}`);
   }
 }

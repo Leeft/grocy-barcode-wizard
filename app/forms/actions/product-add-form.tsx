@@ -38,8 +38,9 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
     withCallbacks(
       productAddSubmit,
       createToastCallbacks({
-        loadingMessage: "Queuing product capture ...",
+        loadingMessage: "Adding product ...",
       }),
+      `/scan/${encodeURIComponent(code)}`,
     ),
     undefined,
   );

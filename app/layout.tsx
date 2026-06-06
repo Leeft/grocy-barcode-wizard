@@ -53,6 +53,7 @@ export default function RootLayout({
                       style: {
                         background: "#363636",
                         color: "#fff",
+                        border: "2px solid #cc0",
                       },
 
                       // Default options for specific types

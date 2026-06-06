@@ -24,9 +24,20 @@ import { ActionFormNote } from "./components/action-form-note";
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ProductInventorySchema } from "../action-form-schemas";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductInventoryForm({ code, product }: { code: string; product: Product }) {
-  const [lastResult, action, submitPending] = useActionState(productInventorySubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productInventorySubmit,
+      createToastCallbacks({
+        loadingMessage: "Updating inventory ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const locations = use(useContext(LocationContext) as Promise<PrLocation[]>);
   const shoppingLocations = use(useContext(ShoppingLocationContext) as Promise<ShoppingLocation[]>);

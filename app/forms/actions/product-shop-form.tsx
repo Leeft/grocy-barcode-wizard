@@ -15,9 +15,20 @@ import { ActionFormNote } from "./components/action-form-note";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormCancel } from "./components/action-form-cancel";
 import { ProductShopSchema } from "../action-form-schemas";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductShopForm({ code, product }: { code: string; product: Product }) {
-  const [lastResult, action, submitPending] = useActionState(productShopSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productShopSubmit,
+      createToastCallbacks({
+        loadingMessage: "Adding to shopping list ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const shoppingLists = use(useContext(ShoppingListContext) as Promise<ShoppingList[]>);
 

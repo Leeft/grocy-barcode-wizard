@@ -113,10 +113,19 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
   const productNames: string[] = products.map(pr => pr.name).filter(name => name !== undefined);
 
   const submission = parseWithZod(formData, { schema: editProductFormSchema(productNames) });
+
   // Send the submission back to the client if the status is not successful
   if (submission.status !== "success") {
-    console.log("submission error:", submission);
-    return submission.reply();
+    const submissionErrors = submission.error;
+    if (submissionErrors !== undefined && submissionErrors !== null) {
+      const keys = Object.keys(submissionErrors);
+      const errors: string[] = [];
+      keys.forEach((key) => {
+        if (submissionErrors[key]) errors.push(`${key}: ` + submissionErrors[key].join("; ") + "\n");
+      });
+      return toActionState("Form validation errors: " + errors.join("\n"), "error");
+    }
+    return toActionState("Submission error", "error");
   }
 
   const data = submission.value;
@@ -210,7 +219,7 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
 
   // Revalidate the cache for the invoices page and redirect the user.
   revalidatePath(`/queue/[barcode]`, "page");
-  redirect(`/queue/${data.barcode}`);
+  return toActionState("Updated product", "success");
 }
 
 async function syncProductToGrocy(productId: number, dueDate: Date) {

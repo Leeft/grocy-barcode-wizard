@@ -17,12 +17,23 @@ import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormLocationId } from "./components/action-form-location-id";
 import { ProductTransferSchema } from "../action-form-schemas";
 import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductTransferForm({ code, product }: { code: string; product: Product }) {
   const multi = useGetAmountPlusUnitObject();
   const stock = use(multi.stockEntryPromise);
 
-  const [lastResult, action, submitPending] = useActionState(productTransferSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productTransferSubmit,
+      createToastCallbacks({
+        loadingMessage: "Transfering product ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const [locationFrom, setLocationFrom] = useState<number>(product.location_id!);
   const [locationTo, setLocationTo] = useState<number>(0);

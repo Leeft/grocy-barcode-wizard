@@ -39,6 +39,8 @@ import { UnitForAmount } from "@/components/unit-for-amount";
 import { CaptureSubmitOnEnter } from "@/forms/capture-submit";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { editProductFormSchema } from "@/forms/product-form-schema";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
@@ -106,7 +108,16 @@ export function EditProductForm({
   product: Promise<GetProduct>;
   photo: Promise<GetProductPhoto>;
 }) {
-  const [lastResult, action, submitPending] = useActionState(productUpdateSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productUpdateSubmit,
+      createToastCallbacks({
+        loadingMessage: "Editing product ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const products = use(useContext(ProductContext) as Promise<Product[]>);
   const productNames: string[] = products.map((pr) => pr.name).filter((name) => name !== undefined);

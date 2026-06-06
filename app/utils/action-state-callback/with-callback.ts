@@ -14,6 +14,7 @@ type Callbacks<T, R = unknown> = {
 export const withCallbacks = <Args extends unknown[], T extends ActionState, R = unknown>(
   fn: (...args: Args) => Promise<T>,
   callbacks: Callbacks<T, R>,
+  redirectTo?: string,
 ): ((...args: Args) => Promise<T>) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const router = useRouter();
@@ -33,7 +34,11 @@ export const withCallbacks = <Args extends unknown[], T extends ActionState, R =
 
     if (result?.status === "success") {
       callbacks.onSuccess?.(result);
-      router.replace(pathname as Route<string>);
+      if (redirectTo !== undefined) {
+        router.replace(redirectTo as Route<string>);
+      } else {
+        router.replace(pathname as Route<string>);
+      }
     }
 
     if (result?.status === "error") {

@@ -14,6 +14,8 @@ import { ActionFormCancel } from "./components/action-form-cancel";
 import { ActionFormSubmit } from "./components/action-form-submit";
 import { ActionFormAllowSubproductSubstitution } from "./components/action-form-allowsubproduct";
 import { ProductOpenSchema } from "../action-form-schemas";
+import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 
 export function ProductOpenForm({
   code,
@@ -24,7 +26,16 @@ export function ProductOpenForm({
   product: Product;
   stock: StockEntry[];
 }) {
-  const [lastResult, action, submitPending] = useActionState(productOpenSubmit, undefined);
+  const [lastResult, action, submitPending] = useActionState(
+    withCallbacks(
+      productOpenSubmit,
+      createToastCallbacks({
+        loadingMessage: "Opening product ...",
+      }),
+      `/scan/${encodeURIComponent(code)}`,
+    ),
+    undefined,
+  );
 
   const [form, fields] = useForm({
     lastResult,
