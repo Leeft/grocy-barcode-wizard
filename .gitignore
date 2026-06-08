@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Test page to trigger label creation
+app/api/qr/route.ts
