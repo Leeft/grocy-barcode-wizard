@@ -48,6 +48,11 @@ export function addMonths(_date: Date, months: number): Date {
   return newDate;
 }
 
+export function differenceInDays(date1: Date, date2: Date): number {
+  const diff = (date1.getTime() - date2.getTime());
+  return Math.ceil(diff / (1000 * 3600 * 24));
+}
+
 export function dateToISODate(_date: Date): string {
   if (_date === undefined) return "";
   const str: string | undefined = _date.toISOString().split("T")[0];

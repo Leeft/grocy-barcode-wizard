@@ -1,7 +1,7 @@
 "use client";
 
 import { Product, ProductLocation, QuantityUnit, StockEntry } from "@/interfaces/grocy";
-import { toLookup } from "@/lib/utils";
+import { differenceInDays, toLookup } from "@/lib/utils";
 import { LocationContext } from "@/providers/location-context";
 import { QuantityUnitContext } from "@/providers/quantity-unit-context";
 import { clsx } from "clsx";
@@ -35,13 +35,7 @@ export function StockEntrySummary({
       </span>{" "}
       {se.open ? <span>(opened)</span> : ""} at{" "}
       <span className="text-location">{locations[se.location_id!]!.name}</span>
-      {dueType !== "No expiry" && se.best_before_date !== "2999-12-31" ? (
-        <>
-          ; {dueType} date is <code>{se.best_before_date}</code>{" "}
-        </>
-      ) : (
-        <>; Does not expire</>
-      )}
+      <DueDateDisplay dueType={dueType} bestBeforeDate={se.best_before_date} />
       {se.note && (
         <>
           {" "}
@@ -50,6 +44,99 @@ export function StockEntrySummary({
       )}
     </div>
   );
+}
+
+type DueTypeString = "Best before" | "Expiration" | "No expiry";
+
+function DueDateDisplay({ dueType, bestBeforeDate }: { dueType: DueTypeString; bestBeforeDate?: string }) {
+  if (bestBeforeDate === undefined || dueType === "No expiry" || bestBeforeDate === "2999-12-31") {
+    return <>; Does not expire</>;
+  }
+
+  let dateDiff;
+  try {
+    dateDiff = differenceInDays(new Date(bestBeforeDate), new Date());
+  } catch {
+    console.error("Could not parse due date", bestBeforeDate);
+  }
+
+  if (dateDiff! >= 30) {
+    const months = dateDiff! / 30;
+    return (
+      <span className={dueDateClass({ dueType: dueType, bestBeforeDate: bestBeforeDate })}>
+        ; {dueType} date is <code>{bestBeforeDate}</code>
+        {dateDiff !== undefined && (
+          <>
+            {": "}~{months.toPrecision(1)} months from now
+          </>
+        )}
+      </span>
+    );
+  }
+
+  return (
+    <span className={dueDateClass({ dueType: dueType, bestBeforeDate: bestBeforeDate })}>
+      ; {dueType} date is <code>{bestBeforeDate}</code>
+      {dateDiff !== undefined && (
+        <>
+          {": "}
+          {Math.abs(dateDiff)} days {dateDiff < 0 ? "ago" : "from now"}
+        </>
+      )}
+    </span>
+  );
+}
+
+function dueDateClass({ dueType, bestBeforeDate }: { dueType: DueTypeString; bestBeforeDate?: string }) {
+  if (bestBeforeDate === undefined || dueType === "No expiry" || bestBeforeDate === "2999-12-31") {
+    return "";
+  }
+
+  let dateDiff;
+  try {
+    dateDiff = differenceInDays(new Date(bestBeforeDate), new Date());
+  } catch {
+    console.error("Could not parse due date", bestBeforeDate);
+  }
+
+  let className = "text-green-400/50";
+
+  if (dateDiff! >= 30) {
+    className = "text-green-300";
+    return className;
+  }
+
+  if (dueType === "Expiration" && dateDiff! < 0) {
+    className = "text-red-400";
+    return className;
+  }
+
+  if (dueType === "Expiration" && dateDiff! < 4) {
+    className = "text-amber-400";
+    return className;
+  }
+
+  if (dueType === "Best before" && dateDiff! < 3) {
+    className = "text-amber-400";
+    return className;
+  }
+
+  if (dueType === "Best before" && dateDiff! < 7) {
+    className = "text-amber-200/80";
+    return className;
+  }
+
+  if (dueType === "Best before" && dateDiff! < 14) {
+    className = "text-red-400";
+    return className;
+  }
+
+  if (dueType === "Best before" && dateDiff! < 0) {
+    className = "text-red-400/50";
+    return className;
+  }
+
+  return className;
 }
 
 export function StockEntrySummaryText({ se, product }: { se: StockEntry; product: Product }) {
@@ -69,12 +156,12 @@ export function StockEntrySummaryText({ se, product }: { se: StockEntry; product
     " " +
     (se.open ? `(opened) ` : ``) +
     `at ${locations[se.location_id!]!.name}` +
-    (dueType !== "No expiry" ? `; ${dueType} date is ${se.best_before_date} ` : "") +
+    (dueType !== "No expiry" ? `; ${dueType} date xx is ${se.best_before_date} ` : "") +
     (se.note ? ` -- note: ${se.note}` : ``)
   );
 }
 
-function dueTypeToString(dueType: number, bestBeforeDays: number): string {
+function dueTypeToString(dueType: number, bestBeforeDays: number): DueTypeString {
   let dueTypeString = "Best before";
   if (dueType === 2) {
     dueTypeString = "Expiration";
@@ -82,5 +169,5 @@ function dueTypeToString(dueType: number, bestBeforeDays: number): string {
   if (bestBeforeDays === -1) {
     dueTypeString = "No expiry";
   }
-  return dueTypeString;
+  return dueTypeString as DueTypeString;
 }
