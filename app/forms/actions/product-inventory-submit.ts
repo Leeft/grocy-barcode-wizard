@@ -6,7 +6,7 @@ import { fetchProduct, grocyClient } from "@/lib/grocy";
 import { labelTypeToGrocy } from "@/interfaces/grocy";
 import { StockLabelType } from "@/generated/prisma/browser";
 import { ProductInventorySchema } from "../action-form-schemas";
-import { toActionState } from "@/lib/utils";
+import { dateToISODate, toActionState } from "@/lib/utils";
 
 export async function productInventorySubmit(prevstate: unknown, formData: FormData) {
   const productId = Number(formData.get("base.productId")?.valueOf());
@@ -41,7 +41,7 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
     params: { path: { productId: data.base.productId } },
     body: {
       new_amount: data.amount.amountShadow,
-      best_before_date: data.bestBeforeDate!.toISOString(),
+      best_before_date: dateToISODate(data.bestBeforeDate!),
       price: product.default_purchase_price_type === 3 ? data.price! / data.amount.amountShadow : data.price,
       shopping_location_id: data.shoppingLocationId,
       location_id: data.locationId,
@@ -54,10 +54,9 @@ export async function productInventorySubmit(prevstate: unknown, formData: FormD
   // @ts-expect-error Shut up already
   if (error || inventoried.error_message!) {
     console.log("Error updating inventory:", error);
-    return toActionState("Grocy returned an error", "error");    
+    return toActionState("Grocy returned an error", "error");
   } else {
     revalidatePath(`/scan/${encodeURIComponent(barcode)}`);
     return toActionState(`${data.amount.amountShadow} of product inventoried`, "success");
-
   }
 }

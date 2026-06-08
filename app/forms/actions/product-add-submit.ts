@@ -6,7 +6,7 @@ import { grocyClient } from "@/lib/grocy";
 import { DueDateType, PurchasePriceType, StockLabelType } from "@/generated/prisma/enums";
 import { Error400, Error500, labelTypeToGrocy, StockLogEntry } from "@/interfaces/grocy";
 import { ProductAddSchema } from "../action-form-schemas";
-import { toActionState } from "@/lib/utils";
+import { dateToISODate, toActionState } from "@/lib/utils";
 
 function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
   if (dueDateType === DueDateType.NO_EXPIRY) return new Date("2999-12-31");
@@ -43,10 +43,9 @@ export async function productAddSubmit(prevstate: unknown, formData: FormData) {
     params: { path: { productId: data.base.productId } },
     body: {
       amount: data.amount.amount,
-      best_before_date: dueOrNoExpiryDate(
-        data.dueDateType! as DueDateType,
-        data.bestBeforeDate!,
-      ).toISOString(),
+      best_before_date: dateToISODate(
+        dueOrNoExpiryDate(data.dueDateType! as DueDateType, data.bestBeforeDate!),
+      ),
       price:
         data.purchasePriceType === PurchasePriceType.TOTAL_PRICE
           ? data.price! / data.amount.amount
