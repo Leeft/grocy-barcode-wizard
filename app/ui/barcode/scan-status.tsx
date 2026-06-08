@@ -38,12 +38,17 @@ export default function BarcodeScanStatus({
 }
 
 function VisualBarcode({ barcode }: { barcode: Barcode }) {
+
+  const isValidBarcode = /^[0-9]{8}$/.test(barcode.code) // EAN-8
+    || /^[0-9]{13}$/.test(barcode.code) // EAN-13
+    || /^[0-9]{6}$/.test(barcode.code); // UPC-E
+
   return (
     <div key={barcode.id} className="animate-in zoom-in duration-300">
       {/* Container for Barcode and Laser */}
       <div className="relative inline-block">
         {/* The Visual Barcode */}
-        {barcode.type === "product" ? (
+        {barcode.type === "product" && isValidBarcode ? (
           <div
             className={`${libreBarcode39.className} md:text-6x1 text-slate-200} text-3xl leading-none tracking-normal`}
           >
