@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Link, { LinkProps } from "next/link";
-import { ShoppingBasket, X, Trash2, PackageOpen, ShelvingUnit, MoveRight, List } from "lucide-react";
+import { ShoppingBasket, X, Trash2, PackageOpen, ShelvingUnit, MoveRight, List, Printer } from "lucide-react";
 import { Product } from "@/interfaces/grocy";
 import React, { use, useContext } from "react";
 import { UrlObject } from "url";
@@ -10,11 +10,14 @@ import { RouteType } from "next/dist/lib/load-custom-routes";
 import { GrocyProductContext } from "@/providers/grocy-product-context";
 import { inputCommonStyles } from "@/lib/product-form-shared";
 import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
+import { GrocyConfigContext } from "@/providers/grocy-config-context";
+import { PrintProductLabelButton } from "@/ui/forms/print-product-label-button";
 
 export default function ActionShortCuts({ code }: { code: string }) {
   const multi = useGetAmountPlusUnitObject();
   const stock = use(multi.stockEntryPromise);
   const product = use(useContext(GrocyProductContext) as Promise<Product>);
+  const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
 
   if (product.active === 0) return <></>;
 
@@ -88,6 +91,12 @@ export default function ActionShortCuts({ code }: { code: string }) {
           <List className={iconClasses} />
           Add to shopping list ...
         </ActionLink>
+
+        {grocyConfig.FEATURE_FLAG_LABEL_PRINTER && (
+          <PrintProductLabelButton productId={product.id!} title={`Print the label for this product`}>
+            <Printer className="mt-0.5 mr-2 size-5" /> Print product label
+          </PrintProductLabelButton>
+        )}
       </div>{" "}
     </fieldset>
   );

@@ -5,6 +5,7 @@ import {
   consumeSpecificStockEntry,
   consumeSpoiledSpecificStockEntry,
   openSpecificStockEntry,
+  printStockLabel,
   transferSpecificStockEntry,
 } from "@/lib/grocy-update";
 import { inputCommonStyles } from "@/lib/product-form-shared";
@@ -112,6 +113,24 @@ export function OpenStockEntryButton({
       className={clsx(stockButtonCommon, "text-open", "bg-open/10", "border-open/90!")}
       disabled={disabled}
       formAction={openSpecificStockEntry}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function PrintStockLabelButton({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      title={title}
+      className={clsx(stockButtonCommon, "text-print", "bg-print/10", "border-print/90!")}
+      formAction={printStockLabel}
     >
       {children}
     </button>

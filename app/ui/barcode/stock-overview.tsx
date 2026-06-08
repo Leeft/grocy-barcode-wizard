@@ -2,12 +2,22 @@
 
 import { Product, ProductLocation, StockEntry } from "@/interfaces/grocy";
 import { LocationDropdown } from "../product/location-dropdown";
-import { FoldVertical, MoveRight, PackageOpen, Tally1, Trash2, UnfoldVertical, X } from "lucide-react";
+import {
+  FoldVertical,
+  MoveRight,
+  PackageOpen,
+  Printer,
+  Tally1,
+  Trash2,
+  UnfoldVertical,
+  X,
+} from "lucide-react";
 import {
   ConsumeOneOfStockEntryButton,
   ConsumeSpoiledStockEntryButton,
   ConsumeStockEntryButton,
   OpenStockEntryButton,
+  PrintStockLabelButton,
   TransferStockEntryButton,
 } from "@/ui/forms/stock-buttons";
 import { use, useContext, useState } from "react";
@@ -17,6 +27,7 @@ import { StockEntrySummary } from "../stock-entry-summary";
 import { clsx } from "clsx";
 import { useGetAmountPlusUnitObject } from "@/providers/amount-plus-unit-context";
 import { stockIdFromBarcode } from "@/lib/barcode";
+import { GrocyConfigContext } from "@/providers/grocy-config-context";
 
 export function StockOverview({ code }: { code: string }) {
   const multi = useGetAmountPlusUnitObject();
@@ -44,6 +55,7 @@ export function StockOverview({ code }: { code: string }) {
 
 function StockEntryRow({ barcode, se, product }: { barcode: string; se: StockEntry; product: Product }) {
   const locations = use(useContext(LocationContext) as Promise<ProductLocation[]>);
+  const grocyConfig = use(useContext(GrocyConfigContext) as Promise<Record<string, never>>);
 
   const stockId = stockIdFromBarcode(barcode);
 
@@ -90,6 +102,7 @@ function StockEntryRow({ barcode, se, product }: { barcode: string; se: StockEnt
           <div className="divide-stock-buttons-border/60 flex flex-col gap-y-2 divide-y-2 divide-dotted">
             <div className="mx-3 flex flex-row flex-wrap gap-x-3 gap-y-2 py-3 pb-5 text-slate-300">
               <input type="hidden" name="productId" value={se.product_id} />
+              <input type="hidden" name="id" value={se.id} />
               <input type="hidden" name="stockId" value={se.stock_id} />
               <input type="hidden" name="stockAmount" value={se.amount} />
               <input type="hidden" name="barcode" value={barcode} />
@@ -116,6 +129,14 @@ function StockEntryRow({ barcode, se, product }: { barcode: string; se: StockEnt
               >
                 <Trash2 className="mt-0.5 mr-2 size-5" /> Spoiled
               </ConsumeSpoiledStockEntryButton>
+
+              {grocyConfig.FEATURE_FLAG_LABEL_PRINTER && (
+                <PrintStockLabelButton
+                  title={`Print label for this specific stock entry`}
+                >
+                  <Printer className="mt-0.5 mr-2 size-5" /> Print label
+                </PrintStockLabelButton>
+              )}
 
               {/* <button
                         type="button"

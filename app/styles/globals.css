@@ -87,6 +87,7 @@
   --color-shopping-list: #f2e078;
   --color-transfer: #f4e7ff;
   --color-track-battery: var(--color-yellow-200);
+  --color-print: var(--color-teal-500);
 
   /* capture forms buttons */
   --color-queue-product-button: var(--color-teal-200);

@@ -132,3 +132,19 @@ export const openSpecificStockEntry = async (formData: FormData) => {
       revalidatePath(`/scan/${barcode}`);
     });
 };
+
+export const printStockLabel = async (formData: FormData) => {
+  const stockEntryId = formData.get("id");
+  await grocyClient
+    .GET("/stock/entry/{entryId}/printlabel", {
+      params: { path: { entryId: Number(stockEntryId) } },
+    })
+};
+
+
+export const printProductLabel = async (productId: number) => {
+  await grocyClient
+    .GET("/stock/products/{productId}/printlabel", {
+      params: { path: { productId: productId } },
+    })
+};
