@@ -244,5 +244,5 @@ export const editProductFormSchema = ( productNames: string[] ) => createProduct
 
   priceConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
 
-  submitMode: z.enum(["updateOnly", "createInGrocy"]),
+  submitMode: z.enum(["updateOnly", "createInGrocy", "deleteQueuedEntry"]),
 });

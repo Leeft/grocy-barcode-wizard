@@ -36,7 +36,11 @@ export async function getPendingProducts() {
 
   return await prisma.product.findMany({
     include: {
-      barcodes: true,
+      barcodes: {
+        where: {
+          productId: { not: null },
+        },
+      },
       productPhoto: true,
     },
     where: {
@@ -45,6 +49,7 @@ export async function getPendingProducts() {
       },
       barcodes: {
         some: {
+          productId: { not: null },
           queued: {
             equals: true,
           },
@@ -71,11 +76,12 @@ export async function countPendingProducts() {
       },
       barcodes: {
         some: {
+          productId: { not: null },          
           queued: {
             equals: true,
           },
         },
-      },      
+      },
     },
   });
 }

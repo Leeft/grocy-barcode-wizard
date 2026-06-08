@@ -41,6 +41,7 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import { editProductFormSchema } from "@/forms/product-form-schema";
 import { withCallbacks } from "@/utils/action-state-callback/with-callback";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
+import { Save, Trash } from "lucide-react";
 
 const unitTaggedLabelClass = clsx("w-60 flex grow");
 const unitConversions = new UnitConversions();
@@ -135,7 +136,7 @@ export function EditProductForm({
     shouldRevalidate: "onInput",
   });
 
-  const [submitMode, setSubmitMode] = useState<"createInGrocy" | "updateOnly">("createInGrocy");
+  const [submitMode, setSubmitMode] = useState<"createInGrocy" | "updateOnly" | "deleteQueuedEntry">("createInGrocy");
 
   const [selectedUnit, setSelectedUnit] = useState<string>(fields.unitId.value!);
   const [selectedPurchaseQuId, setSelectedPurchaseQuId] = useState<string>(
@@ -675,9 +676,26 @@ export function EditProductForm({
                 onClick={() => setSubmitMode("updateOnly")}
                 disabled={submitPending}
               >
+                <Save className="mr-2" />
                 Update local only
               </Button>
             </FormColumn>
+            <FormColumn className="shrink">
+              <Button
+                type="submit"
+                className={clsx(
+                  "border-delete-queue-button/70!",
+                  "bg-delete-queue-button",
+                  "text-delete-queue-button",
+                )}
+                onClick={() => setSubmitMode("deleteQueuedEntry")}
+                disabled={submitPending}
+              >
+                <Trash className="mr-2" />
+                Delete entry
+              </Button>
+            </FormColumn>
+
           </FormRow>
         </div>
       </form>

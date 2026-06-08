@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { prisma } from "@/lib/prisma";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
@@ -33,9 +32,9 @@ function dueOrNoExpiryDate(dueDateType: DueDateType, dueDate: Date) {
 
 export async function productCreateSubmit(prevstate: unknown, formData: FormData) {
   const products = await fetchProducts();
-  const productNames: string[] = products.map(pr => pr.name).filter(name => name !== undefined);
+  const productNames: string[] = products.map((pr) => pr.name).filter((name) => name !== undefined);
 
-  const submission = parseWithZod(formData, { schema: createProductFormSchema( productNames ) });
+  const submission = parseWithZod(formData, { schema: createProductFormSchema(productNames) });
 
   if (submission.status !== "success") {
     const submissionErrors = submission.error;
@@ -110,7 +109,7 @@ export async function productCreateSubmit(prevstate: unknown, formData: FormData
 
 export async function productUpdateSubmit(prevstate: unknown, formData: FormData) {
   const products = await fetchProducts();
-  const productNames: string[] = products.map(pr => pr.name).filter(name => name !== undefined);
+  const productNames: string[] = products.map((pr) => pr.name).filter((name) => name !== undefined);
 
   const submission = parseWithZod(formData, { schema: editProductFormSchema(productNames) });
 
@@ -129,6 +128,16 @@ export async function productUpdateSubmit(prevstate: unknown, formData: FormData
   }
 
   const data = submission.value;
+
+  if (data.submitMode === "deleteQueuedEntry") {
+    await prisma.product.delete({
+      where: {
+        id: data.id,
+      },
+    });
+    revalidatePath(`/queue/[barcode]`, "page");    
+    return toActionState("Queue entry deleted", "success");
+  }
 
   //console.log("submit success:", data);
 

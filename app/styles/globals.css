@@ -91,6 +91,7 @@
   /* capture forms buttons */
   --color-queue-product-button: var(--color-teal-200);
   --color-update-queue-button: var(--color-teal-200);
+  --color-delete-queue-button: var(--color-red-400);
   --color-create-product-button: var(--color-orange-300);
   --color-queue-product-button-text: var(--color-white);
 }
