@@ -111,3 +111,10 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 -- CreateIndex
 CREATE UNIQUE INDEX "UserApiKey_apiKey_key" ON "UserApiKey"("apiKey");
 
+-- Custom SQL not defined in prisma: triggers
+
+CREATE TRIGGER remove_product_data_before_delete BEFORE DELETE ON Product
+BEGIN
+    UPDATE Barcode SET productId = NULL, queued = false WHERE productId = OLD.id;
+    DELETE FROM ProductPhoto WHERE ProductId = OLD.id;
+END;
