@@ -1,6 +1,6 @@
 import Barcode from "@/lib/barcode";
 import { getCapturedProductsByBarcode, CapturedProductsByBarcode, getProduct } from "@/lib/product-db";
-import { findProductInGrocy, getRecipe, getBattery } from "@/lib/grocy";
+import { findProductInGrocy, getRecipe, getBattery, getRecipeIngredients } from "@/lib/grocy";
 import { Product } from "@/interfaces/grocy";
 import ActionShortcuts from "@/ui/barcode/action-shortcuts";
 import { StockOverview } from "@/ui/barcode/stock-overview";
@@ -22,7 +22,8 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
   if (barcodeObject.isRecipeBarcode()) {
     const recipe = await getRecipe(barcodeObject);
     if (recipe) {
-      return <Recipe recipe={recipe} />;
+      const ingredients = await getRecipeIngredients(recipe.id);
+      return <Recipe code={barcodeObject.code} recipe={recipe} ingredients={ingredients} />;
     }
   }
 

@@ -37,6 +37,36 @@ export type Recipe = {
   userfields?: Record<string, never>;
 };
 
+export type Ingredient = {
+  recipe_id: number;
+  recipe_pos_id: number;
+  product_id: number;
+  recipe_amount: number;
+  stock_amount: number;
+  need_fulfilled: 0 | 1;
+  missing_amount: number;
+  amount_on_shopping_list: number;
+  need_fulfilled_with_shopping_list: 0 | 1;
+  qu_id: number;
+  costs: number;
+  is_nested_recipe_pos: 0 | 1;
+  ingredient_group: string | null;
+  product_group: string | null;
+  id: number;
+  recipe_type: string;
+  child_recipe_id: number;
+  note: string | null;
+  recipe_variable_amount: null;
+  only_check_single_unit_in_stock: 0 | 1;
+  calories: number;
+  product_active: 0 | 1;
+  due_score: number;
+  product_id_effective: number;
+  product_name: string;
+};
+
+export type Servings = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
+
 export type Error400 = components["schemas"]["Error400"];
 export type Error500 = components["schemas"]["Error500"];
 export type FileGroups = components["schemas"]["FileGroups"];

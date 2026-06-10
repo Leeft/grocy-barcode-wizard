@@ -89,6 +89,12 @@
   --color-track-battery: var(--color-yellow-200);
   --color-print: var(--color-teal-500);
 
+  /* recipe ingredients age indication */
+  --color-ingredient-danger: var(--color-red-500);
+  --color-ingredient-alert: var(--color-orange-200);
+  --color-ingredient-warning: var(--color-amber-200);
+  --color-ingredient-success: var(--color-green-400);
+
   /* capture forms buttons */
   --color-queue-product-button: var(--color-teal-200);
   --color-update-queue-button: var(--color-teal-200);

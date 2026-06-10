@@ -14,6 +14,8 @@ import {
   Recipe,
   Battery,
   BatteryDetailsResponse,
+  Ingredient,
+  Servings,
 } from "@/interfaces/grocy";
 import { cache } from "react";
 import Barcode, { stripBarcode } from "@/lib/barcode";
@@ -163,7 +165,7 @@ export const fetchProducts = cache(async () => {
     const res = await grocyClient.GET("/objects/{entity}", {
       params: {
         path: { entity: "products" },
-        query: { order: "name:asc", "query[]": ["active=1"] },
+        query: { order: "name:asc" },
       },
     });
     return res.data as Product[];
@@ -312,8 +314,23 @@ export async function getRecipe(barcode: Barcode): Promise<Recipe> {
   return Promise.resolve(data as Recipe);
 }
 
+export async function getRecipeIngredients(recipeId: number): Promise<Ingredient[]> {
+  const { data, error } = await grocyClient.GET("/objects/{entity}", {
+    params: {
+      path: { entity: "recipes_pos_resolved", objectId: recipeId },
+      query: { "query[]": [`recipe_id=${recipeId}`] },
+    },
+  });
+
+  if (error !== undefined) {
+    console.error("Could not fetch recipe from grocy:", error);
+  }
+
+  return Promise.resolve(data as Ingredient[]);
+}
+
 export async function getBattery(barcode: Barcode): Promise<Battery> {
-console.log( "getBattery for", barcode )
+  console.log("getBattery for", barcode);
 
   if (!barcode.isBatteryBarcode()) {
     return Promise.reject("Barcode is not a battery barcode");
@@ -351,4 +368,26 @@ export async function getBatteryDetails(batteryId: number): Promise<BatteryDetai
   }
 
   return Promise.resolve(data as BatteryDetailsResponse);
+}
+
+export async function setRecipeServings({
+  recipeId,
+  servings,
+}: {
+  recipeId: number;
+  servings: Servings;
+}): Promise<any> {
+  const { data, error } = await grocyClient.PUT("/objects/{entity}/{objectId}", {
+    params: {
+      path: { entity: "recipes", objectId: recipeId },
+    },
+    body: {
+      desired_servings: Number(servings),
+    },
+  });
+  if (error !== undefined) {
+    console.error("Could not update servings in grocy:", error);
+  }
+
+  return Promise.resolve(data);
 }
