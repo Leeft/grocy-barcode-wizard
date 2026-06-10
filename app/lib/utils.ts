@@ -27,6 +27,32 @@ export function toLookup<T extends { id?: string | number }>(array: T[]): Record
   );
 }
 
+export function formatNumber(num: number, grocyConfig: Record<string, never>): string {
+  let lang = 'en';
+  let culture = 'GB';
+  if ( grocyConfig !== undefined && grocyConfig.CULTURE ) {
+    const c = grocyConfig.CULTURE as string;
+    culture = c.toLocaleUpperCase();
+  }
+  return new Intl.NumberFormat(`${lang}-${culture}`, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
+export function formatMoney(num: number, grocyConfig: Record<string, never>): string {
+  let lang = 'en';
+  let culture = 'GB';
+  if ( grocyConfig !== undefined && grocyConfig.CULTURE ) {
+    const c = grocyConfig.CULTURE as string;
+    culture = c.toLocaleUpperCase();
+  }
+  return new Intl.NumberFormat(`${lang}-${culture}`, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
 export const pluralUnit = (unit: QuantityUnit | undefined, amount: number | undefined): string => {
   if (unit === undefined || amount === undefined) return "";
   return amount === 1 ? (unit.name ?? "??") : (unit.name_plural ?? "???");
@@ -49,7 +75,7 @@ export function addMonths(_date: Date, months: number): Date {
 }
 
 export function differenceInDays(date1: Date, date2: Date): number {
-  const diff = (date1.getTime() - date2.getTime());
+  const diff = date1.getTime() - date2.getTime();
   return Math.ceil(diff / (1000 * 3600 * 24));
 }
 

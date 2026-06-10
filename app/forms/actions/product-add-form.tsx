@@ -32,6 +32,7 @@ import { ActionFormNote } from "./components/action-form-note";
 import { ProductAddSchema } from "../action-form-schemas";
 import { createToastCallbacks } from "@/utils/action-state-callback/toast-callback";
 import { withCallbacks } from "@/utils/action-state-callback/with-callback";
+import { formatMoney } from "@/lib/utils";
 
 export function ProductAddForm({ code, product }: { code: string; product: Product }) {
   const [lastResult, action, submitPending] = useActionState(
@@ -116,17 +117,13 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
               <div className="w-72">
                 <div className={`flex`}>
                   <div>
-                    <FormLabel
-                      htmlFor={fields.price.id}
-                      title="Price"
-                      className="relative top-[-8] mb-0!"
-                    />
+                    <FormLabel htmlFor={fields.price.id} title="Price" className="relative top-[-8] mb-0!" />
                   </div>
                   <div className="flex grow flex-row text-right">
-                    <div className="inline grow pr-1 text-form-label">
+                    <div className="text-form-label inline grow pr-1">
                       {fields.purchasePriceType.value === PurchasePriceType.TOTAL_PRICE ? (
                         <div className="inline-flex text-right">
-                          {grocyConfig.CURRENCY} {perUnit.toFixed(2)}
+                          {grocyConfig.CURRENCY} {formatMoney(perUnit, grocyConfig)}
                           {" per "}
                           <UnitForAmount
                             unit={product.qu_id_stock!}
@@ -137,7 +134,7 @@ export function ProductAddForm({ code, product }: { code: string; product: Produ
                         </div>
                       ) : (
                         <div>
-                          {grocyConfig.CURRENCY} {total.toFixed(2)} total price
+                          {grocyConfig.CURRENCY} {formatMoney(total, grocyConfig)} total price
                         </div>
                       )}
                     </div>
