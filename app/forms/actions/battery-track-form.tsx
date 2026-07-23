@@ -55,7 +55,7 @@ export function BatteryTrackForm({ code, battery }: { code: string; battery: Bat
         action={action}
         noValidate
         aria-describedby={form.errors ? form.errorId : undefined}
-        className="pt-2p pb-25"
+        className="pt-2p mt-8 pb-25"
       >
         <div id={form.errorId}>{form.errors}</div>
         <input {...getInputProps(fields.barcode, { type: "hidden" })} />

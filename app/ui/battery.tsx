@@ -17,14 +17,14 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode; 
 
   const batteryDetails = await getBatteryDetails(battery.id);
 
-  //  last_charged?: string;
-  //   charge_cycles_count?: number;
-  //   next_estimated_charge_time?: string;
-
   const estimatedChargeDays = differenceInDays(
     new Date(batteryDetails.next_estimated_charge_time ?? ""),
     new Date(),
   );
+
+  function estimatedChargeTimeIsSet(date: string | undefined) {
+    return !/^2999-12-31/.test(date ?? "2999-12-31");
+  }
 
   return (
     <>
@@ -43,11 +43,13 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode; 
           <dd>{battery.charge_interval_days}</dd>
           <dt>Charge cycles count</dt>
           <dd>{batteryDetails.charge_cycles_count ? batteryDetails.charge_cycles_count : "?"}</dd>
+
           <dt>Last charged</dt>
           <dd>
             {batteryDetails.last_charged ? batteryDetails.last_charged : "?"}
             {batteryDetails.last_charged && (
               <>
+                <br className="sm:inline md:hidden" />
                 &nbsp;&mdash;&nbsp;
                 <span className="text-highlight font-bold">
                   {differenceInDays(new Date(), new Date(batteryDetails.last_charged))} days ago
@@ -55,11 +57,16 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode; 
               </>
             )}
           </dd>
-          <dt>Next estimated charge time</dt>
-          <dd>
-            {batteryDetails.next_estimated_charge_time ? batteryDetails.next_estimated_charge_time : "?"}
-            {batteryDetails.next_estimated_charge_time && (
-              <>
+
+          {estimatedChargeTimeIsSet(batteryDetails.next_estimated_charge_time) && (
+            <>
+              <dt>
+                Next estimated
+                <br className="sm:inline md:hidden" /> charge time
+              </dt>
+              <dd>
+                {batteryDetails.next_estimated_charge_time}
+                <br className="sm:inline md:hidden" />
                 &nbsp;&mdash;&nbsp;
                 <span className="">
                   {estimatedChargeDays >= 0 ? (
@@ -68,9 +75,9 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode; 
                     <span className="text-alert">{Math.abs(estimatedChargeDays)} days ago</span>
                   )}
                 </span>
-              </>
-            )}
-          </dd>
+              </dd>
+            </>
+          )}
         </dl>
       </div>
 
@@ -81,16 +88,16 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode; 
 
 function GrocyBatteryLink({ batteryId, children }: { batteryId: number; children: React.ReactNode }) {
   let path = `${grocyUrl}/battery/${encodeURIComponent(batteryId)}`;
-  path = path.replace(/\/\//g, "/");
+  path = path.replace(/\/\/battery/g, "/battery");
   return (
-    <div className="static mb-[-16]">
+    <div className="static">
       <a
         href={path}
         target="_bcw_grocy"
         title="Link to the battery in Grocy"
         className="static mb-[-2] inline-flex underline! decoration-dashed underline-offset-3"
       >
-        <Grocy className="relative top-0 ml-[-3] w-6 fill-[#4b7daa] stroke-[#467baa] pr-2 pl-0" /> {children}
+        <Grocy className="relative top-0 ml-[-3] w-6 lg:w-12 fill-[#4b7daa] stroke-[#467baa] pr-2 pl-0" /> {children}
       </a>
     </div>
   );
