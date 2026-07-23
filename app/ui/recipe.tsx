@@ -17,6 +17,7 @@ import { formatMoney, formatNumber, toLookup } from "@/lib/utils";
 import { Check, TriangleAlert, X } from "lucide-react";
 import { RecipeServings } from "./recipe-servings";
 import { revalidatePath } from "next/cache";
+import { PrintLabel } from "@/lib/print-label";
 
 export const setServings = async (code: string, recipeId: number, servings: Servings) => {
   "use server";
@@ -75,6 +76,8 @@ export default async function Recipe({
 
   const cost = ingredients.reduce((cost: number, ingredient: Ingredient) => ingredient.costs + cost, 0);
 
+  // await PrintLabel({ data: { product: recipe.name, grocycode: `grcy:r:${recipe.id}` } });
+
   return (
     <>
       <div className={`flex flex-col flex-wrap gap-5`}>
@@ -129,12 +132,12 @@ export default async function Recipe({
             <h2 className="text-md inline-block font-bold text-slate-400 uppercase">Ingredients</h2>
 
             {groups.map((group) => (
-              <div key={`group-${group}`} className="my-0 py-0">
+              <div key={`group-${group}`} className="my-0 py-0 w-full">
                 {group !== "_" && (
                   <h3 className="mb-3 inline-block text-sm font-bold text-slate-400">{group}</h3>
                 )}
 
-                <div key={group} className="flex flex-col gap-3">
+                <div key={group} className="flex flex-col gap-3 w-full">
                   {groupedIngredients[group]?.map((ingredient) => {
                     let textClass = "";
                     switch (ingredient.due_score) {
@@ -173,7 +176,7 @@ export default async function Recipe({
 
                     return (
                       <div key={`${group}-${ingredient.recipe_pos_id}`} className="flex flex-row gap-x-3">
-                        <div className={`max-w-100 shrink grow ${textClass}`}>
+                        <div className={`w-xl shrink grow ${textClass}`}>
                           {!product!.active && (
                             <div className="text-xs text-gray-400 italic">
                               Disabled
