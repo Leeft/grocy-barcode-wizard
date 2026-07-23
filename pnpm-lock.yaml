@@ -57,8 +57,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-tooltip:
-        specifier: ^6.0.7
-        version: 6.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^6.0.8
+        version: 6.0.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       sqlite3:
         specifier: ^6.0.1
         version: 6.0.1
@@ -2713,8 +2713,8 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  react-tooltip@6.0.7:
-    resolution: {integrity: sha512-167dUVybfXA9emyTkwa+xCRo3u15BPazeaxKe2QQoz8y05YB6r/IGfeceU8cI33BfDC99S3FbBzTQr3554uAEA==}
+  react-tooltip@6.0.8:
+    resolution: {integrity: sha512-VPjtBPyoFwq72QVE6GYB/LtfEg/mnFBHqL0nD0oNNmjH8EZYFyBwgnFKNCOp5zCte45k1weXjKc0wXE6NICpfg==}
     peerDependencies:
       react: '>=16.14.0'
       react-dom: '>=16.14.0'
@@ -5643,7 +5643,7 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  react-tooltip@6.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-tooltip@6.0.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@floating-ui/dom': 1.7.6
       clsx: 2.1.1
