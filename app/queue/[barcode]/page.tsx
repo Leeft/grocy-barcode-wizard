@@ -38,7 +38,7 @@ export default async function QueuedEntryPage({ params }: { params: Promise<{ ba
 
     return (
       <Suspense>
-        <EditProductForm code={barcode} product={product} photo={productPhoto} />
+        <EditProductForm code={barcode} product={product} photo={productPhoto} date={new Date()} />
       </Suspense>
     );
   }

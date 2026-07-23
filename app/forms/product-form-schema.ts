@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { DueDateType, PurchasePriceType, UnitSystem } from "@/generated/prisma/enums";
 import { addYears, dateToISODate } from "@/lib/utils";
 
-export const createProductFormSchema = ( productNames: string[] ) => {
+export const createProductFormSchema = (productNames: string[]) => {
   return z
     .object({
       intent: z.literal("create"),
@@ -179,70 +179,71 @@ export const createProductFormSchema = ( productNames: string[] ) => {
     )
     .refine(
       ({ name }) => {
-        const found = productNames.find( pn => pn.toLocaleLowerCase() === name.toLocaleLowerCase() );
-        return ( found === undefined );
+        const found = productNames.find((pn) => pn.toLocaleLowerCase() === name.toLocaleLowerCase());
+        return found === undefined;
       },
       {
         message: "Product name exists in Grocy. It must be unique.",
         path: ["name"],
       },
-    );    
+    );
 };
 
 //export createProductFormSchema as CreateProductFormSchema;
 
-export const editProductFormSchema = ( productNames: string[] ) => createProductFormSchema( productNames ).safeExtend({
-  intent: z.literal("update") as never,
+export const editProductFormSchema = (productNames: string[]) =>
+  createProductFormSchema(productNames).safeExtend({
+    intent: z.literal("update") as never,
 
-  id: z.number("Existing product id must be set").gt(0, { message: "Existing product id must be set" }),
+    id: z.number("Existing product id must be set").gt(0, { message: "Existing product id must be set" }),
 
-  productGroup: z.coerce.number().gt(-1, { message: `Must be 0 or greater` }),
+    productGroup: z.number().gt(-1, { message: `Must be 0 or greater` }),
 
-  parentProductId: z.coerce.number().gt(-1, { message: "Parent product must be unset or greater than zero" }),
+    parentProductId: z.number().gt(-1, { message: "Parent product must be unset or greater than zero" }),
 
-  defaultConsumeLocationId: z.coerce
-    .number("Default consume location must be chosen")
-    .gte(0, { message: "Default consume location must be chosen" }),
+    defaultConsumeLocationId: z
+      .number("Default consume location must be chosen")
+      .gte(0, { message: "Default consume location must be chosen" }),
 
-  moveOnOpen: z.coerce.boolean(),
-  enableTareWeight: z.coerce.boolean(),
-  disableStockChecking: z.coerce.boolean(),
-  openedAsOutOfStock: z.coerce.boolean(),
-  accumulateSubProductsMinStock: z.coerce.boolean(),
-  cantOpen: z.coerce.boolean(),
-  dontShowOnStock: z.coerce.boolean(),
+    moveOnOpen: z.boolean(),
+    enableTareWeight: z.boolean(),
+    disableStockChecking: z.boolean(),
+    openedAsOutOfStock: z.boolean(),
+    accumulateSubProductsMinStock: z.boolean(),
+    cantOpen: z.boolean(),
+    dontShowOnStock: z.boolean(),
 
-  // These all have quantityUnitStock (unitId, in this app) as their unit
-  tareWeight: z.coerce.number().gte(0, { message: `Must be 0 or greater` }),
-  energy: z.coerce.number().gte(0, { message: `Must be 0 or greater` }),
-  quickConsumeAmount: z.number().gt(0, { message: `Must greater than zero` }),
-  quickOpenAmount: z.number().gt(0, { message: `Must be greater than zero` }),
+    // These all have quantityUnitStock (unitId, in this app) as their unit
+    tareWeight: z.number().gte(0, { message: `Must be 0 or greater` }),
+    energy: z.number().gte(0, { message: `Must be 0 or greater` }),
+    quickConsumeAmount: z.number().gt(0, { message: `Must greater than zero` }),
+    quickOpenAmount: z.number().gt(0, { message: `Must be greater than zero` }),
 
-  energyCalculationHelper: z.number().optional(),
-  energyCalculatorOptions: z.enum(["PER100G"]).optional(),
+    energyCalculationHelper: z.number().optional(),
+    energyCalculatorOptions: z.enum(["PER100G"]).optional(),
 
-  defaultShop: z
-    .number("Default shop must be a valid number or empty")
-    .gte(0, { message: "Default shop must be a valid number or empty" })
-    .optional(),
+    defaultShop: z
+      .number("Default shop must be a valid number or empty")
+      .gte(0, { message: "Default shop must be a valid number or empty" })
+      .optional(),
 
-  defaultQuantityUnitPurchase: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    defaultQuantityUnitPurchase: z
+      .number("Select a unit from the list")
+      .gt(0, { message: "Select a unit from the list" }),
 
-  defaultQuantityUnitConsume: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    defaultQuantityUnitConsume: z
+      .number("Select a unit from the list")
+      .gt(0, { message: "Select a unit from the list" }),
 
-  quantityUnitPrices: z.coerce
-    .number("Select a unit from the list")
-    .gt(0, { message: "Select a unit from the list" }),
+    quantityUnitPrices: z
+      .number("Select a unit from the list")
+      .gt(0, { message: "Select a unit from the list" }),
 
-  purchaseConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+    purchaseConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
 
-  consumeConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+    consumeConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
 
-  priceConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
+    priceConversionFactor: z.number().gt(0, { message: `Must be greater than 0` }),
 
-  submitMode: z.enum(["updateOnly", "createInGrocy", "deleteQueuedEntry"]),
-});
+    submitMode: z.enum(["updateOnly", "createInGrocy", "deleteQueuedEntry"]),
+  });

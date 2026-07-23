@@ -104,10 +104,12 @@ export function EditProductForm({
   code,
   product,
   photo: productPhoto,
+  date,
 }: {
   code: string;
   product: Promise<GetProduct>;
   photo: Promise<GetProductPhoto>;
+  date: Date;
 }) {
   const [lastResult, action, submitPending] = useActionState(
     withCallbacks(
@@ -647,7 +649,7 @@ export function EditProductForm({
             )}
           </FormContainer>
 
-          <CameraApp photo={photo} />
+          <CameraApp photo={photo} date={date} />
 
           <FormRow comment="Create product submit button" className="gap-y-5">
             <FormColumn className="shrink">
