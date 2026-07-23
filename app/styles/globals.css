@@ -58,6 +58,7 @@
   --color-missing: var(--color-amber-700);
 
   --color-alert: var(--color-amber-500);
+  --color-highlight: var(--color-yellow-200);
 
   --color-out-of-stock: var(--color-amber-500);
   --color-stock-buttons-border: var(--color-yellow-300);

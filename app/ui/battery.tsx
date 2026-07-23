@@ -4,8 +4,9 @@ import Grocy from "@/components/icons/grocy";
 import { getBatteryDetails } from "@/lib/grocy";
 import { BatteryTrackForm } from "@/forms/actions/battery-track-form";
 import Barcode from "@/lib/barcode";
+import { differenceInDays } from "@/lib/utils";
 
-export default async function Battery({ barcode, battery }: { barcode: Barcode, battery: GrocyBattery }) {
+export default async function Battery({ barcode, battery }: { barcode: Barcode; battery: GrocyBattery }) {
   if (!battery.id) {
     return (
       <>
@@ -14,11 +15,16 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode, 
     );
   }
 
-  const batteryDetails = await getBatteryDetails( battery.id );
+  const batteryDetails = await getBatteryDetails(battery.id);
 
   //  last_charged?: string;
   //   charge_cycles_count?: number;
   //   next_estimated_charge_time?: string;
+
+  const estimatedChargeDays = differenceInDays(
+    new Date(batteryDetails.next_estimated_charge_time ?? ""),
+    new Date(),
+  );
 
   return (
     <>
@@ -36,16 +42,39 @@ export default async function Battery({ barcode, battery }: { barcode: Barcode, 
           <dt>Charge interval days</dt>
           <dd>{battery.charge_interval_days}</dd>
           <dt>Charge cycles count</dt>
-          <dd>{batteryDetails.charge_cycles_count ? batteryDetails.charge_cycles_count : '?'}</dd>
+          <dd>{batteryDetails.charge_cycles_count ? batteryDetails.charge_cycles_count : "?"}</dd>
           <dt>Last charged</dt>
-          <dd>{batteryDetails.last_charged ? batteryDetails.last_charged : '?'}</dd>
+          <dd>
+            {batteryDetails.last_charged ? batteryDetails.last_charged : "?"}
+            {batteryDetails.last_charged && (
+              <>
+                &nbsp;&mdash;&nbsp;
+                <span className="text-highlight font-bold">
+                  {differenceInDays(new Date(), new Date(batteryDetails.last_charged))} days ago
+                </span>
+              </>
+            )}
+          </dd>
           <dt>Next estimated charge time</dt>
-          <dd>{batteryDetails.next_estimated_charge_time ? batteryDetails.next_estimated_charge_time : '?'}</dd>
+          <dd>
+            {batteryDetails.next_estimated_charge_time ? batteryDetails.next_estimated_charge_time : "?"}
+            {batteryDetails.next_estimated_charge_time && (
+              <>
+                &nbsp;&mdash;&nbsp;
+                <span className="">
+                  {estimatedChargeDays >= 0 ? (
+                    <span className="">in {estimatedChargeDays} days</span>
+                  ) : (
+                    <span className="text-alert">{Math.abs(estimatedChargeDays)} days ago</span>
+                  )}
+                </span>
+              </>
+            )}
+          </dd>
         </dl>
       </div>
 
       <BatteryTrackForm code={barcode.code} battery={battery} />
-
     </>
   );
 }
