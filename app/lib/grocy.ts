@@ -376,7 +376,7 @@ export async function setRecipeServings({
 }: {
   recipeId: number;
   servings: Servings;
-}): Promise<any> {
+}): Promise<undefined> {
   const { data, error } = await grocyClient.PUT("/objects/{entity}/{objectId}", {
     params: {
       path: { entity: "recipes", objectId: recipeId },

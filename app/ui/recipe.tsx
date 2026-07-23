@@ -17,7 +17,6 @@ import { formatMoney, formatNumber, toLookup } from "@/lib/utils";
 import { Check, TriangleAlert, X } from "lucide-react";
 import { RecipeServings } from "./recipe-servings";
 import { revalidatePath } from "next/cache";
-import { PrintLabel } from "@/lib/print-label";
 
 export const setServings = async (code: string, recipeId: number, servings: Servings) => {
   "use server";

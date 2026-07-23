@@ -32,7 +32,8 @@ export async function productOpenSubmit(prevstate: unknown, formData: FormData) 
 
   const data = submission.value;
 
-  const { data: res } = await grocyClient.POST("/stock/products/{productId}/open", {
+  // const { data: res } = 
+  await grocyClient.POST("/stock/products/{productId}/open", {
     params: { path: { productId: productId } },
     body: {
       amount: data.amount.amount,

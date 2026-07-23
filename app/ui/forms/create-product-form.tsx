@@ -18,7 +18,7 @@ import { ProductContext } from "@/providers/product-context";
 import { Product } from "@/interfaces/grocy";
 import { UnitSystem } from "@/generated/prisma/browser";
 
-export function CreateProductForm({ code }: { code: string }) {
+export function CreateProductForm({ code, date }: { code: string, date: Date }) {
   code = decodeURIComponent(code);
 
   const [lastResult, action, submitPending] = useActionState(
@@ -95,7 +95,7 @@ export function CreateProductForm({ code }: { code: string }) {
             setSelectedUnit={setSelectedUnit}
           />
 
-          <CameraApp />
+          <CameraApp date={date} />
 
           <FormRow comment="Create add to queue button">
             <FormColumn>

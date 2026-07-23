@@ -52,6 +52,7 @@ type CommonButtonArguments = {
   setCameraIsEnabled: Dispatch<SetStateAction<boolean>>;
   setCrop: Dispatch<SetStateAction<Crop>>;
   setCropEnabled: Dispatch<SetStateAction<boolean>>;
+  date: Date;
 };
 
 function isGrocyPhoto(photo: AnyProductPhoto | undefined): photo is GrocyPicture {
@@ -71,7 +72,7 @@ function isUnsavedPhoto(photo: AnyProductPhoto | undefined): photo is UnsavedPho
   );
 }
 
-export function CameraApp({ photo: existingPhoto }: { photo?: AnyProductPhoto }) {
+export function CameraApp({ photo: existingPhoto, date: date }: { photo?: AnyProductPhoto; date: Date }) {
   const [photo, setPhoto] = useState<AnyProductPhoto | undefined>(existingPhoto);
 
   const user = use(useContext(UserContext) as Promise<GetUser>);
@@ -100,7 +101,15 @@ export function CameraApp({ photo: existingPhoto }: { photo?: AnyProductPhoto })
     setCrop: setCrop,
     setCropEnabled: setCropping,
     photo: photo,
+    date: date,
   };
+
+  const dateRef = useRef(date);
+  const photoRef = useRef(photo);
+  const cropRef = useRef(crop);
+  const setCropRef = useRef(setCrop);
+  const setPhotoRef = useRef(setPhoto);
+  const cropEnabledRef = useRef(enableCropping);
 
   return (
     <div className="relative py-4 select-none">
@@ -150,13 +159,39 @@ export function CameraApp({ photo: existingPhoto }: { photo?: AnyProductPhoto })
         <div className="relative">
           {(() => {
             if (cameraIsEnabled && cameraHandler && photo === undefined) {
-              return <BackgroundWebcam cameraHandler={cameraHandler} />;
+              return <BackgroundWebcam cameraHandler={cameraHandler} dateRef={dateRef} />;
             } else if (isUnsavedPhoto(photo)) {
-              return <BackgroundCapturedImage args={commonArguments} />;
+              return (
+                <BackgroundCapturedImage
+                  photo={photoRef}
+                  crop={cropRef}
+                  cropEnabled={cropEnabledRef}
+                  setCrop={setCropRef}
+                  setPhoto={setPhotoRef}
+                  image={imageRef}
+                />
+              );
             } else if (isDatabasePhoto(photo) || isGrocyPhoto(photo)) {
-              return <BackgroundDatabaseImage args={commonArguments} />;
+              return (
+                <BackgroundDatabaseImage
+                  photo={photoRef}
+                  crop={cropRef}
+                  cropEnabled={cropEnabledRef}
+                  setCrop={setCropRef}
+                  setPhoto={setPhotoRef}
+                  image={imageRef}
+                />
+              );
             } else if (isDatabasePhoto(photo) || isGrocyPhoto(photo)) {
-              return <BackgroundGrocyImage args={commonArguments} />;
+              return (
+                <BackgroundGrocyImage
+                  photo={photoRef}
+                  crop={cropRef}
+                  cropEnabled={cropEnabledRef}
+                  setCrop={setCropRef}
+                  setPhoto={setPhotoRef}
+                />
+              );
             } else {
               return <BackgroundCameraInactive ref={cameraAppRef} setCameraIsEnabled={setCameraIsEnabled} />;
             }
@@ -424,7 +459,7 @@ function ButtonConfirmCrop({ args, disabled }: { args: CommonButtonArguments; di
   if (args.crop === undefined) return <></>;
   const crop = args.crop as Crop;
 
-  let filename = `missing-image-name=${Date.now()}.jpg`;
+  let filename = `missing-image-name=${args.date.getTime()}.jpg`;
   if (isUnsavedPhoto(args.photo)) {
     filename = args.photo.name;
   } else if (isDatabasePhoto(args.photo)) {
@@ -507,7 +542,7 @@ function ButtonRotateImageCounterclockwise({
 
   if (!isUnsavedPhoto(args.photo) && !isDatabasePhoto(args.photo)) return <></>;
 
-  let filename = `missing-image-name=${Date.now()}.png`;
+  let filename = `missing-image-name=${args.date.getTime()}.png`;
   if (isUnsavedPhoto(args.photo)) {
     filename = args.photo.name;
   } else if (isDatabasePhoto(args.photo)) {
@@ -572,7 +607,7 @@ function ButtonRotateImageClockwise({
 
   if (!isUnsavedPhoto(args.photo) && !isDatabasePhoto(args.photo)) return <></>;
 
-  let filename = `missing-image-name=${Date.now()}.png`;
+  let filename = `missing-image-name=${args.date.getTime()}.png`;
   if (isUnsavedPhoto(args.photo)) {
     filename = args.photo.name;
   } else if (isDatabasePhoto(args.photo)) {
@@ -710,7 +745,13 @@ function ButtonDeleteImage({
   );
 }
 
-function BackgroundWebcam({ cameraHandler }: { cameraHandler: React.RefObject<WebCameraHandler | null> }) {
+function BackgroundWebcam({
+  cameraHandler,
+  dateRef,
+}: {
+  cameraHandler: React.RefObject<WebCameraHandler | null>;
+  dateRef: React.RefObject<Date>;
+}) {
   return (
     <WebCamera
       ref={cameraHandler}
@@ -719,42 +760,53 @@ function BackgroundWebcam({ cameraHandler }: { cameraHandler: React.RefObject<We
       videoClassName="camera-video"
       captureMode="back"
       captureType="png"
-      getFileName={() => `next-photo-${Date.now()}.jpeg`}
+      getFileName={() => `next-photo-${dateRef.current.getTime()}.jpeg`}
       onError={(err) => console.error(err)}
     />
   );
 }
 
-function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
-  if (!isUnsavedPhoto(args.photo)) return <></>;
+function BackgroundCapturedImage({
+  photo,
+  image,
+  crop,
+  cropEnabled,
+  setCrop,
+  setPhoto,
+}: {
+  photo: React.RefObject<AnyProductPhoto | undefined>;
+  crop: React.RefObject<Crop>;
+  image: React.RefObject<HTMLImageElement | null>;
+  cropEnabled: React.RefObject<boolean>;
+  setCrop: React.RefObject<Dispatch<SetStateAction<Crop>>>;
+  setPhoto: React.RefObject<Dispatch<SetStateAction<AnyProductPhoto | undefined>>>;
+}) {
+  if (!isUnsavedPhoto(photo.current)) return <></>;
 
   function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
-    if (args.photo !== undefined) {
-      const photo = { ...args.photo };
-      photo.width = width;
-      photo.height = height;
-      args.setPhoto(photo);
+    if (photo.current !== undefined) {
+      const _photo = { ...photo.current };
+      _photo.width = width;
+      _photo.height = height;
+      setPhoto.current(_photo);
     }
   }
 
   return (
     <div key={`captured-image-container`} className="relative">
-      {args.cropEnabled ? (
+      {cropEnabled.current ? (
         <>
-          {/* eslint-disable-next-line react-hooks/refs */}
           <ReactCrop
             className="mx-3 sm:mx-0"
-            crop={args.crop}
-            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
+            crop={crop.current}
+            onChange={(crop, percentCrop) => setCrop.current(percentCrop)}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              // eslint-disable-next-line react-hooks/refs
-              ref={args.imageRef}
+              ref={image}
               key={`captured-image`}
-              // eslint-disable-next-line react-hooks/refs
-              src={args.photo.data}
+              src={photo.current.data}
               alt="Captured image from camera"
               onLoad={onImageLoad}
             />
@@ -764,56 +816,68 @@ function BackgroundCapturedImage({ args }: { args: CommonButtonArguments }) {
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            // eslint-disable-next-line react-hooks/refs
-            ref={args.imageRef}
+            ref={image}
             key={`captured-image`}
-            // eslint-disable-next-line react-hooks/refs
-            src={args.photo.data}
+            src={photo.current.data}
             alt="Captured image from camera"
             onLoad={onImageLoad}
           />
         </>
       )}
-      {false && args.photo !== undefined && (
+      {false && photo.current !== undefined && (
         <>
           <p>
-            Image size is {args.photo!.width} x {args.photo!.height}
+            Image size is {photo.current!.width} x {photo.current!.height}
           </p>
-          <p>Crop is {JSON.stringify(args.crop, null, 2)}</p>
+          <p>Crop is {JSON.stringify(crop.current, null, 2)}</p>
         </>
       )}
     </div>
   );
 }
 
-function BackgroundDatabaseImage({ args }: { args: CommonButtonArguments }) {
-  if (!isDatabasePhoto(args.photo)) return <></>;
+function BackgroundDatabaseImage({
+  photo,
+  image,
+  crop,
+  cropEnabled,
+  setCrop,
+  setPhoto,
+}: {
+  photo: React.RefObject<AnyProductPhoto | undefined>;
+  crop: React.RefObject<Crop>;
+  image: React.RefObject<HTMLImageElement | null>;
+  cropEnabled: React.RefObject<boolean>;
+  setCrop: React.RefObject<Dispatch<SetStateAction<Crop>>>;
+  setPhoto: React.RefObject<Dispatch<SetStateAction<AnyProductPhoto | undefined>>>;
+}) {
+  if (!isDatabasePhoto(photo.current)) return <></>;
 
   function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
-    if (args.photo !== undefined) {
-      const photo = { ...args.photo };
-      photo.width = width;
-      photo.height = height;
-      args.setPhoto(photo);
+    if (photo.current !== undefined) {
+      const _photo = { ...photo.current };
+      _photo.width = width;
+      _photo.height = height;
+      setPhoto.current(_photo);
     }
   }
 
   return (
-    <div key={`captured-image-${args.photo.id}-container`} className="relative">
-      {args.cropEnabled ? (
+    <div key={`captured-image-${photo.current.id}-container`} className="relative">
+      {cropEnabled.current ? (
         <>
           <ReactCrop
             className="mx-3 sm:mx-0"
-            crop={args.crop}
-            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
+            crop={crop.current}
+            onChange={(crop, percentCrop) => setCrop.current(percentCrop)}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              ref={args.imageRef}
-              key={`captured-image-${args.photo.id}`}
-              alt={`BackgroundSavedImage of the product ${args.photo.id}`}
-              src={`/api/image/${args.photo.id}?ts=${args.photo.lastChanged}`}
+              ref={image}
+              key={`captured-image-${photo.current.id}`}
+              alt={`BackgroundSavedImage of the product ${photo.current.id}`}
+              src={`/api/image/${photo.current.id}?ts=${photo.current.lastChanged}`}
               onLoad={onImageLoad}
             />
           </ReactCrop>
@@ -822,57 +886,60 @@ function BackgroundDatabaseImage({ args }: { args: CommonButtonArguments }) {
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            // eslint-disable-next-line react-hooks/refs
-            ref={args.imageRef}
-            key={`captured-image-${args.photo.id}`}
-            alt={`BackgroundSavedImage of the product ${args.photo.id}`}
-            src={`/api/image/${args.photo.id}?ts=${args.photo.lastChanged}`}
+            ref={image}
+            key={`captured-image-${photo.current.id}`}
+            alt={`BackgroundSavedImage of the product ${photo.current.id}`}
+            src={`/api/image/${photo.current.id}?ts=${photo.current.lastChanged}`}
             onLoad={onImageLoad}
           />
         </>
       )}
-      {false && args.photo !== undefined && (
+      {false && photo.current !== undefined && (
         <>
           <p>
-            Image size is {args.photo!.width} x {args.photo!.height}
+            Image size is {photo.current!.width} x {photo.current!.height}
           </p>
-          <p>Crop is {JSON.stringify(args.crop, null, 2)}</p>
+          <p>Crop is {JSON.stringify(crop.current, null, 2)}</p>
         </>
       )}
     </div>
   );
 }
 
-function BackgroundGrocyImage({ args }: { args: CommonButtonArguments }) {
-  if (!isGrocyPhoto(args.photo)) return <></>;
+function BackgroundGrocyImage({
+  photo,
+  crop,
+  cropEnabled,
+  setCrop,
+  setPhoto,
+}: {
+  photo: React.RefObject<AnyProductPhoto | undefined>;
+  crop: React.RefObject<Crop>;
+  cropEnabled: React.RefObject<boolean>;
+  setCrop: React.RefObject<Dispatch<SetStateAction<Crop>>>;
+  setPhoto: React.RefObject<Dispatch<SetStateAction<AnyProductPhoto | undefined>>>;
+}) {
+  if (!isGrocyPhoto(photo.current)) return <></>;
 
   function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
-    if (args.photo !== undefined) {
-      const photo = { ...args.photo };
-      photo.width = width;
-      photo.height = height;
-      args.setPhoto(photo);
+    if (photo.current !== undefined) {
+      const _photo = { ...photo.current };
+      _photo.width = width;
+      _photo.height = height;
+      setPhoto.current(_photo);
     }
   }
 
   return (
     <div key={`grocy-image-container`} className="relative">
-      {args.cropEnabled ? (
+      {cropEnabled.current ? (
         <>
           <ReactCrop
             className="mx-3 sm:mx-0"
-            crop={args.crop}
-            onChange={(crop, percentCrop) => args.setCrop(percentCrop)}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {/* <img
-              ref={args.imageRef}
-              key={`captured-image-${args.photo.id}`}
-              alt={`BackgroundSavedImage of the product ${args.photo.id}`}
-              src={`/api/image/${args.photo.id}?ts=${lastSaved}`}
-            /> */}
-          </ReactCrop>
+            crop={crop.current}
+            onChange={(crop, percentCrop) => setCrop.current(percentCrop)}
+          />
         </>
       ) : (
         <>
@@ -880,7 +947,7 @@ function BackgroundGrocyImage({ args }: { args: CommonButtonArguments }) {
           <img
             className="my-5 max-w-full rounded-xl md:max-h-100 md:max-w-100"
             alt="Photo of the product as currently saved in Grocy"
-            src={baseUrl + "/files/productpictures/" + btoa(args.photo.fileName)}
+            src={baseUrl + "/files/productpictures/" + btoa(photo.current.fileName)}
             onLoad={onImageLoad}
           />
         </>

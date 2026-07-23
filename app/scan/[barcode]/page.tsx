@@ -71,7 +71,7 @@ export default async function BarcodeScannedPage({ params }: { params: Promise<{
   }
 
   if (grocyProduct === undefined && barcodeObject.type === ProductBarcodeTypes.PRODUCT) {
-    return <CreateProductForm code={barcodeObject.code} />;
+    return <CreateProductForm code={barcodeObject.code} date={new Date()} />;
   }
 
   return (

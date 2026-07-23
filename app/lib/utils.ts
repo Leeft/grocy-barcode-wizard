@@ -28,7 +28,7 @@ export function toLookup<T extends { id?: string | number }>(array: T[]): Record
 }
 
 export function formatNumber(num: number, grocyConfig: Record<string, never>): string {
-  let lang = 'en';
+  const lang = 'en';
   let culture = 'GB';
   if ( grocyConfig !== undefined && grocyConfig.CULTURE ) {
     const c = grocyConfig.CULTURE as string;
@@ -41,7 +41,7 @@ export function formatNumber(num: number, grocyConfig: Record<string, never>): s
 }
 
 export function formatMoney(num: number, grocyConfig: Record<string, never>): string {
-  let lang = 'en';
+  const lang = 'en';
   let culture = 'GB';
   if ( grocyConfig !== undefined && grocyConfig.CULTURE ) {
     const c = grocyConfig.CULTURE as string;

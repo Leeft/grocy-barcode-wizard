@@ -31,7 +31,8 @@ export function PrintProductLabelButton({
   productId: number;
 }) {
   const handleClick = async () => {
-    const result = await printProductLabel(productId);
+    // const result =
+    await printProductLabel(productId);
   };
 
   return (
