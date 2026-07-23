@@ -6,3 +6,5 @@ allowBuilds:
   sharp: false
   sqlite3: true
   unrs-resolver: false
+minimumReleaseAgeExclude:
+  - lucide-react@1.26.0
