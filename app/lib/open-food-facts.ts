@@ -9,34 +9,25 @@ import ExternalLookup from "@/lib/external-lookup";
 import { globalEvents } from "./events";
 import { ProductBarcodeTypes } from "@/interfaces";
 
-const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>(
-  {
-    product_name_en: JsonDecoder.string(),
-  },
-  "OpenFoodFactsProduct",
-);
+const openFoodFactsProductDecoder = JsonDecoder.object<OpenFoodFactsProduct>({
+  product_name_en: JsonDecoder.string(),
+});
 
-const openFoodFactsDecoder = JsonDecoder.object<OpenFoodFactsResult>(
-  {
-    code: JsonDecoder.string(),
-    status: JsonDecoder.number(),
-    status_verbose: JsonDecoder.string(),
-    product: openFoodFactsProductDecoder,
-  },
-  "OpenFoodFactsResult",
-);
+const openFoodFactsDecoder = JsonDecoder.object<OpenFoodFactsResult>({
+  code: JsonDecoder.string(),
+  status: JsonDecoder.number(),
+  status_verbose: JsonDecoder.string(),
+  product: openFoodFactsProductDecoder,
+});
 
-const openFoodFactsNotFoundDecoder = JsonDecoder.object<OpenFoodFactsNotFoundResult>(
-  {
-    code: JsonDecoder.string(),
-    status: JsonDecoder.number(),
-    status_verbose: JsonDecoder.string(),
-  },
-  "OpenFoodFactsNotFoundResult",
-);
+const openFoodFactsNotFoundDecoder = JsonDecoder.object<OpenFoodFactsNotFoundResult>({
+  code: JsonDecoder.string(),
+  status: JsonDecoder.number(),
+  status_verbose: JsonDecoder.string(),
+});
 
 export async function findProductInOpenFoodFacts(barcode: Barcode) {
-  if ( barcode.type !== ProductBarcodeTypes.PRODUCT ) {
+  if (barcode.type !== ProductBarcodeTypes.PRODUCT) {
     return;
   }
 

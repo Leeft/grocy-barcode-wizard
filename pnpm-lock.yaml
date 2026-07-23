@@ -63,8 +63,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
       ts.data.json:
-        specifier: ^3.3.0
-        version: 3.3.0
+        specifier: ^4.1.0
+        version: 4.1.0
       tsx:
         specifier: ^4.23.1
         version: 4.23.1
@@ -3048,8 +3048,8 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
-  ts.data.json@3.3.0:
-    resolution: {integrity: sha512-GkuFwuK1pgKb66nQ2RTuONe0sI9g4iVdtA0UmbOIphjkL3jE4Esk6SsaHvRN59zpVw1CncTyqUjWwYeLK7Wbcg==}
+  ts.data.json@4.1.0:
+    resolution: {integrity: sha512-HQAJkw5DwHRG9mH2u8m6qdQftX1uGvsfRo3iC+NLC7q2pbnscOzhYNgccjia1uBxxd0b8HaeMeIk2MrwjLLhlg==}
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
@@ -6170,7 +6170,7 @@ snapshots:
     dependencies:
       typescript: '@typescript/typescript6@6.0.2'
 
-  ts.data.json@3.3.0: {}
+  ts.data.json@4.1.0: {}
 
   tsconfig-paths@3.15.0:
     dependencies:

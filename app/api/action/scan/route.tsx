@@ -27,12 +27,9 @@ export async function POST(req: Request) {
   }
 
   if (req.headers.get("content-type") === "application/json") {
-    const apiRequestDecoder = JsonDecoder.object<ReceivedBarcode>(
-      {
-        barcode: JsonDecoder.string(),
-      },
-      "ReceivedBarcode",
-    );
+    const apiRequestDecoder = JsonDecoder.object<ReceivedBarcode>({
+      barcode: JsonDecoder.string(),
+    });
 
     const decoded = apiRequestDecoder.decode(await req.json());
     if (decoded.isOk()) {
@@ -94,12 +91,9 @@ async function isAuthorized(req: Request | NextRequest): Promise<number | undefi
     req.method !== "GET" &&
     req.headers.get("content-type") === "application/json"
   ) {
-    const reqDecoder = JsonDecoder.object<ReceivedApiKey>(
-      {
-        apikey: JsonDecoder.string(),
-      },
-      "ReceivedApiKey",
-    );
+    const reqDecoder = JsonDecoder.object<ReceivedApiKey>({
+      apikey: JsonDecoder.string(),
+    });
     const decoded = reqDecoder.decode(await req.json());
     if (decoded.isOk()) {
       apiKey = decoded.value.apikey;
